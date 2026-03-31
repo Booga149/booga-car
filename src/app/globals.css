@@ -1,0 +1,200 @@
+:root {
+  /* Forced World-Class Dark Palette (Stealth Black) */
+  --background: #000000;   /* Deep Black */
+  --surface: #0a0a0a;      /* Slate 950 */
+  --surface-hover: #111111; /* Slate 900 */
+  
+  /* Premium Gold Branding */
+  --primary: #FFD700;      /* Classic Gold */
+  --primary-hover: #F59E0B; /* Deep Amber/Gold */
+  
+  --text-primary: #ffffff; /* Pure White */
+  --text-secondary: #94a3b8; /* Slate 400 */
+  --border: rgba(255, 255, 255, 0.1); 
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  
+  /* Semantic Colors */
+  --error: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Base styles for modern aesthetic */
+.glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+}
+
+/* Hide scrollbar for horizontal scroll sections */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.desktop-nav {
+  display: none;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex;
+  }
+}
+
+/* ─── Mobile Responsive Utilities ─── */
+
+/* Hero Section */
+.hero-dropdowns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.hero-tabs {
+  display: flex;
+}
+
+.hero-vin-form {
+  display: flex;
+  gap: 0.8rem;
+  flex-direction: row-reverse;
+}
+
+/* Checkout Layout */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 3rem;
+  align-items: start;
+}
+
+/* Profile Layout */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 2rem;
+}
+
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Trust Section Cards */
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* Feature highlights */
+.feature-highlights {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+/* Admin stat cards */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ─── Mobile Breakpoint (max 768px) ─── */
+@media (max-width: 768px) {
+  .hero-dropdowns {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .hero-tabs {
+    flex-direction: column;
+  }
+
+  .hero-tabs button {
+    font-size: 0.9rem !important;
+    padding: 0.8rem !important;
+  }
+
+  .hero-vin-form {
+    flex-direction: column;
+  }
+
+  .hero-vin-form button[type="submit"] {
+    width: 100%;
+    padding: 0.9rem !important;
+    justify-content: center;
+  }
+
+  .checkout-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .feature-highlights {
+    gap: 1.5rem;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ─── Small phone (max 480px) ─── */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-highlights {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+}

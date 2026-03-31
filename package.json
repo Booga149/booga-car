@@ -1,0 +1,32 @@
+{
+  "name": "booga-car",
+  "version": "1.0.0",
+  "description": "Booga Car - E-commerce platform for vehicles",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
+    "lucide-react": "^1.0.1",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "prettier": "^3.1.0",
+    "typescript": "latest"
+  }
+}
