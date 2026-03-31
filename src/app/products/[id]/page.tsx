@@ -3,13 +3,13 @@ import { supabase } from '@/lib/supabase';
 import ProductDetailsClient from './ProductDetailsClient';
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const { id } = await params;
+  const id = params.id;
 
   try {
     const { data } = await supabase.from('products').select('name, brand, category, price, image_url').eq('id', id).single();
@@ -37,7 +37,6 @@ export async function generateMetadata(
   }
 }
 
-export default async function ProductDetailsServerPage({ params }: Props) {
-  const { id } = await params;
-  return <ProductDetailsClient id={id} />;
+export default function ProductDetailsServerPage({ params }: Props) {
+  return <ProductDetailsClient id={params.id} />;
 }
