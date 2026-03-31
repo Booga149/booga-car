@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Circle, Lightbulb, Wind, Wrench, Cog, CarFront, CircuitBoard, Fuel,
@@ -30,7 +30,7 @@ const allCategories = [
   { name: 'الجنوط والكفرات', icon: <Cog size={24} /> },
 ];
 
-export default function CategoriesBar() {
+function CategoriesBarInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category') || '';
@@ -102,5 +102,13 @@ export default function CategoriesBar() {
         }
       `}</style>
     </section>
+  );
+}
+
+export default function CategoriesBar() {
+  return (
+    <Suspense fallback={<div style={{ height: '80px', background: 'var(--surface)' }} />}>
+      <CategoriesBarInner />
+    </Suspense>
   );
 }

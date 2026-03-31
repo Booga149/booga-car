@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import ProductDetailsClient from './ProductDetailsClient';
 
+export const dynamic = 'force-dynamic';
+
 type Props = {
   params: { id: string }
 }
