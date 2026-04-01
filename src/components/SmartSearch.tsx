@@ -17,6 +17,7 @@ export default function SmartSearch() {
   const [manualYear, setManualYear] = useState('2022');
   const [manualPart, setManualPart] = useState('');
   const [isDecoding, setIsDecoding] = useState(false);
+  const [vinNotFound, setVinNotFound] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('booga_saved_car');
@@ -33,13 +34,21 @@ export default function SmartSearch() {
     if (trimmed.length === 17) {
       const runDecode = async () => {
         setIsDecoding(true);
+        setVinNotFound(false);
         const vehicle = await decodeVIN(trimmed);
-        if (vehicle) setDetectedVehicle(vehicle);
+        if (vehicle) {
+          setDetectedVehicle(vehicle);
+          setVinNotFound(false);
+        } else {
+          setDetectedVehicle(null);
+          setVinNotFound(true);
+        }
         setIsDecoding(false);
       };
       runDecode();
     } else {
       setDetectedVehicle(null);
+      setVinNotFound(false);
     }
   }, [query]);
 
@@ -170,9 +179,8 @@ export default function SmartSearch() {
                   width: '100%',
                   padding: '1.2rem 3.5rem 1.2rem 1.2rem',
                   borderRadius: '18px',
-                  border: 'none',
-                  background: 'var(--background)',
                   border: '1px solid var(--border)',
+                  background: 'var(--background)',
                   fontSize: '1.15rem',
                   fontWeight: 600,
                   color: 'var(--text-primary)',
@@ -181,14 +189,28 @@ export default function SmartSearch() {
               />
               {/* Recognition Logic */}
               <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }}>
-                 {isDecoding && <div className="spinner"></div>}
-                 {detectedVehicle && (
+                 {isDecoding && (
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700 }}>
+                     <Loader2 size={16} className="animate-spin" /> جاري البحث...
+                   </div>
+                 )}
+                 {detectedVehicle && !isDecoding && (
                    <div style={{ 
                      background: 'var(--success)', color: 'white', padding: '0.3rem 0.8rem', 
                      borderRadius: '10px', fontSize: '0.85rem', fontWeight: 900, 
                      display: 'flex', alignItems: 'center', gap: '0.4rem'
                    }}>
                      <Shield size={16} /> تم التعرف: {detectedVehicle.make} {detectedVehicle.year}
+                   </div>
+                 )}
+                 {vinNotFound && !isDecoding && (
+                   <div style={{ 
+                     background: 'rgba(244,63,94,0.15)', color: 'var(--primary)', padding: '0.3rem 0.8rem', 
+                     borderRadius: '10px', fontSize: '0.82rem', fontWeight: 800, 
+                     display: 'flex', alignItems: 'center', gap: '0.4rem',
+                     border: '1px solid rgba(244,63,94,0.3)'
+                   }}>
+                     ⚠️ رقم الهيكل غير معروف — يمكنك البحث يدوياً
                    </div>
                  )}
               </div>

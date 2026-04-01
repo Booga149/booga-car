@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
@@ -18,8 +19,11 @@ import {
 export default function DealerFormPage() {
   const { user, openLoginModal } = useAuth();
   const { addToast } = useToast();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   const [formData, setFormData] = useState({
     business_name: '',
     cr_number: '',
@@ -30,8 +34,18 @@ export default function DealerFormPage() {
 
   useEffect(() => {
     if (!user) {
-       addToast("يرجى تسجيل الدخول أولاً للمتابعة", "info");
+      setCheckingProfile(false);
+      return;
     }
+    // Check if user is already a merchant
+    supabase.from('profiles').select('cr_number, business_name').eq('id', user.id).single().then(({ data }) => {
+      setProfile(data);
+      setCheckingProfile(false);
+      if (data?.cr_number) {
+        addToast("أنت مسجل كتاجر بالفعل! سيتم تحويلك للوحة التحكم.", "info");
+        router.replace('/seller/dashboard');
+      }
+    });
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +92,16 @@ export default function DealerFormPage() {
     }
   };
 
+  // Show loading while checking profile
+  if (checkingProfile) {
+    return (
+      <main style={{ minHeight: '100vh', background: 'var(--background)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Navbar />
+        <div style={{ color: 'var(--text-secondary)', fontWeight: 700, fontSize: '1.1rem' }}>جاري التحقق من حسابك...</div>
+      </main>
+    );
+  }
+
   if (!user && !success) {
     return (
       <main style={{ minHeight: '100vh', background: 'var(--background)' }}>
@@ -89,7 +113,7 @@ export default function DealerFormPage() {
           }}>
              <Building2 size={60} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
              <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem' }}>سجل دخولك أولاً</h2>
-             <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontWeight: 600 }}>يجب أن تملك حساباً عادياً لتتمكن من ترقيته إلى حساب بوجا للأعمال.</p>
+             <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontWeight: 600 }}>يجب أن تملك حساباً عادياً لتتمكن من ترقيته إلى حساب تاجر.</p>
              <button onClick={openLoginModal} style={{ 
                background: 'var(--primary)', color: 'white', padding: '1rem 3rem',
                borderRadius: '12px', fontWeight: 800, border: 'none', cursor: 'pointer',

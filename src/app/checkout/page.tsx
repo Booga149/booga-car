@@ -15,15 +15,20 @@ export default function CheckoutPage() {
   // Discount logic
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [discountStatus, setDiscountStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [discountMsg, setDiscountMsg] = useState('');
 
   const applyDiscount = () => {
     if (discountCode.trim().toUpperCase() === 'SAUDI15') {
-       setAppliedDiscount(0.15); // 15% discount
-       alert('🎉 تم تطبيق خصم الترحيب بنجاح! تم خصم 15% من المجموع.');
+       setAppliedDiscount(0.15);
+       setDiscountStatus('success');
+       setDiscountMsg('🎉 مبروك! تم تطبيق خصم 15% بنجاح');
     } else {
        setAppliedDiscount(0);
-       alert('❌ كود الخصم غير صحيح أو منتهي الصلاحية.');
+       setDiscountStatus('error');
+       setDiscountMsg('كود الخصم غير صحيح أو منتهي الصلاحية');
     }
+    setTimeout(() => { setDiscountStatus('idle'); setDiscountMsg(''); }, 4000);
   };
 
   // Shipping cost logic
@@ -309,29 +314,160 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
-                {/* --- Discount Code Section --- */}
-                <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
-                  <input type="text" placeholder="أدخل كود الخصم" value={discountCode} onChange={e => setDiscountCode(e.target.value)} style={{
-                    flex: 1, padding: '0.8rem 1rem', background: 'var(--background)',
-                    border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-primary)',
-                    outline: 'none', fontWeight: 600, fontSize: '0.95rem'
-                  }} onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'} onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'} />
+                {/* --- VIP Discount Coupon Section --- */}
+                <div style={{ 
+                  marginBottom: '1.5rem',
+                  position: 'relative', overflow: 'hidden',
+                  borderRadius: '18px',
+                }}>
+                  {/* Coupon outer glow */}
+                  <div style={{
+                    position: 'absolute', inset: '-1px',
+                    borderRadius: '19px',
+                    background: 'linear-gradient(135deg, rgba(244,63,94,0.5) 0%, rgba(251,146,60,0.3) 50%, rgba(244,63,94,0.5) 100%)',
+                    backgroundSize: '200% 200%',
+                    animation: 'couponBorderShimmer 3s ease-in-out infinite',
+                    zIndex: 0,
+                  }} />
                   
-                  <button type="button" onClick={applyDiscount} style={{
-                    padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.05)', color: 'white',
-                    border: '1px solid var(--border)', borderRadius: '12px', fontWeight: 800, cursor: 'pointer',
-                    transition: '0.3s'
-                  }} onMouseOver={e=>{e.currentTarget.style.background='var(--primary)'; e.currentTarget.style.borderColor='var(--primary)';}} onMouseOut={e=>{e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor='var(--border)';}}>
-                    تطبيق
-                  </button>
+                  <div style={{
+                    position: 'relative', zIndex: 1,
+                    background: 'linear-gradient(135deg, #1a0a0f 0%, #150812 50%, #12070e 100%)',
+                    borderRadius: '17px',
+                    overflow: 'hidden',
+                  }}>
+                    {/* Subtle inner glow top */}
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+                      background: 'linear-gradient(90deg, transparent, rgba(244,63,94,0.8), rgba(251,146,60,0.6), transparent)',
+                    }} />
+                    
+                    {/* Background texture */}
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(244,63,94,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(251,146,60,0.03) 0%, transparent 50%)',
+                    }} />
+
+                    {/* Perforations left */}
+                    <div style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-50%)', width: '14px', height: '28px', background: 'var(--surface)', borderRadius: '14px 0 0 14px', zIndex: 2 }} />
+                    <div style={{ position: 'absolute', left: '0', top: '50%', transform: 'translateY(-50%)', width: '14px', height: '28px', background: 'var(--surface)', borderRadius: '0 14px 14px 0', zIndex: 2 }} />
+
+                    {/* Dotted divider */}
+                    <div style={{
+                      position: 'absolute', top: '50%', left: '14px', right: '14px',
+                      borderTop: '1px dashed rgba(244,63,94,0.2)',
+                      display: 'none',
+                    }} />
+
+                    <div style={{ padding: '1.3rem 1.5rem', position: 'relative', zIndex: 1 }}>
+                      {/* Header row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1rem' }}>
+                        <div style={{
+                          width: '34px', height: '34px', borderRadius: '10px', flexShrink: 0,
+                          background: 'linear-gradient(135deg, rgba(244,63,94,0.2), rgba(251,146,60,0.15))',
+                          border: '1px solid rgba(244,63,94,0.3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem',
+                          boxShadow: '0 4px 12px rgba(244,63,94,0.15)',
+                        }}>🎫</div>
+                        <div>
+                          <div style={{ fontWeight: 900, fontSize: '0.92rem', color: '#fde8ec', letterSpacing: '0.3px' }}>كود خصم حصري</div>
+                          <div style={{ fontSize: '0.72rem', color: 'rgba(253,232,236,0.45)', fontWeight: 600 }}>أدخل كودك واحصل على خصم فوري</div>
+                        </div>
+                        <div style={{ marginRight: 'auto' }}>
+                          <div style={{
+                            padding: '0.2rem 0.7rem', borderRadius: '100px', fontSize: '0.65rem', fontWeight: 800,
+                            background: 'rgba(244,63,94,0.12)', border: '1px solid rgba(244,63,94,0.25)',
+                            color: '#f43f5e', letterSpacing: '0.5px', textTransform: 'uppercase',
+                          }}>VIP</div>
+                        </div>
+                      </div>
+
+                      {/* Input row */}
+                      <div style={{ display: 'flex', gap: '0.6rem' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                          <input 
+                            type="text" placeholder="SAUDI15" 
+                            value={discountCode} onChange={e => setDiscountCode(e.target.value)} 
+                            style={{
+                              width: '100%', padding: '0.9rem 1rem 0.9rem 2.8rem',
+                              background: 'rgba(255,255,255,0.04)',
+                              border: '1.5px solid rgba(244,63,94,0.2)', borderRadius: '12px', 
+                              color: '#fde8ec',
+                              outline: 'none', fontWeight: 800, fontSize: '0.95rem', 
+                              letterSpacing: '3px', textTransform: 'uppercase', 
+                              transition: 'all 0.3s',
+                              caretColor: '#f43f5e',
+                            }} 
+                            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(244,63,94,0.6)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(244,63,94,0.08)'; }} 
+                            onBlur={e => { e.currentTarget.style.borderColor = 'rgba(244,63,94,0.2)'; e.currentTarget.style.boxShadow = 'none'; }} 
+                          />
+                          <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', opacity: 0.5 }}>🏷️</span>
+                        </div>
+                        <button 
+                          type="button" onClick={applyDiscount} 
+                          style={{
+                            padding: '0.9rem 1.3rem', 
+                            background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #c01038 100%)', 
+                            color: 'white',
+                            border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer',
+                            transition: 'all 0.3s', fontSize: '0.88rem',
+                            boxShadow: '0 4px 16px rgba(244,63,94,0.3)',
+                            whiteSpace: 'nowrap', letterSpacing: '0.3px',
+                          }}
+                          onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(244,63,94,0.45)'; e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                          onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(244,63,94,0.3)'; e.currentTarget.style.filter = 'brightness(1)'; }}
+                        >
+                          تطبيق ✓
+                        </button>
+                      </div>
+                      
+                      {discountMsg && (
+                        <div style={{ 
+                          marginTop: '0.9rem', padding: '0.8rem 1rem', borderRadius: '12px', 
+                          fontSize: '0.85rem', fontWeight: 800, textAlign: 'center',
+                          background: discountStatus === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.08)',
+                          color: discountStatus === 'success' ? '#10b981' : '#f87171',
+                          border: discountStatus === 'success' ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(244,63,94,0.2)',
+                          animation: 'fadeInUp 0.3s ease',
+                          backdropFilter: 'blur(10px)',
+                        }}>
+                          {discountMsg}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom hint row */}
+                    <div style={{
+                      padding: '0.6rem 1.5rem 0.8rem',
+                      borderTop: '1px solid rgba(244,63,94,0.08)',
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      background: 'rgba(244,63,94,0.03)',
+                    }}>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.5)', fontWeight: 700 }}>💡 جرب الكود:</span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.7)', fontWeight: 900, letterSpacing: '2px', fontFamily: 'monospace' }}>SAUDI15</span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.4)', fontWeight: 600, marginRight: 'auto' }}>خصم 15%</span>
+                    </div>
+                  </div>
                 </div>
+                <style>{`
+                  @keyframes couponBorderShimmer {
+                    0%, 100% { background-position: 0% 50%; opacity: 0.7; }
+                    50% { background-position: 100% 50%; opacity: 1; }
+                  }
+                `}</style>
 
                 {appliedDiscount > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--primary)', fontWeight: 800 }}>
-                    <span>الخصم المطبق (15%)</span>
-                    <span>- {discountAmount?.toLocaleString()} ر.س</span>
+                  <div style={{ 
+                    display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', 
+                    fontSize: '1.1rem', fontWeight: 800,
+                    padding: '1rem', borderRadius: '12px',
+                    background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
+                  }}>
+                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق (15%)</span>
+                    <span style={{ color: '#10b981' }}>- {discountAmount?.toLocaleString()} ر.س</span>
                   </div>
                 )}
+
                 {/* --------------------------- */}
                 {shippingCost > 0 && (
                   <div style={{ 

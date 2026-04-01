@@ -198,18 +198,38 @@ export default function MerchantImportPage() {
 
   const startImport = async () => {
     if (!file || !user) return;
+
+    // ── Validation: part_number required for all products ──
+    // Re-detect mapping fresh at import time (applies any latest fixes to mapHeader)
+    const freshMapping: Record<string, string> = {};
+    headers.forEach(h => {
+      const matched = mapHeader(h);
+      if (matched) freshMapping[h] = matched;
+      else if (mapping[h]) freshMapping[h] = mapping[h]; // fallback to user-set mapping
+    });
+
+    const rowsProcessed = rawData.map(row => {
+      const mappedRow: any = {};
+      headers.forEach(h => { if (freshMapping[h]) mappedRow[freshMapping[h]] = row[h]; });
+      return { raw: row, processed: processRow(mappedRow) };
+    });
+    const missing = rowsProcessed.filter(r => !r.processed.part_number || r.processed.part_number.trim() === '');
+    // Warn about missing part numbers but don't block — auto-generate for those rows
+    if (missing.length > 0) {
+      const names = missing.slice(0, 3).map(r => r.processed.name).join('، ');
+      addToast(`⚠️ ${missing.length} منتج ليس له رقم قطعة — سيتم توليد رقم تلقائي`, 'error');
+    }
+
     setIsUploading(true);
     setStep(3);
     setLogs([{ type: 'success', message: 'جاري البدء في معالجة البيانات وبدء الرفع...' }]);
-    
+
     try {
-      const finalInserts = rawData.map(row => {
-        const mappedRow: any = {};
-        headers.forEach(h => {
-          if (mapping[h]) mappedRow[mapping[h]] = row[h];
-        });
-        
-        const p = processRow(mappedRow);
+      const finalInserts = rowsProcessed.map(({ processed }) => {
+        const p = processed;
+        const resolveUrl = (url: string | undefined) =>
+          url && url.trim() ? (baseUrl ? `${baseUrl}/${url}`.replace(/([^:]\/)\/+/g, '$1') : url) : null;
+        const allImages = (p.images || []).map(resolveUrl).filter((u): u is string => Boolean(u));
 
         return {
           name: p.name,
@@ -217,12 +237,15 @@ export default function MerchantImportPage() {
           category: p.category,
           price: p.price,
           old_price: p.old_price || null,
-          image_url: p.image_url ? (baseUrl ? `${baseUrl}/${p.image_url}`.replace(/([^:]\/)\/+/g, "$1") : p.image_url) : null,
-          part_number: p.part_number || 'N/A',
+          image_url: allImages[0] || null,
+          images: allImages,
+          part_number: (p.part_number && (p.part_number as string).trim() !== '')
+            ? (p.part_number as string).trim()
+            : `AUTO-${Date.now()}-${Math.random().toString(36).substring(2,6)}`,
           condition: p.condition,
-          stock: p.stock, // "متوفر" / "غير متوفر"
-          stock_quantity: p.stock === 'متوفر' ? 10 : 0, // Default to 10 if available
-          seller_id: user.id,
+          stock: p.stock,
+          stock_quantity: p.stock === 'متوفر' ? 10 : 0,
+          seller_id: user!.id,
           is_active: true,
           description: p.description || null
         };
@@ -238,10 +261,10 @@ export default function MerchantImportPage() {
       for (let i = 0; i < finalInserts.length; i += chunkSize) {
         const chunk = finalInserts.slice(i, i + chunkSize);
         
-        // Smart Upsert: Matches on (part_number, brand, seller_id)
+        // Smart Upsert: Matches on (part_number, seller_id) — same seller can't have same part number twice
         const { error } = await supabase
           .from('products')
-          .upsert(chunk, { onConflict: 'part_number,brand,seller_id' });
+          .upsert(chunk, { onConflict: 'part_number,seller_id' });
         
         if (error) {
           failedCount += chunk.length;
@@ -287,9 +310,10 @@ export default function MerchantImportPage() {
           
           <button 
             onClick={() => {
-              const headers = "اسم المنتج,السعر,الماركة,القسم,رقم القطعة,الحالة,المخزون,رابط الصورة\n";
-              const sample = "مساعدات رياضية,450,KYB,نظام التعليق,KYB-123,جديد,10,https://example.com/img.jpg";
-              const blob = new Blob([headers + sample], { type: 'text/csv;charset=utf-8;' });
+              const headers = "رقم القطعة *,اسم المنتج *,السعر *,الماركة,القسم,الحالة,الكمية,الوصف,صورة 1,صورة 2,صورة 3\n";
+              const sample = "KYB-55126,مساعد أمامي يميني,450,KYB,المساعدات والمقصات,جديد,10,مساعد أمامي يلائم كامري 2018-2022,https://example.com/img1.jpg,https://example.com/img2.jpg,https://example.com/img3.jpg";
+              const note = "\n\n# ملاحظة: الأعمدة التي تحمل * إجبارية. يمكنك إضافة صورة 4 بنفس الطريقة.";
+              const blob = new Blob([headers + sample + note], { type: 'text/csv;charset=utf-8;' });
               const link = document.createElement("a");
               link.href = URL.createObjectURL(blob);
               link.download = "booga_template.csv";
@@ -385,36 +409,47 @@ export default function MerchantImportPage() {
               </div>
             </div>
 
-            {/* Column Mapping UI */}
+            {/* ✅ Auto-Detection Summary — replaces manual column mapping */}
             <div style={{ 
-              background: 'rgba(255,255,255,0.03)', borderRadius: '24px', 
-              padding: '2rem', marginBottom: '2.5rem', border: '1px solid var(--border)' 
+              background: 'rgba(16,185,129,0.04)', borderRadius: '24px', 
+              padding: '2rem', marginBottom: '2.5rem', border: '1px solid rgba(16,185,129,0.15)' 
             }}>
-              <h4 style={{ marginBottom: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Table size={20} color="var(--primary)" /> ربط عناوين الجدول
+              <h4 style={{ marginBottom: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981' }}>
+                <Sparkles size={20} /> تم التعرف التلقائي على الأعمدة
               </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                {headers.map((h, i) => (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700 }}>عنوان الملف: "{h}"</label>
-                    <select 
-                      value={mapping[h] || ''} 
-                      onChange={(e) => setMapping({ ...mapping, [h]: e.target.value })}
-                      style={{ 
-                        padding: '1rem', borderRadius: '12px', background: 'var(--background)',
-                        color: 'var(--text-primary)', border: '1px solid var(--border)',
-                        fontWeight: 700, appearance: 'none', cursor: 'pointer'
-                      }}
-                    >
-                      <option value="">-- تجاهل هذا العمود --</option>
-                      {internalFields.map(f => (
-                        <option key={f.key} value={f.key}>{f.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+                {headers.map((h, i) => {
+                  const mapped = mapping[h];
+                  const fieldLabel = internalFields.find(f => f.key === mapped)?.label;
+                  return (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: '0.8rem',
+                      padding: '0.9rem 1.2rem', borderRadius: '14px',
+                      background: mapped ? 'rgba(16,185,129,0.07)' : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${mapped ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                    }}>
+                      <div style={{
+                        width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
+                        background: mapped ? '#10b981' : 'rgba(255,255,255,0.15)',
+                        boxShadow: mapped ? '0 0 6px rgba(16,185,129,0.6)' : 'none'
+                      }} />
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, marginBottom: '2px' }}>{h}</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: mapped ? '#10b981' : 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {mapped ? `→ ${fieldLabel}` : '— متجاهل —'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+              {Object.keys(mapping).length === 0 && (
+                <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '12px', background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.15)', color: '#f43f5e', fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <AlertCircle size={18} /> لم يتم التعرف على أي عمود — تأكد أن الملف يحتوي على أسماء مثل "اسم المنتج", "السعر", "رقم القطعة"
+                </div>
+              )}
             </div>
+
 
             <div style={{ overflowX: 'auto', marginBottom: '3rem' }}>
               <h4 style={{ marginBottom: '1rem', fontWeight: 800 }}>معاينة أول 5 منتجات</h4>

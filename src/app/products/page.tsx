@@ -48,8 +48,8 @@ export default function ProductsPage() {
       const g = params.get('global');
       const vinV = params.get('vin_verified');
       
-      if (m && mo && y) {
-        setFitment({ make: m, model: mo, year: y });
+      if (m) {
+        setFitment({ make: m, model: mo || '', year: y || '' });
         if (vinV === 'true') setIsVinVerified(true);
       }
       
@@ -98,11 +98,20 @@ export default function ProductsPage() {
       result = result.filter(p => selectedCategories.includes(p.category));
     }
 
+    // Fitment Filter (VIN or Garage car)
+    if (fitment?.make) {
+      const makeLower = fitment.make.toLowerCase();
+      result = result.filter(p => {
+        const target = (p.name + ' ' + p.brand + ' ' + (p.description || '')).toLowerCase();
+        return target.includes(makeLower);
+      });
+    }
+
     // Smart AND Search
     if (filters.search) {
       const searchWords = filters.search.toLowerCase().split(/\s+/).filter(w => w.length > 0);
       result = result.filter(p => {
-        const target = (p.name + ' ' + p.brand + ' ' + p.category).toLowerCase();
+        const target = (p.name + ' ' + p.brand + ' ' + p.category + ' ' + (p.description || '')).toLowerCase();
         return searchWords.every(word => target.includes(word));
       });
     }
@@ -120,7 +129,7 @@ export default function ProductsPage() {
     else if (sortBy === 'popular') result.sort((a, b) => b.reviews - a.reviews);
 
     return result;
-  }, [products, filters, sortBy]);
+  }, [products, filters, sortBy, fitment, selectedCategories]);
 
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>

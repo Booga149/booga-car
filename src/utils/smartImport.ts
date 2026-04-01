@@ -11,6 +11,7 @@ export interface ImportProduct {
   condition: 'جديد' | 'مستعمل';
   stock: 'متوفر' | 'غير متوفر';
   image_url?: string;
+  images?: string[];  // Multiple images support
   part_number?: string;
   old_price?: number;
   description?: string;
@@ -22,7 +23,10 @@ const HEADER_SYNONYMS: Record<string, string[]> = {
   price: ['السعر', 'القيمة', 'التكلفة', 'price', 'cost', 'val', 'rate', 'بيع', 'سعر البيع'],
   brand: ['الماركة', 'الشركة', 'البراند', 'صانع', 'brand', 'make', 'manufacturer', 'vendor'],
   category: ['القسم', 'الفئة', 'النوع', 'تصنيف', 'category', 'type', 'dept', 'classification'],
-  image_url: ['الصورة', 'رابط الصورة', 'link', 'image', 'picture', 'url', 'thumb', 'photo', 'img'],
+  image_url: ['الصورة', 'رابط الصورة', 'صورة 1', 'image', 'image_url', 'picture', 'url', 'thumb', 'photo', 'img', 'image1', 'photo1'],
+  image2: ['صورة 2', 'image2', 'photo2', 'img2', 'picture2'],
+  image3: ['صورة 3', 'image3', 'photo3', 'img3', 'picture3'],
+  image4: ['صورة 4', 'image4', 'photo4', 'img4', 'picture4'],
   part_number: ['رقم القطعة', 'رقم', 'كود', 'الرقم المصنعي', 'sku', 'part number', 'pn', 'partno', 'serial', 'part'],
   condition: ['الحالة', 'جديد/مستعمل', 'مستعمل/جديد', 'condition', 'status', 'state'],
   stock: ['المخزون', 'الكمية', 'المتوفر', 'stock', 'qty', 'status_stock', 'quantity', 'count'],
@@ -48,13 +52,30 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   'صيانة دورية': ['زيت', 'تصفية', 'تربيط', 'تشحيم', 'oil', 'service', 'maintenance', 'lube']
 };
 
+/** Normalize Arabic text: unify ة/ه, ى/ي, أ/إ/آ/ا, and strip diacritics */
+const normalizeArabic = (text: string): string =>
+  text
+    .trim()
+    .toLowerCase()
+    .replace(/[\u064B-\u065F]/g, '')  // Remove tashkeel (diacritics)
+    .replace(/ة/g, 'ه')               // ة → ه  (ta marbuta)
+    .replace(/[أإآ]/g, 'ا')           // أ إ آ → ا
+    .replace(/ى/g, 'ي');              // ى → ي
+
 /**
  * Fuzzy matches a header string to one of our internal keys
  */
 export const mapHeader = (rawHeader: string): string | null => {
-  const normalized = rawHeader.trim().toLowerCase();
+  const normalized = normalizeArabic(rawHeader);
   for (const [key, synonyms] of Object.entries(HEADER_SYNONYMS)) {
-    if (key === normalized || synonyms.some(s => normalized === s || normalized.includes(s))) {
+    const normalizedKey = normalizeArabic(key);
+    if (
+      normalized === normalizedKey ||
+      synonyms.some(s => {
+        const ns = normalizeArabic(s);
+        return normalized === ns || normalized.includes(ns) || ns.includes(normalized);
+      })
+    ) {
       return key;
     }
   }
@@ -100,7 +121,14 @@ export const processRow = (rawRow: Record<string, any>): ImportProduct => {
     }
   });
 
-  // Ensure data types and defaults
+  // Collect all images into an array
+  const allImages: string[] = [
+    product.image_url,
+    product.image2,
+    product.image3,
+    product.image4,
+  ].filter((url): url is string => Boolean(url && url.trim() !== ''));
+
   const finalProduct: ImportProduct = {
     name: product.name || 'منتج غير مسمى',
     price: typeof product.price === 'number' ? product.price : parseFloat(String(product.price).replace(/[^\d.]/g, '')) || 0,
@@ -108,7 +136,8 @@ export const processRow = (rawRow: Record<string, any>): ImportProduct => {
     category: product.category || autoCategorize(product.name || ''),
     condition: product.condition?.toString().includes('مستعمل') ? 'مستعمل' : 'جديد',
     stock: product.stock?.toString().includes('غير متوفر') ? 'غير متوفر' : 'متوفر',
-    image_url: product.image_url || '',
+    image_url: allImages[0] || '',          // Primary image = first one
+    images: allImages,                       // All images array
     part_number: product.part_number?.toString() || '',
     old_price: product.old_price ? parseFloat(String(product.old_price).replace(/[^\d.]/g, '')) : undefined,
     description: product.description || ''
