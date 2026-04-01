@@ -1,52 +1,55 @@
 "use client";
 import { useRouter, usePathname } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import { useState } from 'react';
 
-// Pages where the back button should NOT appear
 const HIDDEN_ON = ['/', '/products', '/categories'];
 
 export default function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
+  const [hovered, setHovered] = useState(false);
 
-  // Don't show on home page or main listing pages
   if (HIDDEN_ON.includes(pathname)) return null;
 
   return (
     <button
       onClick={() => router.back()}
-      title="رجوع"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         position: 'fixed',
-        top: '85px',
-        right: '1.5rem',
-        zIndex: 999,
-        width: '44px',
-        height: '44px',
-        borderRadius: '50%',
-        background: 'rgba(20,20,20,0.92)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        color: 'white',
+        top: '50%',
+        right: 0,
+        transform: 'translateY(-50%)',
+        zIndex: 998,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: '0.5rem',
+        padding: hovered ? '0.75rem 1.2rem' : '0.75rem 0.8rem',
+        background: hovered ? '#D4AF37' : 'rgba(212,175,55,0.12)',
+        border: '1px solid rgba(212,175,55,0.35)',
+        borderRight: 'none',
+        borderRadius: '12px 0 0 12px',
+        color: hovered ? '#000' : '#D4AF37',
+        fontWeight: 800,
+        fontSize: '0.9rem',
         cursor: 'pointer',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(10px)',
+        boxShadow: hovered ? '0 4px 24px rgba(212,175,55,0.35)' : '0 2px 12px rgba(0,0,0,0.3)',
         transition: 'all 0.25s ease',
-      }}
-      onMouseOver={e => {
-        e.currentTarget.style.background = 'rgba(212,175,55,0.15)';
-        e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
-        e.currentTarget.style.transform = 'scale(1.1)';
-      }}
-      onMouseOut={e => {
-        e.currentTarget.style.background = 'rgba(20,20,20,0.92)';
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-        e.currentTarget.style.transform = 'scale(1)';
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
       }}
     >
-      <ArrowRight size={22} />
+      <ArrowRight size={20} />
+      <span style={{
+        maxWidth: hovered ? '80px' : '0',
+        overflow: 'hidden',
+        transition: 'max-width 0.25s ease',
+        display: 'inline-block',
+      }}>
+        رجوع
+      </span>
     </button>
   );
 }
