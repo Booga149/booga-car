@@ -196,8 +196,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000,
-      background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(30px)',
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200000,
+      background: 'rgba(0, 0, 0, 0.92)', backdropFilter: 'blur(30px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1.5rem'
     }} onClick={onClose}>
       
