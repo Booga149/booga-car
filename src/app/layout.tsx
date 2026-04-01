@@ -17,6 +17,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import Footer from '@/components/Footer';
 import { MessageCircle } from 'lucide-react';
 import AdminToastListener from '@/components/AdminToastListener';
+import BackButton from '@/components/BackButton';
 
 export default function RootLayout({
   children,
@@ -60,6 +61,7 @@ export default function RootLayout({
                   </a>
                   
                   {children}
+                  <BackButton />
                   <CartDrawer />
                   <Footer />
                   <AdminToastListener />
