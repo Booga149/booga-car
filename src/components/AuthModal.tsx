@@ -732,6 +732,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 }}>
                   {loading ? 'جاري الإرسال...' : (<>إرسال رمز التحقق <ArrowRight size={18} /></>)}
                 </button>
+                {/* Toggle login/signup */}
+                <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+                    {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
+                    <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
+                      background: 'transparent', border: 'none', color: '#FFD700', 
+                      cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
+                      textDecoration: 'underline', textUnderlineOffset: '3px',
+                    }}>
+                      {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
+                    </button>
+                  </p>
+                </div>
               </form>
             )
           ) : (
@@ -796,18 +809,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   {loading ? 'جاري التحقق...' : (<>{isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب'} <ArrowRight size={18} /></>)}
                 </button>
               </form>
-              <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
-                  {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
-                  <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
-                    background: 'transparent', border: 'none', color: '#FFD700', 
-                    cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
-                    textDecoration: 'underline', textUnderlineOffset: '3px',
-                  }}>
-                    {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
-                  </button>
-                </p>
-              </div>
             </>
           )}
 
