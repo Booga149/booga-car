@@ -68,13 +68,13 @@ export default function Navbar() {
         display: 'flex',
         flexDirection: 'column',
         background: isMerchant
-          ? 'linear-gradient(180deg, #07060100 0%, rgba(8,7,2,0.99) 100%)'
+          ? '#080702'
           : 'rgba(10, 10, 10, 0.98)',
         borderBottom: isMerchant
           ? '1px solid rgba(212,175,55,0.18)'
           : '1px solid var(--border)',
         boxShadow: isMerchant
-          ? '0 4px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.04) inset'
+          ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
           : '0 4px 30px rgba(0,0,0,0.4)',
         transition: 'all 0.5s ease',
       }}>
