@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Circle, Lightbulb, Wind, Wrench, Cog, CarFront, CircuitBoard, Fuel,
@@ -34,6 +34,20 @@ function CategoriesBarInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category') || '';
+  const [navHeight, setNavHeight] = useState(73);
+
+  // Dynamically measure navbar height (works for both regular + merchant navbars)
+  useEffect(() => {
+    const measure = () => {
+      const navbar = document.querySelector('header');
+      if (navbar) setNavHeight(navbar.offsetHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    const navbar = document.querySelector('header');
+    if (navbar) ro.observe(navbar);
+    return () => ro.disconnect();
+  }, []);
 
   const handleCategoryClick = (name: string) => {
     if (name === 'الكل') {
@@ -45,15 +59,13 @@ function CategoriesBarInner() {
 
   return (
     <section style={{
-      background: 'var(--surface)',
-      borderTop: '1px solid var(--border)',
+      background: 'var(--background)',
       borderBottom: '1px solid var(--border)',
       padding: '0',
       position: 'sticky',
-      top: '73px', 
+      top: `${navHeight}px`,
       zIndex: 90,
-      backdropFilter: 'blur(10px)',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+      boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
     }}>
       <div style={{
         maxWidth: '1400px', margin: '0 auto',
@@ -112,3 +124,4 @@ export default function CategoriesBar() {
     </Suspense>
   );
 }
+
