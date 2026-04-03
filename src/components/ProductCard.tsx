@@ -358,8 +358,12 @@ export default function ProductCard({
 
           {/* Add to Cart Button */}
           {user?.id === seller_id ? (
-            <a
-              href={`/seller/products/edit/${id}`}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.location.href = `/seller/products/edit/${id}`;
+              }}
               style={{
                 marginTop: '0.5rem',
                 width: '100%',
@@ -388,7 +392,7 @@ export default function ProductCard({
               }}
             >
               <Check size={20} /> إدارة المنتج
-            </a>
+            </div>
           ) : (
             <button
               disabled={stock !== 'متوفر'}
