@@ -4,8 +4,10 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/context/ProductsContext';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import {
-  ShieldCheck, Zap, Globe, Award, ArrowUpRight
+  ShieldCheck, Zap, Globe, Award, ArrowUpRight, Terminal, Users, Package, CircleDollarSign, ShoppingCart as CartIcon, Crosshair
 } from 'lucide-react';
 import EngineeringSystems from '@/components/EngineeringSystems';
 import KSATrustBar from '@/components/KSATrustBar';
@@ -14,15 +16,44 @@ import WelcomeOffer from '@/components/WelcomeOffer';
 
 export default function Home() {
   const { products } = useProducts();
+  const { user } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminStats, setAdminStats] = useState({ users: 0, orders: 0, products: 0, revenue: 0 });
 
-  // User specifically requested the "Booga Car" Welcome appearance at 3s instead of 5s.
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowWelcome(true);
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Admin detection + stats
+  useEffect(() => {
+    if (!user?.email) { setIsAdmin(false); return; }
+    const isAdm = user.email.startsWith('mrmrx2824') || user.email.startsWith('admin');
+    if (!isAdm) {
+      supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => {
+        if (data?.role === 'admin' || data?.role === 'superadmin') {
+          setIsAdmin(true);
+          loadAdminStats();
+        }
+      });
+    } else {
+      setIsAdmin(true);
+      loadAdminStats();
+    }
+  }, [user]);
+
+  async function loadAdminStats() {
+    const [u, o, p] = await Promise.all([
+      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('orders').select('total'),
+      supabase.from('products').select('id', { count: 'exact', head: true }),
+    ]);
+    const revenue = (o.data || []).reduce((s: number, x: any) => s + (Number(x.total) || 0), 0);
+    setAdminStats({ users: u.count || 0, orders: (o.data || []).length, products: p.count || 0, revenue });
+  }
 
   return (
     <main style={{ 
@@ -36,13 +67,66 @@ export default function Home() {
       {/* Global Precision Grid */}
       <div style={{
         position: 'fixed', inset: 0,
-        backgroundImage: 'radial-gradient(rgba(244, 63, 94, 0.05) 1px, transparent 1px)',
-        backgroundSize: '80px 80px',
+        backgroundImage: isAdmin
+          ? 'linear-gradient(rgba(76,201,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.03) 1px, transparent 1px)'
+          : 'radial-gradient(rgba(244, 63, 94, 0.05) 1px, transparent 1px)',
+        backgroundSize: isAdmin ? '50px 50px' : '80px 80px',
         zIndex: 0, pointerEvents: 'none'
       }} />
 
       <div style={{ position: 'relative', zIndex: 10 }}>
         <Navbar />
+
+        {/* ═══ ADMIN COMMAND BAR ═══ */}
+        {isAdmin && (
+          <div style={{
+            marginTop: '120px', marginLeft: '2rem', marginRight: '2rem',
+            background: 'rgba(5, 5, 12, 0.85)', backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(76,201,240,0.2)', borderRadius: '20px',
+            padding: '1rem 2rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: '1rem',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.6), inset 0 0 15px rgba(76,201,240,0.03)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, #4cc9f0, transparent)', opacity: 0.5 }} />
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f43f5e', boxShadow: '0 0 10px #f43f5e' }} />
+                <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1px solid #f43f5e', opacity: 0.4, animation: 'adminPing 2s infinite' }} />
+              </div>
+              <span style={{ color: '#4cc9f0', fontSize: '0.78rem', fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Terminal size={14} /> أنت تتصفح كمدير النظام
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+              {[
+                { label: 'المستخدمين', value: adminStats.users, icon: <Users size={14} />, color: '#f59e0b' },
+                { label: 'الطلبات', value: adminStats.orders, icon: <CartIcon size={14} />, color: '#4cc9f0' },
+                { label: 'المنتجات', value: adminStats.products, icon: <Package size={14} />, color: '#b5179e' },
+                { label: 'الإيرادات', value: `${(adminStats.revenue / 1000).toFixed(1)}K`, icon: <CircleDollarSign size={14} />, color: '#10b981' },
+              ].map(s => (
+                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ color: s.color, opacity: 0.7 }}>{s.icon}</div>
+                  <span style={{ color: '#fff', fontWeight: 950, fontSize: '1rem' }}>{s.value}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', fontWeight: 700 }}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <a href="/admin" style={{
+              padding: '0.5rem 1.2rem', borderRadius: '10px',
+              background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)',
+              color: '#f43f5e', textDecoration: 'none', fontWeight: 900, fontSize: '0.8rem',
+              display: 'flex', alignItems: 'center', gap: '0.4rem', transition: '0.2s',
+            }}>
+              <Crosshair size={13} /> مركز القيادة
+            </a>
+          </div>
+        )}
+
         {showWelcome && <WelcomeOffer />}
         <Hero />
         

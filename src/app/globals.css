@@ -198,3 +198,170 @@ a {
     gap: 1.2rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   GOD MODE — SYSTEM-WIDE ADMIN OVERRIDE
+   When body.god-mode is active, the ENTIRE site transforms
+   into a cyber command interface.
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Base Override ─── */
+body.god-mode {
+  --gm-accent: #4cc9f0;
+  --gm-danger: #f43f5e;
+  --gm-bg: #020205;
+  --gm-surface: rgba(10, 10, 18, 0.85);
+  --gm-border: rgba(76, 201, 240, 0.15);
+  --gm-glow: rgba(76, 201, 240, 0.08);
+  --gm-text: #e0e6ed;
+  --gm-text-dim: rgba(255,255,255,0.4);
+
+  background-color: var(--gm-bg) !important;
+  background-image:
+    linear-gradient(rgba(76, 201, 240, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 201, 240, 0.035) 1px, transparent 1px) !important;
+  background-size: 50px 50px !important;
+  color: var(--gm-text) !important;
+}
+
+body.god-mode::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.06) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+body.god-mode::after {
+  content: "";
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(76, 201, 240, 0.07) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Scrollbar ─── */
+body.god-mode ::-webkit-scrollbar { width: 8px; height: 8px; }
+body.god-mode ::-webkit-scrollbar-track { background: rgba(5,5,15,0.5); }
+body.god-mode ::-webkit-scrollbar-thumb { background: rgba(76,201,240,0.35); border-radius: 10px; }
+body.god-mode ::-webkit-scrollbar-thumb:hover { background: rgba(76,201,240,0.6); }
+
+/* ─── Links ─── */
+body.god-mode a:hover {
+  text-shadow: 0 0 8px rgba(76,201,240,0.3) !important;
+}
+
+/* ─── Cards & Surfaces ─── */
+body.god-mode .glass-panel,
+body.god-mode [class*="card"],
+body.god-mode [style*="var(--surface)"] {
+  border-color: var(--gm-border) !important;
+}
+
+/* ─── Product Card God Mode Override ─── */
+body.god-mode .gm-product-card {
+  background: rgba(8, 8, 20, 0.9) !important;
+  border: 1px solid rgba(76,201,240,0.12) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(76,201,240,0.05) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+body.god-mode .gm-product-card:hover {
+  border-color: rgba(76,201,240,0.4) !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 30px rgba(76,201,240,0.08), inset 0 0 15px rgba(76,201,240,0.03) !important;
+  transform: translateY(-6px) !important;
+}
+
+/* ─── Buttons in God Mode ─── */
+body.god-mode .gm-btn-primary {
+  background: linear-gradient(135deg, #4cc9f0, #0891b2) !important;
+  color: #020205 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 8px 25px rgba(76,201,240,0.3) !important;
+  border: none !important;
+}
+body.god-mode .gm-btn-primary:hover {
+  box-shadow: 0 12px 35px rgba(76,201,240,0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+body.god-mode .gm-btn-outline {
+  background: transparent !important;
+  border: 1px solid rgba(76,201,240,0.3) !important;
+  color: #4cc9f0 !important;
+}
+body.god-mode .gm-btn-outline:hover {
+  background: rgba(76,201,240,0.08) !important;
+  box-shadow: 0 0 20px rgba(76,201,240,0.15) !important;
+}
+
+/* ─── Inputs ─── */
+body.god-mode input,
+body.god-mode textarea,
+body.god-mode select {
+  background: rgba(5, 5, 15, 0.8) !important;
+  border-color: rgba(76,201,240,0.2) !important;
+  color: #fff !important;
+}
+body.god-mode input:focus,
+body.god-mode textarea:focus,
+body.god-mode select:focus {
+  border-color: #4cc9f0 !important;
+  box-shadow: 0 0 15px rgba(76,201,240,0.15) !important;
+  outline: none !important;
+}
+
+/* ─── Footer God Mode ─── */
+body.god-mode footer {
+  background: #020205 !important;
+  border-top-color: rgba(76,201,240,0.15) !important;
+}
+
+/* ─── Section backgrounds ─── */
+body.god-mode main,
+body.god-mode section {
+  position: relative;
+}
+
+/* ─── Selection ─── */
+body.god-mode ::selection {
+  background: rgba(76,201,240,0.3);
+  color: #fff;
+}
+
+/* ─── Admin Info Badge on product cards ─── */
+body.god-mode .gm-admin-info {
+  display: flex !important;
+}
+
+/* ─── Animations ─── */
+@keyframes slideUpAdmin {
+  from { opacity: 0; transform: translateY(30px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes adminPing {
+  75%, 100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes gmScanline {
+  0%   { top: -5%; }
+  100% { top: 105%; }
+}
+
+@keyframes gmGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes gmFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}

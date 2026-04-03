@@ -18,6 +18,7 @@ import Footer from '@/components/Footer';
 import { MessageCircle } from 'lucide-react';
 import AdminToastListener from '@/components/AdminToastListener';
 import BackButton from '@/components/BackButton';
+import AdminGodModeEnforcer from '@/components/AdminGodModeEnforcer';
 
 export default function RootLayout({
   children,
@@ -65,6 +66,7 @@ export default function RootLayout({
                   <CartDrawer />
                   <Footer />
                   <AdminToastListener />
+                  <AdminGodModeEnforcer />
                 </CartProvider>
               </ProductsProvider>
             </WishlistProvider>

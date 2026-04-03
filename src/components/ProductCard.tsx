@@ -44,9 +44,9 @@ export default function ProductCard({
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
       <div
+        className="gm-product-card"
         style={{
           background: 'var(--surface)',
-          // background: 'var(--surface)',
           borderRadius: '16px',
           overflow: 'hidden',
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -62,6 +62,23 @@ export default function ProductCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Admin-only info bar — hidden by default, shown via god-mode CSS */}
+        <div className="gm-admin-info" style={{
+          display: 'none',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0.4rem 0.8rem',
+          background: 'rgba(76,201,240,0.06)',
+          borderBottom: '1px solid rgba(76,201,240,0.1)',
+          fontSize: '0.65rem',
+          fontFamily: 'monospace',
+          color: 'rgba(76,201,240,0.6)',
+          fontWeight: 700,
+          letterSpacing: '0.5px',
+        }}>
+          <span>ID: {id?.substring(0, 8)}</span>
+          {seller_id && <span>SELLER: {seller_id?.substring(0, 8)}</span>}
+        </div>
         {/* ─── Image Section ─── */}
         <div style={{
           position: 'relative',

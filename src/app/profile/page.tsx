@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { User, Package, ShoppingCart, Settings, Clock, CheckCircle2, Truck, MapPin, Tag, LogOut, Save, AlertCircle, XCircle, ShieldCheck, BarChart3, TrendingUp, Heart as HeartIcon, Eye as EyeIcon, DollarSign, Crown, Zap, PackagePlus, Store, Star } from 'lucide-react';
+import { User, Package, ShoppingCart, Settings, Clock, CheckCircle2, Truck, MapPin, Tag, LogOut, Save, AlertCircle, XCircle, ShieldCheck, BarChart3, TrendingUp, Heart as HeartIcon, Eye as EyeIcon, DollarSign, Crown, Zap, PackagePlus, Store, Star, Crosshair, Users } from 'lucide-react';
 
 type Order = {
   id: string;
@@ -62,6 +62,7 @@ export default function ProfilePage() {
   const [myProducts, setMyProducts] = useState<any[]>([]);
   const router = useRouter();
   const isMerchant = !!profile?.cr_number;
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'superadmin' || user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin');
 
   useEffect(() => {
     async function getData() {
@@ -72,9 +73,11 @@ export default function ProfilePage() {
         const { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (prof) {
           setProfile(prof);
-          // Set default tab based on user type
-          if (prof?.cr_number) {
+          const isAdm = prof?.role === 'admin' || prof?.role === 'superadmin' || session.user.email?.startsWith('mrmrx2824') || session.user.email?.startsWith('admin');
+          if (prof?.cr_number && !isAdm) {
             setActiveTab('store');
+          } else if (isAdm) {
+            setActiveTab('orders');
           }
         }
         const { data: ords } = await supabase.from('orders').select('*, order_items(*)').eq('user_id', session.user.id).order('created_at', { ascending: false });
@@ -115,12 +118,107 @@ export default function ProfilePage() {
   const activeProducts = myProducts.filter(p => p.is_active !== false).length;
 
   return (
-    <div style={{ minHeight: '100vh', background: isMerchant ? '#050400' : 'var(--background)' }}>
+    <div style={{ minHeight: '100vh', background: isAdmin ? '#020205' : isMerchant ? '#050400' : 'var(--background)' }}>
       
       {/* ═══════════════════════════════════════════
-          MERCHANT CINEMATIC HERO HEADER
+          ADMIN GOD MODE HERO HEADER
       ═══════════════════════════════════════════ */}
-      {isMerchant ? (
+      {isAdmin ? (
+        <div style={{ position: 'relative', overflow: 'hidden', paddingTop: '70px' }}>
+          {/* Background Layers */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, #0a0a1a 0%, #020208 50%, #020205 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(76,201,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+          <div style={{ position: 'absolute', top: '-30%', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(76,201,240,0.06) 0%, transparent 70%)', animation: 'merchantGlow 5s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', top: '10%', right: '-5%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,63,94,0.05) 0%, transparent 70%)', animation: 'merchantGlow 8s ease-in-out 2s infinite reverse' }} />
+          {/* Cyber particles */}
+          {[...Array(12)].map((_, i) => (
+            <div key={i} style={{ position: 'absolute', width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`, borderRadius: '50%', background: `rgba(76,201,240,${0.15 + (i % 5) * 0.08})`, left: `${(i * 17 + 5) % 100}%`, top: `${(i * 13 + 8) % 100}%`, animation: `particleUp ${4 + (i % 5)}s ease-in-out ${(i % 4) * 0.7}s infinite`, boxShadow: i % 3 === 0 ? '0 0 6px rgba(76,201,240,0.4)' : 'none' }} />
+          ))}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent 0%, rgba(76,201,240,0.5) 20%, rgba(76,201,240,0.8) 50%, rgba(76,201,240,0.5) 80%, transparent 100%)' }} />
+
+          {/* Hero Content */}
+          <div style={{ position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem 0' }}>
+            {/* GOD MODE BADGE */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '2rem', animation: 'fadeInUp 0.5s ease 0.1s both' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem 0.4rem 0.7rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '100px', color: '#f43f5e', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '1.5px' }}>
+                <Crown size={13} /> GOD MODE — System Administrator
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem', background: 'rgba(76,201,240,0.1)', border: '1px solid rgba(76,201,240,0.25)', borderRadius: '100px', color: '#4cc9f0', fontSize: '0.72rem', fontWeight: 900 }}>
+                <ShieldCheck size={13} /> صلاحيات عليا ✓
+              </div>
+            </div>
+
+            {/* Main hero row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+              {/* Avatar with cyber ring */}
+              <div style={{ position: 'relative', flexShrink: 0, animation: 'fadeInUp 0.5s ease 0.2s both' }}>
+                <div style={{ position: 'absolute', inset: '-5px', borderRadius: '35px', background: 'conic-gradient(from 0deg, #4cc9f0, #f43f5e, rgba(76,201,240,0.2), #f43f5e, #4cc9f0)', animation: 'spinRing 6s linear infinite', opacity: 0.8 }} />
+                <div style={{ width: '110px', height: '110px', borderRadius: '30px', background: 'linear-gradient(135deg, #0a0a1a 0%, #131325 50%, #0a0a1a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', color: '#4cc9f0', fontWeight: 900, textTransform: 'uppercase', boxShadow: '0 20px 50px rgba(76,201,240,0.2), inset 0 0 30px rgba(76,201,240,0.05)', position: 'relative', zIndex: 1, border: '2px solid rgba(76,201,240,0.2)' }}>
+                  <Crosshair size={48} />
+                </div>
+                <div style={{ position: 'absolute', bottom: -8, right: -8, background: '#020205', borderRadius: '50%', padding: '3px', zIndex: 2 }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #f43f5e, #be123c)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(244,63,94,0.5)' }}>
+                    <Crown size={15} color="white" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Admin info */}
+              <div style={{ flex: 1, animation: 'fadeInUp 0.5s ease 0.3s both' }}>
+                <h1 style={{ margin: '0 0 0.6rem', fontSize: '3rem', fontWeight: 950, letterSpacing: '-1.5px', lineHeight: 1, color: '#4cc9f0', textShadow: '0 0 30px rgba(76,201,240,0.3)' }}>
+                  {profile?.full_name || 'مدير النظام'}
+                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', flexWrap: 'wrap', marginBottom: '1.2rem' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <User size={14} color="rgba(76,201,240,0.5)" /> {user.email}
+                  </span>
+                  <span style={{ color: 'rgba(244,63,94,0.6)', fontSize: '0.78rem', fontWeight: 900, letterSpacing: '1px', fontFamily: 'monospace' }}>
+                    ROLE: ADMIN
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 1.6rem', background: 'linear-gradient(135deg, #4cc9f0, #0891b2)', color: '#020205', borderRadius: '14px', textDecoration: 'none', fontWeight: 900, fontSize: '0.95rem', boxShadow: '0 8px 25px rgba(76,201,240,0.3)', transition: 'all 0.3s' }}
+                    onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(76,201,240,0.45)'; }}
+                    onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(76,201,240,0.3)'; }}>
+                    <BarChart3 size={18} /> مركز القيادة
+                  </Link>
+                  <Link href="/admin/users" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 1.6rem', background: 'rgba(76,201,240,0.08)', color: '#4cc9f0', border: '1px solid rgba(76,201,240,0.25)', borderRadius: '14px', textDecoration: 'none', fontWeight: 800, fontSize: '0.95rem', transition: 'all 0.3s' }}
+                    onMouseOver={e => { e.currentTarget.style.background = 'rgba(76,201,240,0.15)'; }}
+                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(76,201,240,0.08)'; }}>
+                    <Users size={18} /> المستخدمين
+                  </Link>
+                  <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 1.4rem', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.3s' }}
+                    onMouseOver={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#ff5555'; }}
+                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}>
+                    <LogOut size={16} /> الخروج
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Tabs */}
+          </div>
+          <div style={{ position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '0 auto', padding: '2rem 2rem 0' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(76,201,240,0.1)' }}>
+              {[
+                { id: 'orders', label: 'مشترياتي', icon: <ShoppingCart size={16}/> },
+                { id: 'settings', label: 'إعدادات الحساب', icon: <Settings size={16}/> },
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                  padding: '0.9rem 1.5rem', border: 'none', cursor: 'pointer',
+                  background: 'transparent', fontWeight: 800, fontSize: '0.9rem',
+                  color: activeTab === tab.id ? '#4cc9f0' : 'rgba(255,255,255,0.3)',
+                  borderBottom: activeTab === tab.id ? '2px solid #4cc9f0' : '2px solid transparent',
+                  marginBottom: '-1px', transition: 'all 0.25s', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  boxShadow: activeTab === tab.id ? '0 10px 20px rgba(76,201,240,0.05)' : 'none',
+                }}>
+                  {tab.icon} {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : isMerchant ? (
         <div style={{ position: 'relative', overflow: 'hidden', paddingTop: '70px' }}>
           
           {/* Background Layers */}
@@ -396,23 +494,23 @@ export default function ProfilePage() {
 
         {/* ═══ SETTINGS TAB ═══ */}
         {activeTab === 'settings' && (
-          <div style={{ background: isMerchant ? 'rgba(212,175,55,0.03)' : 'var(--surface)', borderRadius: '24px', border: isMerchant ? '1px solid rgba(212,175,55,0.12)' : '1px solid var(--border)', padding: '3rem', boxShadow: 'var(--card-shadow)', marginTop: isMerchant ? '2rem' : '0' }}>
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.8rem', fontWeight: 900, color: isMerchant ? '#D4AF37' : 'var(--text-primary)' }}>{isMerchant ? 'إعدادات المحل' : 'تعديل البيانات الشخصية'}</h2>
-            <p style={{ color: isMerchant ? 'rgba(212,175,55,0.4)' : 'var(--text-secondary)', fontWeight: 600, marginBottom: '2.5rem' }}>حافظ على بياناتك محدثة</p>
+          <div style={{ background: isAdmin ? 'rgba(76,201,240,0.03)' : isMerchant ? 'rgba(212,175,55,0.03)' : 'var(--surface)', borderRadius: '24px', border: isAdmin ? '1px solid rgba(76,201,240,0.15)' : isMerchant ? '1px solid rgba(212,175,55,0.12)' : '1px solid var(--border)', padding: '3rem', boxShadow: 'var(--card-shadow)', marginTop: isAdmin || isMerchant ? '2rem' : '0' }}>
+            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.8rem', fontWeight: 900, color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--text-primary)' }}>{isAdmin ? 'إعدادات المدير' : isMerchant ? 'إعدادات المحل' : 'تعديل البيانات الشخصية'}</h2>
+            <p style={{ color: isAdmin ? 'rgba(76,201,240,0.4)' : isMerchant ? 'rgba(212,175,55,0.4)' : 'var(--text-secondary)', fontWeight: 600, marginBottom: '2.5rem' }}>حافظ على بياناتك محدثة</p>
             <form onSubmit={handleUpdateProfile} style={{ display: 'grid', gap: '2rem' }}>
               <div style={{ display: 'grid', gap: '0.8rem' }}>
-                <label style={{ fontSize: '0.95rem', fontWeight: 800, color: isMerchant ? 'rgba(212,175,55,0.7)' : 'var(--text-primary)' }}>الاسم بالكامل</label>
-                <input name="full_name" defaultValue={profile?.full_name} placeholder="أدخل اسمك بالكامل" style={{ padding: '1.2rem', borderRadius: '14px', border: `2px solid ${isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'}`, background: isMerchant ? 'rgba(0,0,0,0.3)' : 'var(--surface-hover)', color: isMerchant ? '#fff' : 'var(--text-primary)', outline: 'none', fontWeight: 600, fontSize: '1rem', transition: '0.3s' }}
-                  onFocus={e => e.currentTarget.style.borderColor = isMerchant ? 'rgba(212,175,55,0.6)' : 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'} />
+                <label style={{ fontSize: '0.95rem', fontWeight: 800, color: isAdmin ? 'rgba(76,201,240,0.7)' : isMerchant ? 'rgba(212,175,55,0.7)' : 'var(--text-primary)' }}>الاسم بالكامل</label>
+                <input name="full_name" defaultValue={profile?.full_name} placeholder="أدخل اسمك بالكامل" style={{ padding: '1.2rem', borderRadius: '14px', border: `2px solid ${isAdmin ? 'rgba(76,201,240,0.2)' : isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'}`, background: isAdmin ? 'rgba(5,5,15,0.6)' : isMerchant ? 'rgba(0,0,0,0.3)' : 'var(--surface-hover)', color: isAdmin || isMerchant ? '#fff' : 'var(--text-primary)', outline: 'none', fontWeight: 600, fontSize: '1rem', transition: '0.3s' }}
+                  onFocus={e => e.currentTarget.style.borderColor = isAdmin ? '#4cc9f0' : isMerchant ? 'rgba(212,175,55,0.6)' : 'var(--primary)'}
+                  onBlur={e => e.currentTarget.style.borderColor = isAdmin ? 'rgba(76,201,240,0.2)' : isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'} />
               </div>
               <div style={{ display: 'grid', gap: '0.8rem' }}>
-                <label style={{ fontSize: '0.95rem', fontWeight: 800, color: isMerchant ? 'rgba(212,175,55,0.7)' : 'var(--text-primary)' }}>رقم الجوال</label>
-                <input name="phone" defaultValue={profile?.phone} placeholder="05XXXXXXXX" style={{ padding: '1.2rem', borderRadius: '14px', border: `2px solid ${isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'}`, background: isMerchant ? 'rgba(0,0,0,0.3)' : 'var(--surface-hover)', color: isMerchant ? '#fff' : 'var(--text-primary)', textAlign: 'left', direction: 'ltr', fontWeight: 600, fontSize: '1.1rem', transition: '0.3s' }}
-                  onFocus={e => e.currentTarget.style.borderColor = isMerchant ? 'rgba(212,175,55,0.6)' : 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'} />
+                <label style={{ fontSize: '0.95rem', fontWeight: 800, color: isAdmin ? 'rgba(76,201,240,0.7)' : isMerchant ? 'rgba(212,175,55,0.7)' : 'var(--text-primary)' }}>رقم الجوال</label>
+                <input name="phone" defaultValue={profile?.phone} placeholder="05XXXXXXXX" style={{ padding: '1.2rem', borderRadius: '14px', border: `2px solid ${isAdmin ? 'rgba(76,201,240,0.2)' : isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'}`, background: isAdmin ? 'rgba(5,5,15,0.6)' : isMerchant ? 'rgba(0,0,0,0.3)' : 'var(--surface-hover)', color: isAdmin || isMerchant ? '#fff' : 'var(--text-primary)', textAlign: 'left', direction: 'ltr', fontWeight: 600, fontSize: '1.1rem', transition: '0.3s' }}
+                  onFocus={e => e.currentTarget.style.borderColor = isAdmin ? '#4cc9f0' : isMerchant ? 'rgba(212,175,55,0.6)' : 'var(--primary)'}
+                  onBlur={e => e.currentTarget.style.borderColor = isAdmin ? 'rgba(76,201,240,0.2)' : isMerchant ? 'rgba(212,175,55,0.2)' : 'var(--border)'} />
               </div>
-              <button type="submit" disabled={saving} style={{ background: isMerchant ? 'linear-gradient(135deg, #D4AF37, #FFD700)' : 'var(--primary)', color: isMerchant ? '#111' : '#ffffff', padding: '1.4rem', borderRadius: '16px', border: 'none', fontWeight: 900, fontSize: '1.1rem', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', boxShadow: isMerchant ? '0 8px 25px rgba(212,175,55,0.3)' : '0 8px 25px rgba(244, 63, 94, 0.3)', transition: '0.3s' }}
+              <button type="submit" disabled={saving} style={{ background: isAdmin ? 'linear-gradient(135deg, #4cc9f0, #0891b2)' : isMerchant ? 'linear-gradient(135deg, #D4AF37, #FFD700)' : 'var(--primary)', color: isAdmin ? '#020205' : isMerchant ? '#111' : '#ffffff', padding: '1.4rem', borderRadius: '16px', border: 'none', fontWeight: 900, fontSize: '1.1rem', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', boxShadow: isAdmin ? '0 8px 25px rgba(76,201,240,0.3)' : isMerchant ? '0 8px 25px rgba(212,175,55,0.3)' : '0 8px 25px rgba(244, 63, 94, 0.3)', transition: '0.3s' }}
                 onMouseOver={e => !saving && (e.currentTarget.style.transform = 'translateY(-3px)')} onMouseOut={e => !saving && (e.currentTarget.style.transform = 'translateY(0)')}>
                 {saving ? 'جاري الحفظ...' : <><Save size={22} /> حفظ التغييرات</>}
               </button>

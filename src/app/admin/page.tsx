@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { CircleDollarSign, Package, Settings, Users, User, LogIn, Activity, Eye, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck } from 'lucide-react';
+import { CircleDollarSign, Package, Settings, Users, User, LogIn, Activity, Eye, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck, Terminal, Crosshair, Zap } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Order } from '@/types';
 
@@ -53,11 +53,11 @@ export default function AdminDashboard() {
   const statusColor = (s: string) => {
     switch (s) {
       case 'قيد المراجعة': return '#f59e0b';
-      case 'تم التأكيد': return '#2563eb';
-      case 'جاري الشحن': return '#8b5cf6';
-      case 'تم التوصيل': return '#059669';
-      case 'ملغي': return '#dc2626';
-      default: return 'var(--text-secondary)';
+      case 'تم التأكيد': return '#4cc9f0';
+      case 'جاري الشحن': return '#b5179e';
+      case 'تم التوصيل': return '#10b981';
+      case 'ملغي': return '#f43f5e';
+      default: return 'rgba(255,255,255,0.4)';
     }
   };
 
@@ -73,58 +73,65 @@ export default function AdminDashboard() {
   };
 
   const statCards = [
-    { title: 'إجمالي المبيعات', value: formatCurrency(stats.revenue), color: '#059669', icon: <CircleDollarSign size={24} color="#059669" /> },
-    { title: 'الطلبات', value: `${stats.orders} طلب`, color: '#2563eb', icon: <Package size={24} color="#2563eb" /> },
-    { title: 'التجار المعتمدين', value: `${stats.merchants}`, color: '#FFD700', icon: <ShieldCheck size={24} color="#FFD700" /> },
-    { title: 'إجمالي العملاء', value: `${stats.users}`, color: '#f59e0b', icon: <Users size={24} color="#f59e0b" /> }
+    { title: 'إجمالي المبيعات', value: formatCurrency(stats.revenue), color: '#10b981', glow: 'rgba(16, 185, 129, 0.4)', icon: <CircleDollarSign size={28} color="#10b981" /> },
+    { title: 'الطلبات', value: `${stats.orders} طلب`, color: '#4cc9f0', glow: 'rgba(76, 201, 240, 0.4)', icon: <Package size={28} color="#4cc9f0" /> },
+    { title: 'التجار المعتمدين', value: `${stats.merchants}`, color: '#b5179e', glow: 'rgba(181, 23, 158, 0.4)', icon: <ShieldCheck size={28} color="#b5179e" /> },
+    { title: 'إجمالي المستخدمين', value: `${stats.users}`, color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.4)', icon: <Crosshair size={28} color="#f59e0b" /> }
   ];
 
   const allStatuses = ['الكل', 'قيد المراجعة', 'تم التأكيد', 'جاري الشحن', 'تم التوصيل', 'ملغي'];
 
   return (
-    <div style={{ color: 'var(--text-primary)' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', margin: '0 0 0.3rem', fontWeight: 800 }}>لوحة التحكم</h1>
-        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>إحصائيات سريعة وإدارة الطلبات الواردة.</p>
+    <div style={{ color: '#fff', paddingBottom: '4rem' }}>
+      {/* Hero Header */}
+      <div style={{ marginBottom: '3rem', position: 'relative', padding: '2rem', background: 'linear-gradient(90deg, rgba(76,201,240,0.1), transparent)', borderRadius: '24px', border: '1px solid rgba(76,201,240,0.2)', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #4cc9f0, transparent)', opacity: 0.5 }} />
+        <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem', fontWeight: 950, letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '1rem', textShadow: '0 0 20px rgba(76,201,240,0.3)' }}>
+          <Zap size={36} color="#4cc9f0" /> لوحة المراقبة الشاملة
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.6)', margin: 0, fontSize: '1.05rem', fontWeight: 700, letterSpacing: '1px' }}>تم تفعيل بروتوكول الإدارة الاستراتيجية. كل الصلاحيات ممنوحة.</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="admin-stats" style={{ marginBottom: '2.5rem' }}>
+      {/* Stats Cards 3D */}
+      <div className="admin-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3.5rem' }}>
         {statCards.map((stat) => (
           <div key={stat.title} style={{
-            background: 'var(--surface)', padding: '1.5rem', borderRadius: '12px',
-            border: '1px solid var(--border)', borderTop: `3px solid ${stat.color}`,
-            boxShadow: 'var(--card-shadow)', transition: '0.3s'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-              <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, fontWeight: 600 }}>{stat.title}</h3>
-              {stat.icon}
+            background: 'rgba(10, 10, 15, 0.6)', padding: '1.8rem', borderRadius: '20px',
+            border: '1px solid rgba(255,255,255,0.05)',
+            boxShadow: `0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px ${stat.glow}`,
+            position: 'relative', overflow: 'hidden', cursor: 'default',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }} onMouseOver={e=>{e.currentTarget.style.transform='translateY(-5px) scale(1.02)'; e.currentTarget.style.boxShadow=`0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px ${stat.glow}`}} onMouseOut={e=>{e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow=`0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px ${stat.glow}`}}>
+            <div style={{ position: 'absolute', top: 0, right: 0, padding: '1.5rem', opacity: 0.1, transform: 'scale(2.5) translate(20%, -20%)' }}>{stat.icon}</div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
+              <h3 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', margin: 0, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.title}</h3>
+              <div style={{ background: 'rgba(0,0,0,0.5)', padding: '0.6rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>{stat.icon}</div>
             </div>
-            <p style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{stat.value}</p>
+            <p style={{ fontSize: '2.2rem', fontWeight: 950, margin: 0, color: '#fff', position: 'relative', zIndex: 1, textShadow: `0 0 20px ${stat.glow}` }}>{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* ═══ Orders Report Table ═══ */}
-      <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '2.5rem', overflow: 'hidden', boxShadow: 'var(--card-shadow)' }}>
+      {/* ═══ Tactical Orders Report ═══ */}
+      <div style={{ background: 'rgba(10, 10, 15, 0.7)', backdropFilter: 'blur(30px)', borderRadius: '24px', border: '1px solid rgba(76,201,240,0.2)', marginBottom: '3.5rem', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
         {/* Header Bar */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border)', background: 'var(--background)',
+          padding: '1.5rem 2rem', borderBottom: '1px solid rgba(76,201,240,0.1)', background: 'linear-gradient(180deg, rgba(76,201,240,0.05) 0%, transparent 100%)',
           flexWrap: 'wrap', gap: '1rem'
         }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
-            <Package size={20} /> تقرير الطلبات ({filteredOrders.length})
+          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#fff' }}>
+            <Crosshair size={22} color="#4cc9f0" /> رادار تتبع الطلبات <span style={{ background: 'rgba(76,201,240,0.15)', color: '#4cc9f0', padding: '0.2rem 0.8rem', borderRadius: '20px', fontSize: '0.9rem' }}>{filteredOrders.length} هدف</span>
           </h2>
-          <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.4)', padding: '0.3rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
             {allStatuses.map(s => (
               <button key={s} onClick={() => setStatusFilter(s)} style={{
-                padding: '0.4rem 0.8rem', borderRadius: '8px',
-                fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: '0.2s',
-                background: statusFilter === s ? 'var(--primary)' : 'var(--surface)',
-                color: statusFilter === s ? '#ffffff' : 'var(--text-secondary)',
-                border: statusFilter === s ? 'none' : '1px solid var(--border)'
+                padding: '0.5rem 1rem', borderRadius: '8px',
+                fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer', transition: 'all 0.3s',
+                background: statusFilter === s ? '#4cc9f0' : 'transparent',
+                color: statusFilter === s ? '#020205' : 'rgba(255,255,255,0.5)',
+                border: 'none', boxShadow: statusFilter === s ? '0 0 15px rgba(76,201,240,0.5)' : 'none'
               }}>
                 {s}
               </button>
@@ -133,83 +140,89 @@ export default function AdminDashboard() {
         </div>
 
         {/* Table wrapper for horizontal scroll */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', minWidth: '800px' }}>
+        <div style={{ overflowX: 'auto', padding: '0.5rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem', fontSize: '0.95rem', minWidth: '800px' }}>
             <thead>
-              <tr style={{ background: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-secondary)' }}>رقم الطلب</th>
-                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-secondary)' }}>التاريخ</th>
-                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-secondary)' }}>المبلغ</th>
-                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-secondary)' }}>طريقة الدفع</th>
-                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-secondary)' }}>الحالة</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 800, color: 'var(--text-secondary)' }}>تفاصيل</th>
+              <tr>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>معرف العملية</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>التاريخ</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>القيمة</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>قناة الدفع</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الحالة</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'center', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>لا توجد طلبات مطابقة حالياً</td>
+                  <td colSpan={6} style={{ padding: '5rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '1.2rem' }}>لا توجد أهداف نشطة حالياً</td>
                 </tr>
               ) : filteredOrders.map(order => (
                 <React.Fragment key={order.id}>
-                  <tr style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.2s', cursor: 'pointer' }}
+                  <tr style={{ background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.2s', border: expandedOrder === order.id ? '1px solid rgba(76,201,240,0.5)' : '1px solid transparent' }}
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                    onMouseOver={e => e.currentTarget.style.background = 'var(--background)'}
-                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                    onMouseOver={e => { e.currentTarget.style.background = 'rgba(76,201,240,0.05)'; e.currentTarget.style.transform = 'scale(1.002)' }}
+                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.transform = 'scale(1)' }}
                   >
-                    <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      #BC-{order.id.substring(0, 6).toUpperCase()}
+                    <td style={{ padding: '1.2rem 1.5rem', fontWeight: 900, color: '#fff', letterSpacing: '2px', borderTopRightRadius: '12px', borderBottomRightRadius: '12px' }}>
+                      <span style={{ color: '#4cc9f0' }}>#BC</span>-{order.id.substring(0, 6).toUpperCase()}
                     </td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+                    <td style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>
                       {new Date(order.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td style={{ padding: '1rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    <td style={{ padding: '1.2rem 1.5rem', fontWeight: 950, color: '#10b981', textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>
                       {formatCurrency(order.total)}
                     </td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{order.payment_method || '—'}</td>
-                    <td style={{ padding: '1rem' }}>
+                    <td style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{order.payment_method || '—'}</td>
+                    <td style={{ padding: '1.2rem 1.5rem' }}>
                       <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                        padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800,
-                        color: statusColor(order.status), background: `${statusColor(order.status)}15`,
-                        border: `1px solid ${statusColor(order.status)}30`
+                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                        padding: '0.4rem 1rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '1px',
+                        color: statusColor(order.status), background: `rgba(0,0,0,0.5)`,
+                        border: `1px solid ${statusColor(order.status)}`,
+                        boxShadow: `inset 0 0 10px ${statusColor(order.status)}40, 0 0 10px ${statusColor(order.status)}20`
                       }}>
                         {statusIcon(order.status)} {order.status}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                      {expandedOrder === order.id ? <ChevronUp size={18} color="var(--text-secondary)" /> : <ChevronDown size={18} color="var(--text-secondary)" />}
+                    <td style={{ padding: '1.2rem 1.5rem', textAlign: 'center', borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: expandedOrder === order.id ? '#4cc9f0' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', transition: '0.3s' }}>
+                        {expandedOrder === order.id ? <ChevronUp size={18} color="#000" /> : <ChevronDown size={18} color="#fff" />}
+                      </div>
                     </td>
                   </tr>
 
                   {/* Expanded Row */}
                   {expandedOrder === order.id && (
-                    <tr style={{ background: 'var(--background)' }}>
-                      <td colSpan={6} style={{ padding: '2rem', borderBottom: '1px solid var(--border)' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+                    <tr>
+                      <td colSpan={6} style={{ padding: '0 1rem 1rem' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.6)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(76,201,240,0.2)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem', boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8)' }}>
                           {/* Order Meta */}
                           <div>
-                            <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>بيانات الشحن والعميل</h4>
-                            <div style={{ color: 'var(--text-secondary)', display: 'grid', gap: '0.6rem', fontSize: '0.85rem' }}>
-                              <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> <strong>العنوان:</strong> {order.shipping_address || '—'}</p>
-                              <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={16} /> <strong>معرف العميل:</strong> {order.user_id}</p>
-                              <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Package size={16} /> <strong>المنتجات:</strong> {order.order_items?.length || 0} قطع</p>
+                            <h4 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem', letterSpacing: '1px' }}><MapPin size={18} color="#4cc9f0" /> الإحداثيات والبيانات الفنية</h4>
+                            <div style={{ color: 'rgba(255,255,255,0.6)', display: 'grid', gap: '1rem', fontSize: '0.95rem', fontWeight: 700 }}>
+                              <p style={{ margin: 0, paddingBottom: '0.8rem', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}><strong style={{ color: '#aaa', display: 'inline-block', width: '90px' }}>العنوان:</strong> {order.shipping_address || '—'}</p>
+                              <p style={{ margin: 0, paddingBottom: '0.8rem', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}><strong style={{ color: '#aaa', display: 'inline-block', width: '90px' }}>المعرف:</strong> <span style={{ fontFamily: 'monospace', color: '#4cc9f0' }}>{order.user_id}</span></p>
+                              <p style={{ margin: 0 }}><strong style={{ color: '#aaa', display: 'inline-block', width: '90px' }}>القطع:</strong> {order.order_items?.length || 0} أهداف</p>
                             </div>
                           </div>
 
                           {/* Quick Actions / Status Update */}
                           <div>
-                            <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>تغيير الحالة بسرعة</h4>
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <h4 style={{ margin: '0 0 1.5rem', fontSize: '1.1rem', fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem', letterSpacing: '1px' }}><Terminal size={18} color="#4cc9f0" /> تجاوز حالة النظام</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
                               {['قيد المراجعة', 'تم التأكيد', 'جاري الشحن', 'تم التوصيل', 'ملغي'].map(s => (
                                 <button key={s} onClick={(e) => { e.stopPropagation(); updateOrderStatus(order.id, s); }}
                                   style={{
-                                    padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid',
-                                    borderColor: order.status === s ? statusColor(s) : 'var(--border)',
-                                    background: order.status === s ? `${statusColor(s)}15` : 'var(--surface)',
-                                    color: order.status === s ? statusColor(s) : 'var(--text-secondary)',
-                                    fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', transition: '0.2s',
+                                    padding: '0.8rem 1rem', borderRadius: '8px', border: '1px solid',
+                                    borderColor: order.status === s ? statusColor(s) : 'rgba(255,255,255,0.1)',
+                                    background: order.status === s ? `${statusColor(s)}20` : 'rgba(255,255,255,0.02)',
+                                    color: order.status === s ? statusColor(s) : 'rgba(255,255,255,0.5)',
+                                    fontSize: '0.85rem', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s',
+                                    boxShadow: order.status === s ? `0 0 15px ${statusColor(s)}30` : 'none'
                                   }}
+                                  onMouseOver={e=>{if(order.status!==s){e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.2)'}}}
+                                  onMouseOut={e=>{if(order.status!==s){e.currentTarget.style.background='rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.1)'}}}
                                 >
                                   {s}
                                 </button>
@@ -227,42 +240,47 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Activity Log */}
-      <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-primary)', fontWeight: 800 }}>
-          <Activity size={20} className="text-primary" style={{ color: 'var(--primary)' }} /> نشاطات النظام الأخيرة
+      {/* Cyber Activity Log / Terminal */}
+      <div style={{ background: '#020205', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(244,63,94,0.3)', boxShadow: '0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(244,63,94,0.05)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #f43f5e, transparent)' }} />
+        
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#f43f5e', fontWeight: 950, letterSpacing: '2px', textTransform: 'uppercase' }}>
+          <Terminal size={24} /> سجل العمليات الأمنية <span style={{ fontSize: '0.8rem', color: 'rgba(244,63,94,0.5)', animation: 'blink 1.5s infinite' }}>[LIVE]</span>
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: 'monospace' }}>
           {recentLogs.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>لا توجد أنشطة مسجلة في سجل النظام.</p>
+            <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '3rem', fontSize: '1.2rem', fontWeight: 800 }}>[ النظام ساكن - لا توجد اختراقات أو عمليات مسجلة ]</p>
           ) : recentLogs.map((log, i) => (
             <div key={log.id} style={{ 
-              padding: '1rem', 
+              padding: '1.2rem 1.5rem', 
               borderRadius: '12px',
-              background: 'var(--background)',
-              border: '1px solid var(--border)',
+              background: 'rgba(244,63,94,0.02)',
+              borderLeft: `4px solid ${log.type === 'NEW_USER' ? '#3b82f6' : log.type === 'NEW_ORDER' ? '#10b981' : log.type === 'NEW_DEALER' ? '#b5179e' : log.type === 'SECURITY_ALERT' ? '#f43f5e' : '#f59e0b'}`,
               display: 'flex', 
               alignItems: 'center', 
-              gap: '1rem', 
-              fontSize: '0.9rem' 
-            }}>
+              gap: '1.5rem', 
+              transition: 'all 0.3s',
+              cursor: 'default'
+            }} onMouseOver={e=>{e.currentTarget.style.background='rgba(244,63,94,0.05)'; e.currentTarget.style.transform='translateX(5px)'}} onMouseOut={e=>{e.currentTarget.style.background='rgba(244,63,94,0.02)'; e.currentTarget.style.transform='none'}}>
               <div style={{ 
-                width: '40px', height: '40px', borderRadius: '10px', 
-                background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0
+                width: '45px', height: '45px', borderRadius: '12px', 
+                background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0, border: '1px solid rgba(255,255,255,0.05)',
+                boxShadow: `0 0 15px ${log.type === 'NEW_USER' ? '#3b82f6' : log.type === 'NEW_ORDER' ? '#10b981' : log.type === 'NEW_DEALER' ? '#b5179e' : log.type === 'SECURITY_ALERT' ? '#f43f5e' : '#f59e0b'}40`
               }}>
-                {log.type === 'NEW_USER' ? <User size={18} color="#2563eb" /> : 
-                 log.type === 'NEW_ORDER' ? <Package size={18} color="#059669" /> : 
-                 log.type === 'NEW_DEALER' ? <ShieldCheck size={18} color="#FFD700" /> : 
-                 log.type === 'LOGIN_TRACKING' ? <LogIn size={18} color="#f59e0b" /> : 
-                 <Activity size={18} color="#8b5cf6" />}
+                {log.type === 'NEW_USER' ? <User size={20} color="#3b82f6" /> : 
+                 log.type === 'NEW_ORDER' ? <Package size={20} color="#10b981" /> : 
+                 log.type === 'NEW_DEALER' ? <ShieldCheck size={20} color="#b5179e" /> : 
+                 log.type === 'SECURITY_ALERT' ? <ShieldAlert size={20} color="#f43f5e" /> : 
+                 <Activity size={20} color="#f59e0b" />}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.1rem' }}>{log.title}</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{log.message}</div>
+                <div style={{ fontWeight: 900, color: '#fff', marginBottom: '0.3rem', fontSize: '1rem', letterSpacing: '0.5px' }}>{log.title}</div>
+                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', lineHeight: 1.4, fontFamily: 'inherit' }}>{log.message}</div>
               </div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                {new Date(log.created_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+              <div style={{ color: '#4cc9f0', fontSize: '0.85rem', fontWeight: 800, background: 'rgba(76,201,240,0.1)', padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px dashed rgba(76,201,240,0.3)' }}>
+                {new Date(log.created_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </div>
             </div>
           ))}

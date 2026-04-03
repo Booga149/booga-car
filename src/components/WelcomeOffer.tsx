@@ -62,14 +62,16 @@ export default function WelcomeOffer() {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 2000000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
       padding: '1.5rem', 
       background: 'rgba(0, 0, 0, 0.92)',
       backdropFilter: 'blur(20px)',
       animation: 'offerOverlayIn 0.4s ease',
+      overflowY: 'auto',
     }}>
       <div style={{
         width: '100%', maxWidth: '560px',
+        margin: '6rem auto 2rem', /* Added margin to push it down */
         borderRadius: '36px', 
         border: '1px solid rgba(255,215,0,0.15)',
         boxShadow: '0 50px 100px rgba(0,0,0,0.7), 0 0 80px rgba(255,215,0,0.05)',
@@ -83,7 +85,7 @@ export default function WelcomeOffer() {
         
         {/* === HEADER: Cinematic Gold Background === */}
         <div style={{ 
-          height: '280px', position: 'relative', overflow: 'hidden',
+          height: '240px', position: 'relative', overflow: 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>
           {/* Base gradient */}

@@ -36,6 +36,7 @@ export default function Navbar() {
     }
   };
 
+  const isAdmin = user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin') || profile?.role === 'admin' || profile?.role === 'superadmin';
   const isMerchant = !!profile?.cr_number;
   const merchantName = profile?.business_name || profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0];
   const merchantInitial = (profile?.business_name?.charAt(0) || profile?.full_name?.charAt(0) || user?.email?.charAt(0) || '?').toUpperCase();
@@ -67,20 +68,66 @@ export default function Navbar() {
         zIndex: 99999,
         display: 'flex',
         flexDirection: 'column',
-        background: isMerchant
-          ? '#080702'
-          : 'rgba(10, 10, 10, 0.98)',
-        borderBottom: isMerchant
-          ? '1px solid rgba(212,175,55,0.18)'
-          : '1px solid var(--border)',
-        boxShadow: isMerchant
-          ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
-          : '0 4px 30px rgba(0,0,0,0.4)',
+        background: isAdmin 
+          ? 'rgba(5, 5, 12, 0.85)' /* Cyber Dark */
+          : isMerchant
+            ? '#080702'
+            : 'rgba(10, 10, 10, 0.98)',
+        backdropFilter: isAdmin ? 'blur(25px)' : 'none',
+        borderBottom: isAdmin
+          ? '1px solid rgba(76,201,240,0.2)'
+          : isMerchant
+            ? '1px solid rgba(212,175,55,0.18)'
+            : '1px solid var(--border)',
+        boxShadow: isAdmin
+          ? '0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(76,201,240,0.05) inset'
+          : isMerchant
+            ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
+            : '0 4px 30px rgba(0,0,0,0.4)',
         transition: 'all 0.5s ease',
       }}>
 
-        {/* ═══ MERCHANT GOLD TOP BAR ═══ */}
-        {isMerchant && (
+        {/* ═══ ADMIN GOD MODE TOP BAR ═══ */}
+        {isAdmin ? (
+          <div style={{
+            background: 'linear-gradient(90deg, rgba(76,201,240,0) 0%, rgba(76,201,240,0.07) 20%, rgba(76,201,240,0.15) 50%, rgba(76,201,240,0.07) 80%, rgba(76,201,240,0) 100%)',
+            borderBottom: '1px solid rgba(76,201,240,0.1)',
+            padding: '0.38rem 2.5rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.8rem' }}>
+              {/* Live dot + label */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f43f5e', boxShadow: '0 0 8px rgba(244,63,94,0.8)' }} />
+                  <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1.5px solid #f43f5e', opacity: 0.4, animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite' }} />
+                </div>
+                <span style={{ color: '#4cc9f0', fontSize: '0.68rem', fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Crown size={12} color="#f43f5e" /> System Admin
+                </span>
+              </div>
+              {/* Quick Admin links */}
+              {[
+                { href: '/admin', label: 'مركز القيادة' },
+                { href: '/admin/finances', label: 'الماليات والعمولات' },
+                { href: '/admin/users', label: 'سجلات المستهدفين' },
+              ].map(link => (
+                <Link key={link.href} href={link.href} style={{
+                  color: 'rgba(76,201,240,0.5)', fontSize: '0.68rem', fontWeight: 700,
+                  textDecoration: 'none', letterSpacing: '0.3px', transition: '0.2s',
+                  display: 'flex', alignItems: 'center', gap: '0.3rem'
+                }}
+                  onMouseOver={e => e.currentTarget.style.color = '#4cc9f0'}
+                  onMouseOut={e => e.currentTarget.style.color = 'rgba(76,201,240,0.5)'}
+                >{link.label}</Link>
+              ))}
+            </div>
+            <div style={{ color: '#f43f5e', fontSize: '0.65rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', letterSpacing: '1px' }}>
+              <ShieldCheck size={10} /> صلاحيات عليا (GOD MODE)
+            </div>
+          </div>
+        ) : isMerchant ? (
+          /* ═══ MERCHANT GOLD TOP BAR ═══ */
           <div style={{
             background: 'linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.07) 20%, rgba(212,175,55,0.1) 50%, rgba(212,175,55,0.07) 80%, rgba(212,175,55,0) 100%)',
             borderBottom: '1px solid rgba(212,175,55,0.1)',
@@ -117,7 +164,7 @@ export default function Navbar() {
               <ShieldCheck size={10} /> سجل تجاري موثق {profile.cr_number}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* ═══ MAIN NAV ROW ═══ */}
         <div style={{
@@ -129,15 +176,25 @@ export default function Navbar() {
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ position: 'relative' }}>
                 <h1 style={{ 
-                  color: isMerchant ? '#D4AF37' : 'var(--text-primary)', 
+                  color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--text-primary)', 
                   margin: 0, fontSize: '1.9rem', fontWeight: 950, letterSpacing: '-1px',
-                  textShadow: isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : '0 0 20px rgba(244, 63, 94, 0.2)',
+                  textShadow: isAdmin ? '0 0 20px rgba(76,201,240,0.5)' : isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : '0 0 20px rgba(244, 63, 94, 0.2)',
                   display: 'flex', alignItems: 'center', gap: '0.4rem'
                 }}>
-                  BOOGA <span style={{ color: isMerchant ? '#FFD700' : 'var(--primary)' }}>CAR</span>
+                  BOOGA <span style={{ color: isAdmin ? '#f43f5e' : isMerchant ? '#FFD700' : 'var(--primary)' }}>CAR</span>
                 </h1>
                 {/* Badge */}
-                {isMerchant ? (
+                {isAdmin ? (
+                  <div style={{ 
+                    position: 'absolute', top: -14, right: -40, 
+                    fontSize: '0.6rem', fontWeight: 900, 
+                    background: 'linear-gradient(90deg, #f43f5e, #be123c)', color: '#fff',
+                    padding: '0.2rem 0.6rem', borderRadius: '40px',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 2px 15px rgba(244,63,94,0.5)',
+                    letterSpacing: '0.5px'
+                  }}>GOD MODE</div>
+                ) : isMerchant ? (
                   <div style={{ 
                     position: 'absolute', top: -14, right: -30, 
                     fontSize: '0.6rem', fontWeight: 900, 
@@ -161,7 +218,12 @@ export default function Navbar() {
             </Link>
 
             <nav className="desktop-nav" style={{ display: 'flex', gap: '2rem' }}>
-              {(isMerchant ? [
+              {(isAdmin ? [
+                { href: '/admin', label: '🛡️ مركز القيادة' },
+                { href: '/admin/products', label: 'ترسانة المنتجات' },
+                { href: '/admin/users', label: 'سجلات المستهدفين' },
+                { href: '/products', label: 'تصفح كالمستخدم' },
+              ] : isMerchant ? [
                 { href: '/seller/dashboard', label: '⚡ لوحة التحكم' },
                 { href: '/sell', label: 'إضافة منتج' },
                 { href: '/seller/products', label: 'منتجاتي' },
@@ -176,11 +238,11 @@ export default function Navbar() {
                 { href: '/become-dealer', label: 'بوجا للأعمال', isNew: true },
               ]).map((link: any) => {
                 const isActive = pathname === link.href;
-                const isCTA = link.href === '/sell' || (isMerchant && link.href === '/seller/dashboard');
+                const isCTA = link.href === '/sell' || (isMerchant && link.href === '/seller/dashboard') || (isAdmin && link.href === '/admin');
                 return (
                   <Link key={link.href} href={link.href} style={{
                     color: isCTA
-                      ? (isMerchant ? '#D4AF37' : 'var(--primary)')
+                      ? (isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--primary)')
                       : isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontWeight: isActive || isCTA ? 800 : 700,
                     fontSize: '0.9rem',
@@ -188,11 +250,11 @@ export default function Navbar() {
                     transition: 'all 0.3s ease',
                     position: 'relative',
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    textShadow: isCTA && isMerchant ? '0 0 15px rgba(212,175,55,0.4)' : 'none',
+                    textShadow: isCTA && isAdmin ? '0 0 15px rgba(76,201,240,0.4)' : isCTA && isMerchant ? '0 0 15px rgba(212,175,55,0.4)' : 'none',
                   }}>
                     {link.label}
-                    {link.href === '/sell' && !isMerchant && <Tag size={16} />}
-                    {(link as any).isNew && !isMerchant && (
+                    {link.href === '/sell' && !isMerchant && !isAdmin && <Tag size={16} />}
+                    {(link as any).isNew && !isMerchant && !isAdmin && (
                       <span style={{ 
                         fontSize: '0.6rem', background: 'var(--primary)', color: 'white', 
                         padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900,
@@ -202,8 +264,8 @@ export default function Navbar() {
                     {isActive && (
                       <span style={{ 
                         position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', 
-                        background: isMerchant ? '#D4AF37' : 'var(--primary)', borderRadius: '2px',
-                        boxShadow: isMerchant ? '0 2px 8px rgba(212,175,55,0.5)' : '0 2px 8px rgba(244, 63, 94, 0.4)'
+                        background: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--primary)', borderRadius: '2px',
+                        boxShadow: isAdmin ? '0 2px 8px rgba(76,201,240,0.5)' : isMerchant ? '0 2px 8px rgba(212,175,55,0.5)' : '0 2px 8px rgba(244, 63, 94, 0.4)'
                       }} />
                     )}
                   </Link>
