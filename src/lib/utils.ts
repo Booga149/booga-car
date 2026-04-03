@@ -97,34 +97,27 @@ export async function logSecurityEvent(supabase: any, {
   title: string, 
   account: string 
 }) {
-  let ip = 'غير معروف';
-  let location = 'غير معروف';
-  
   try {
-    // Primary: ipapi.co
-    const res = await fetch('https://ipapi.co/json/');
-    const data = await res.json();
-    if (data.ip) {
-      ip = data.ip;
-      location = `${data.city || ''}, ${data.country_name || ''}`;
-    } else {
-      throw new Error('ipapi.co failed');
-    }
-  } catch (e) {
+    let ip = 'غير معروف';
+    let location = 'غير معروف';
+    
     try {
-      // Fallback: freeipapi.com
-      const res2 = await fetch('https://freeipapi.com/api/json');
-      const data2 = await res2.json();
-      ip = data2.ipAddress || 'غير معروف';
-      location = `${data2.cityName || ''}, ${data2.countryName || ''}`;
-    } catch (e2) {
-      console.error('All IP lookups failed', e2);
+      const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+      const data = await res.json();
+      if (data.ip) {
+        ip = data.ip;
+        location = `${data.city || ''}, ${data.country_name || ''}`;
+      }
+    } catch {
+      // IP lookup failed silently - not critical
     }
-  }
 
-  await supabase.from('admin_notifications').insert({
-    type,
-    title,
-    message: `الحساب: ${account} | الـ IP: ${ip} | الموقع: ${location} | الجهاز: ${navigator.userAgent}`
-  });
+    await supabase.from('admin_notifications').insert({
+      type,
+      title,
+      message: `الحساب: ${account} | الـ IP: ${ip} | الموقع: ${location} | الجهاز: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}`
+    }).catch(() => {});
+  } catch {
+    // Entire function is non-critical - never crash the page
+  }
 }

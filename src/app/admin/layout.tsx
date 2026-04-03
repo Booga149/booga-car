@@ -25,11 +25,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
-        await logSecurityEvent(supabase, {
+        logSecurityEvent(supabase, {
           type: 'SECURITY_ALERT',
           title: 'محاولة دخول غير مصرحة!',
           account: email ? `مستخدم (${email})` : 'زائر مجهول'
-        });
+        }).catch(() => {});
       }
       setLoading(false);
     });
