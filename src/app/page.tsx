@@ -103,16 +103,18 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               {[
-                { label: 'المستخدمين', value: adminStats.users, icon: <Users size={14} />, color: '#f59e0b' },
-                { label: 'الطلبات', value: adminStats.orders, icon: <CartIcon size={14} />, color: '#4cc9f0' },
-                { label: 'المنتجات', value: adminStats.products, icon: <Package size={14} />, color: '#b5179e' },
-                { label: 'الإيرادات', value: `${(adminStats.revenue / 1000).toFixed(1)}K`, icon: <CircleDollarSign size={14} />, color: '#10b981' },
+                { label: 'المستخدمين', value: adminStats.users, icon: <Users size={14} />, color: '#f59e0b', href: '/admin/users' },
+                { label: 'الطلبات', value: adminStats.orders, icon: <CartIcon size={14} />, color: '#4cc9f0', href: '/admin' },
+                { label: 'المنتجات', value: adminStats.products, icon: <Package size={14} />, color: '#b5179e', href: '/admin/products' },
+                { label: 'الإيرادات', value: `${(adminStats.revenue / 1000).toFixed(1)}K`, icon: <CircleDollarSign size={14} />, color: '#10b981', href: '/admin' },
               ].map(s => (
-                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <a key={s.label} href={s.href} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.4rem 0.8rem', borderRadius: '10px', transition: 'all 0.2s', cursor: 'pointer' }}
+                  onMouseOver={e => { e.currentTarget.style.background = `${s.color}15`; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                  onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                   <div style={{ color: s.color, opacity: 0.7 }}>{s.icon}</div>
                   <span style={{ color: '#fff', fontWeight: 950, fontSize: '1rem' }}>{s.value}</span>
                   <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', fontWeight: 700 }}>{s.label}</span>
-                </div>
+                </a>
               ))}
             </div>
 
