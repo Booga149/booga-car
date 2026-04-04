@@ -72,8 +72,8 @@ export default function Navbar() {
           ? 'rgba(5, 5, 12, 0.85)' /* Cyber Dark */
           : isMerchant
             ? '#080702'
-            : 'rgba(10, 10, 10, 0.98)',
-        backdropFilter: isAdmin ? 'blur(25px)' : 'none',
+            : 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(25px)',
         borderBottom: isAdmin
           ? '1px solid rgba(76,201,240,0.2)'
           : isMerchant
@@ -83,7 +83,7 @@ export default function Navbar() {
           ? '0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(76,201,240,0.05) inset'
           : isMerchant
             ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
-            : '0 4px 30px rgba(0,0,0,0.4)',
+            : '0 2px 20px rgba(0,0,0,0.06)',
         transition: 'all 0.5s ease',
       }}>
 
@@ -548,11 +548,11 @@ export default function Navbar() {
                     /* REGULAR USER DROPDOWN */
                     <div style={{ 
                       position: 'absolute', top: 'calc(100% + 12px)', left: 0, width: '220px', 
-                      background: '#0a0a0a', 
+                      background: 'var(--surface)', 
                       border: '1px solid var(--border)', 
                       borderRadius: '16px', 
                       padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', 
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.8)', 
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.15)', 
                       zIndex: 999999,
                       animation: 'fadeInScale 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}>

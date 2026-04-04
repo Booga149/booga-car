@@ -1,12 +1,14 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { usePathname } from 'next/navigation';
 import { Crosshair } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminGodModeEnforcer() {
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
@@ -39,9 +41,11 @@ export default function AdminGodModeEnforcer() {
       });
   }, [user, loading]);
 
-  // Toggle the 'god-mode' class on <body> (styles live in globals.css)
+  // Toggle the 'god-mode' class on <body> ONLY on /admin pages
+  const isOnAdminPage = pathname?.startsWith('/admin');
+
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && isOnAdminPage) {
       document.body.classList.add('god-mode');
     } else {
       document.body.classList.remove('god-mode');
@@ -49,7 +53,7 @@ export default function AdminGodModeEnforcer() {
     return () => {
       document.body.classList.remove('god-mode');
     };
-  }, [isAdmin]);
+  }, [isAdmin, isOnAdminPage]);
 
   // Nothing to render until auth resolves and user IS admin
   if (loading || !isAdmin) return null;

@@ -1,22 +1,22 @@
 :root {
-  /* Forced World-Class Dark Palette (Stealth Black) */
-  --background: #000000;   /* Deep Black */
-  --surface: #0a0a0a;      /* Slate 950 */
-  --surface-hover: #111111; /* Slate 900 */
+  /* Clean Premium Light Palette */
+  --background: #f8f9fb;   /* Soft Off-White */
+  --surface: #ffffff;      /* Pure White */
+  --surface-hover: #f1f3f7; /* Light Gray */
   
-  /* Premium Gold Branding */
-  --primary: #FFD700;      /* Classic Gold */
-  --primary-hover: #F59E0B; /* Deep Amber/Gold */
+  /* Premium Red Branding */
+  --primary: #e11d48;      /* Rose 600 */
+  --primary-hover: #be123c; /* Rose 700 */
   
-  --text-primary: #ffffff; /* Pure White */
-  --text-secondary: #94a3b8; /* Slate 400 */
-  --border: rgba(255, 255, 255, 0.1); 
-  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --text-primary: #1e293b; /* Slate 800 */
+  --text-secondary: #64748b; /* Slate 500 */
+  --border: rgba(0, 0, 0, 0.08); 
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   
   /* Semantic Colors */
-  --error: #f87171;
-  --success: #34d399;
-  --warning: #fbbf24;
+  --error: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
 }
 
 body {

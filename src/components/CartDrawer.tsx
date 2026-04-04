@@ -21,10 +21,10 @@ export default function CartDrawer() {
       <div className="glass-panel" style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, width: '400px', maxWidth: '100vw',
         borderRight: '1px solid var(--border)', zIndex: 10000,
-        background: '#0a0a0a', /* Force pure black background */
-        color: '#ffffff',
+        background: 'var(--surface)',
+        color: 'var(--text-primary)',
         padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column',
-        boxShadow: '10px 0 30px rgba(0,0,0,0.5)',
+        boxShadow: '10px 0 30px rgba(0,0,0,0.1)',
         animation: 'slideRight 0.3s ease-out forwards'
       }}>
         <style>{`

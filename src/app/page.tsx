@@ -61,7 +61,7 @@ export default function Home() {
       display: 'flex', 
       flexDirection: 'column', 
       overflowX: 'hidden', 
-      background: '#000',
+      background: 'var(--background)',
       position: 'relative'
     }}>
       {/* Global Precision Grid */}
@@ -69,7 +69,7 @@ export default function Home() {
         position: 'fixed', inset: 0,
         backgroundImage: isAdmin
           ? 'linear-gradient(rgba(76,201,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.03) 1px, transparent 1px)'
-          : 'radial-gradient(rgba(244, 63, 94, 0.05) 1px, transparent 1px)',
+          : 'radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px)',
         backgroundSize: isAdmin ? '50px 50px' : '80px 80px',
         zIndex: 0, pointerEvents: 'none'
       }} />
@@ -186,17 +186,17 @@ export default function Home() {
           width: '100%', position: 'relative', zIndex: 10
         }}>
           <div style={{
-            background: 'linear-gradient(145deg, #0a0a0a, #000)',
+            background: 'var(--surface)',
             borderRadius: '60px', padding: '6rem',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-            flexWrap: 'wrap', gap: '5rem', border: '1px solid rgba(255,255,255,0.05)',
-            boxShadow: '0 50px 100px rgba(0,0,0,0.8)'
+            flexWrap: 'wrap', gap: '5rem', border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow)'
           }}>
             <div style={{ flex: 1, minWidth: '400px' }}>
-               <h2 style={{ color: 'white', fontSize: '3.5rem', fontWeight: 950, marginBottom: '2rem', lineHeight: 1.1 }}>
+               <h2 style={{ color: 'var(--text-primary)', fontSize: '3.5rem', fontWeight: 950, marginBottom: '2rem', lineHeight: 1.1 }}>
                  خبيرك الخاص في <br /> <span style={{ color: 'var(--primary)' }}>توافقية</span> القطع
                </h2>
-               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.3rem', lineHeight: 1.8, marginBottom: '3.5rem', fontWeight: 500 }}>
+               <p style={{ color: 'var(--text-secondary)', fontSize: '1.3rem', lineHeight: 1.8, marginBottom: '3.5rem', fontWeight: 500 }}>
                  سواء كنت تمتلك سيارة نادرة أو حديثة، فريقنا الهندسي متصل بشبكة توريد عالمية تضمن لك الحصول على القطع الصحيحة بالرقم التسلسلي الأصلي.
                </p>
                <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
@@ -206,7 +206,7 @@ export default function Home() {
                      boxShadow: '0 15px 35px rgba(244, 63, 94, 0.4)', fontSize: '1.2rem',
                      transition: '0.3s'
                   }}>تحدث مع المهندس</a>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'rgba(255,255,255,0.8)', fontWeight: 800 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-primary)', fontWeight: 800 }}>
                      <Award size={28} color="#FFD700" /> موثق من تجارة
                   </div>
                </div>
@@ -220,10 +220,10 @@ export default function Home() {
                  { title: 'دعم مباشر', icon: <Zap size={28} /> },
                ].map((item, i) => (
                  <div key={i} style={{ 
-                   background: 'rgba(255,255,255,0.02)', padding: '2.5rem', 
-                   borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)',
-                   textAlign: 'center', color: 'white', transition: '0.3s'
-                 }}>
+                    background: 'var(--background)', padding: '2.5rem', 
+                    borderRadius: '32px', border: '1px solid var(--border)',
+                    textAlign: 'center', color: 'var(--text-primary)', transition: '0.3s'
+                  }}>
                     <div style={{ color: 'var(--primary)', marginBottom: '1.2rem', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
                     <div style={{ fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{item.title}</div>
                  </div>

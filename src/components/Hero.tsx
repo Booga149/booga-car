@@ -12,7 +12,7 @@ export default function Hero() {
     <section style={{
       minHeight: '100vh',
       width: '100%',
-      backgroundColor: '#000',
+      backgroundColor: 'var(--background)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -27,9 +27,9 @@ export default function Hero() {
         backgroundImage: 'url("/premium_car_exploded_view_hero_1774815481734.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.35,
+        opacity: 0.12,
         zIndex: 0,
-        filter: 'grayscale(1) contrast(1.2)'
+        filter: 'grayscale(0.5) contrast(0.9)'
       }} />
       
       {/* ─── Technical HUD Overlay (Grid) ─── */}
@@ -44,7 +44,7 @@ export default function Hero() {
       {/* ─── Cinematic Gradient & Vignette ─── */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(circle at 50% 50%, transparent 20%, rgba(0,0,0,0.95) 100%)',
+        background: 'radial-gradient(circle at 50% 50%, transparent 30%, var(--background) 100%)',
         zIndex: 2,
         pointerEvents: 'none'
       }} />
@@ -61,11 +61,11 @@ export default function Hero() {
         {/* Floating Technical Badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.8rem',
-          background: 'rgba(0,0,0,0.6)', border: '1px solid var(--primary)',
+          background: 'var(--surface)', border: '1px solid var(--primary)',
           padding: '0.7rem 1.8rem', borderRadius: '40px',
           marginBottom: '3.5rem', fontSize: '0.9rem', fontWeight: 900,
-          color: 'white', letterSpacing: '3px', textTransform: 'uppercase',
-          backdropFilter: 'blur(20px)', boxShadow: '0 0 30px rgba(244,63,94,0.3)',
+          color: 'var(--text-primary)', letterSpacing: '3px', textTransform: 'uppercase',
+          boxShadow: '0 4px 20px rgba(225,29,72,0.15)',
           animation: 'float 3s ease-in-out infinite'
         }}>
            <Activity size={18} color="var(--primary)" /> BOOGA QUANTUM ENGINEERING
@@ -75,30 +75,29 @@ export default function Hero() {
         <h1 style={{
           fontSize: 'clamp(2.5rem, 8vw, 5rem)',
           fontWeight: 950,
-          color: 'white',
+          color: 'var(--text-primary)',
           lineHeight: 0.9,
           marginBottom: '1.2rem',
           letterSpacing: '-2px',
-          textShadow: '0 0 50px rgba(244,63,94,0.2)'
         }}>
            <span style={{ display: 'block', opacity: 0.9 }}>بوجا</span>
            <span style={{ color: 'var(--primary)', WebkitTextStroke: '1px var(--primary)', WebkitTextFillColor: 'transparent' }}>كار</span>
         </h1>
 
         <p style={{
-          fontSize: '1.4rem', color: 'rgba(255,255,255,0.6)', 
+          fontSize: '1.4rem', color: 'var(--text-secondary)', 
           marginBottom: '4.5rem', maxWidth: '800px', margin: '0 auto 5rem',
           lineHeight: 1.6, fontWeight: 600, letterSpacing: '0.5px'
         }}>
-          تجاوز حدود التجارة التقليدية. بوجا كار تربطك بقطاع <span style={{ color: 'white', fontWeight: 900 }}>الأنظمة المعقدة</span> بمعايير المطابقة الفائقة.
+          تجاوز حدود التجارة التقليدية. بوجا كار تربطك بقطاع <span style={{ color: 'var(--text-primary)', fontWeight: 900 }}>الأنظمة المعقدة</span> بمعايير المطابقة الفائقة.
         </p>
 
         {/* ─── HUD-Inspired Search Hub ─── */}
         <div style={{ 
           position: 'relative', maxWidth: '900px', margin: '0 auto',
-          background: 'rgba(25,25,25,0.95)', padding: '0.5rem',
-          borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
+          background: 'var(--surface)', padding: '0.5rem',
+          borderRadius: '24px', border: '1px solid var(--border)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.08)'
         }}>
            <SmartSearch />
         </div>
@@ -106,7 +105,7 @@ export default function Hero() {
         {/* Quick Tech Stats */}
         <div style={{ 
           display: 'flex', justifyContent: 'center', gap: '4rem', 
-          marginTop: '6rem', opacity: 1, color: 'white'
+          marginTop: '6rem', opacity: 1, color: 'var(--text-primary)'
         }}>
            {[
              { label: 'دقة المطابقة', val: '99.9%', icon: <Shield size={16}/> },
@@ -127,7 +126,7 @@ export default function Hero() {
       <div style={{ 
         position: 'absolute', bottom: '3rem', 
         display: 'flex', flexDirection: 'column', alignItems: 'center', 
-        gap: '1rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', fontWeight: 700 
+        gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700 
       }}>
          اكتشف المزيد
          <div style={{ animation: 'bounce 2s infinite' }}>

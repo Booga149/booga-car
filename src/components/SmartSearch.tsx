@@ -131,7 +131,7 @@ export default function SmartSearch() {
         background: 'var(--surface)', 
         borderRadius: '24px', 
         padding: '0.6rem', 
-        boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+        boxShadow: 'var(--card-shadow)',
         border: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',

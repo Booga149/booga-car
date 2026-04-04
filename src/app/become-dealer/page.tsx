@@ -85,10 +85,12 @@ export default function BecomeDealerPage() {
             </Link>
             
             <a href="#benefits" style={{ 
-              background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', padding: '1.2rem 2.8rem',
+              background: 'var(--surface)', color: 'var(--text-primary)', padding: '1.2rem 2.8rem',
               borderRadius: '16px', fontWeight: 800, fontSize: '1.2rem', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'all 0.3s ease'
-            }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
+            }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface-hover)'} onMouseOut={e => e.currentTarget.style.background = 'var(--surface)'}>
+              اكتشف المزايا
+            </a>
               اكتشف المزايا
             </a>
           </div>
@@ -128,7 +130,7 @@ export default function BecomeDealerPage() {
       </section>
 
       {/* Features Showcase */}
-      <section style={{ padding: '6rem 2rem', background: '#0a0a0a', position: 'relative' }}>
+      <section style={{ padding: '6rem 2rem', background: 'var(--surface)', position: 'relative' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '5rem', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontSize: '2.8rem', fontWeight: 950, marginBottom: '2rem', letterSpacing: '-1px' }}>ثقة العميل هي <span style={{ color: 'var(--primary)' }}>رأس مالك</span></h2>
@@ -151,9 +153,9 @@ export default function BecomeDealerPage() {
           
           <div style={{ position: 'relative' }}>
             <div style={{ 
-              background: 'linear-gradient(135deg, var(--surface) 0%, #111 100%)',
+              background: 'var(--surface)',
               borderRadius: '40px', padding: '1rem', border: '1px solid var(--border)',
-              boxShadow: '0 40px 80px rgba(0,0,0,0.5)'
+              boxShadow: 'var(--card-shadow)'
             }}>
               <div style={{ borderRadius: '30px', overflow: 'hidden', position: 'relative' }}>
                 <img 
