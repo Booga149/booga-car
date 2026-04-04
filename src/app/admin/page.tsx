@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { CircleDollarSign, Package, Settings, Users, User, LogIn, Activity, Eye, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck, Terminal, Crosshair, Zap } from 'lucide-react';
+import { CircleDollarSign, Package, Settings, Users, User, LogIn, Activity, Eye, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck, ShieldAlert, Terminal, Crosshair, Zap } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Order } from '@/types';
 
