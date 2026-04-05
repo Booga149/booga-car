@@ -1,5 +1,4 @@
-"use client";
-import dynamic from 'next/dynamic';
+"use client"; // force reload
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import Filters from '@/components/products/Filters';
@@ -8,9 +7,10 @@ import ProductGrid from '@/components/products/ProductGrid';
 import { useProducts } from '@/context/ProductsContext';
 import {
   CheckCircle2, X, Circle, Lightbulb, Wind, Wrench, Cog, CarFront,
-  PaintBucket, Filter, Disc3, Shield, Globe
+  PaintBucket, Filter, Disc3, Shield, Globe, MapPin, Locate
 } from 'lucide-react';
 import CategoriesBar from '@/components/CategoriesBar';
+import { useGeolocation, calculateDistance } from '@/hooks/useGeolocation';
 
 
 export default function ProductsPage() {
@@ -33,6 +33,8 @@ export default function ProductsPage() {
   const [fitment, setFitment] = useState<{make: string, model: string, year: string} | null>(null);
   const [isVinVerified, setIsVinVerified] = useState(false);
   const [isGlobal, setIsGlobal] = useState(false);
+  const [distanceRange, setDistanceRange] = useState<number>(0); // 0 = كل المسافات
+  const { position, requestLocation, isLoading: geoLoading, permissionState } = useGeolocation(true);
 
   useEffect(() => {
     // Read URL queries on mount for filtering from categories/vehicles pages
@@ -128,11 +130,37 @@ export default function ProductsPage() {
     else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
     else if (sortBy === 'popular') result.sort((a, b) => b.reviews - a.reviews);
 
+    // حساب المسافة وإضافتها لكل منتج
+    if (position) {
+      result = result.map(p => {
+        if (p.seller_latitude && p.seller_longitude) {
+          return {
+            ...p,
+            seller_distance: calculateDistance(
+              position.latitude, position.longitude,
+              p.seller_latitude, p.seller_longitude
+            )
+          };
+        }
+        return p;
+      });
+
+      // فلتر المسافة
+      if (distanceRange > 0) {
+        result = result.filter(p => p.seller_distance !== undefined && p.seller_distance <= distanceRange);
+      }
+
+      // ترتيب حسب الأقرب
+      if (sortBy === 'nearest') {
+        result.sort((a, b) => (a.seller_distance ?? 9999) - (b.seller_distance ?? 9999));
+      }
+    }
+
     return result;
-  }, [products, filters, sortBy, fitment, selectedCategories]);
+  }, [products, filters, sortBy, fitment, selectedCategories, position, distanceRange]);
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#050508' }}>
       <Navbar />
       <CategoriesBar />
       
@@ -142,10 +170,10 @@ export default function ProductsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
           {fitment && (
             <div style={{ 
-              background: isVinVerified ? 'rgba(37, 99, 235, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
+              background: isVinVerified ? 'rgba(37, 99, 235, 0.08)' : 'rgba(16, 185, 129, 0.08)', 
               border: isVinVerified ? '1px solid rgba(37, 99, 235, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)', 
               padding: '1.2rem 2rem', 
-              borderRadius: '20px', 
+              borderRadius: '20px',
               display: 'flex', 
               alignItems: 'center', 
               gap: '1.5rem', 
@@ -159,8 +187,8 @@ export default function ProductsPage() {
                 <h3 style={{ margin: '0 0 0.2rem', color: isVinVerified ? '#2563eb' : '#10b981', fontSize: '1.2rem', fontWeight: 900 }}>
                   {isVinVerified ? 'تأكيد VIN نشط' : 'تطابق سيارة الكراج'}
                 </h3>
-                <p style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 600 }}>
-                  النتائج مخصصة لسيارتك: <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{fitment.make} {fitment.model} {fitment.year}</span>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', fontWeight: 600 }}>
+                  النتائج مخصصة لسيارتك: <span style={{ color: '#e11d48', fontWeight: 800 }}>{fitment.make} {fitment.model} {fitment.year}</span>
                 </p>
               </div>
             </div>
@@ -177,22 +205,113 @@ export default function ProductsPage() {
               gap: '1rem',
               animation: 'pulse 2s infinite'
             }}>
-               <Globe size={20} color="var(--primary)" />
-               <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.9rem' }}>
+               <Globe size={20} color="#e11d48" />
+               <span style={{ fontWeight: 800, color: '#e11d48', fontSize: '0.9rem' }}>
                  تم تفعيل "البحث العالمي": يتم الآن عرض قطع من الموردين الدوليين والمحليين معاً.
                </span>
             </div>
           )}
         </div>
 
+        {/* Location Banner */}
+        {position && (
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.05)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            padding: '0.8rem 1.5rem',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            marginBottom: '1.5rem',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{
+                width: '10px', height: '10px',
+                borderRadius: '50%',
+                background: '#10b981',
+                boxShadow: '0 0 8px rgba(16,185,129,0.5)',
+              }} />
+              <span style={{ fontWeight: 800, color: '#10b981', fontSize: '0.9rem' }}>
+                📍 الموقع مفعّل — المسافات محسوبة من موقعك
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {[5, 10, 25, 50, 0].map(d => (
+                <button
+                  key={d}
+                  onClick={() => setDistanceRange(d)}
+                  style={{
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: '8px',
+                    border: distanceRange === d ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                    background: distanceRange === d ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)',
+                    color: distanceRange === d ? '#10b981' : 'rgba(255,255,255,0.5)',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    transition: '0.2s',
+                  }}
+                >
+                  {d === 0 ? 'الكل' : `${d} كم`}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!position && sortBy === 'nearest' && (
+          <div style={{
+            background: 'rgba(245, 158, 11, 0.05)',
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+            padding: '1rem 1.5rem',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginBottom: '1.5rem',
+            flexWrap: 'wrap',
+          }}>
+            <MapPin size={20} color="#f59e0b" />
+            <span style={{ fontWeight: 800, color: '#f59e0b', fontSize: '0.9rem', flex: 1 }}>
+              لاستخدام ترتيب "الأقرب إليك"، يرجى تفعيل خدمة الموقع
+            </span>
+            <button
+              onClick={requestLocation}
+              disabled={geoLoading}
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: '10px',
+                border: '1px solid rgba(245,158,11,0.3)',
+                background: 'rgba(245,158,11,0.08)',
+                color: '#f59e0b',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                cursor: geoLoading ? 'wait' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Locate size={16} />
+              {geoLoading ? 'جاري التحديد...' : 'تفعيل الموقع'}
+            </button>
+          </div>
+        )}
+
         {/* Breadcrumb & Header */}
         <div style={{ marginBottom: '3rem' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', fontWeight: 600 }}>
-             الرئيسية <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>/</span> <span style={{ color: 'var(--text-primary)' }}>كل القطع ({filteredSortedProducts.length})</span>
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '1rem', fontWeight: 600 }}>
+             الرئيسية <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>/</span> <span style={{ color: '#ffffff' }}>كل القطع ({filteredSortedProducts.length})</span>
           </div>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'var(--text-primary)' }}>تسوق قطع الغيار</h1>
+            <div>
+              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 950, margin: 0, color: '#ffffff' }}>تسوق قطع الغيار</h1>
+              <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', marginTop: '0.8rem', boxShadow: '0 0 15px rgba(212,175,55,0.3)' }} />
+            </div>
             
             <div style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
               <input 
@@ -201,18 +320,18 @@ export default function ProductsPage() {
                 value={filters.search}
                 onChange={e => setFilters({...filters, search: e.target.value})}
                 style={{ 
-                  width: '100%', padding: '1.2rem 1.5rem', background: 'var(--surface)', 
-                  border: '1px solid var(--border)', borderRadius: '16px', color: 'var(--text-primary)', fontSize: '1.1rem',
-                  outline: 'none', transition: 'all 0.3s ease', boxShadow: 'var(--card-shadow)',
+                  width: '100%', padding: '1.2rem 1.5rem', background: 'rgba(255,255,255,0.04)', 
+                  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', color: '#ffffff', fontSize: '1.1rem',
+                  outline: 'none', transition: 'all 0.3s ease', boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                   fontWeight: 600
                 }} 
                 onFocus={e => {
-                  e.currentTarget.style.borderColor = 'var(--primary)';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(244, 63, 94, 0.15)';
+                  e.currentTarget.style.borderColor = '#e11d48';
+                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(225,29,72,0.15)';
                 }}
                 onBlur={e => {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.boxShadow = 'var(--card-shadow)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
                 }}
               />
             </div>

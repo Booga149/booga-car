@@ -13,6 +13,7 @@ import EngineeringSystems from '@/components/EngineeringSystems';
 import KSATrustBar from '@/components/KSATrustBar';
 import WhatsAppHub from '@/components/WhatsAppHub';
 import WelcomeOffer from '@/components/WelcomeOffer';
+import NearbySellers from '@/components/NearbySellers';
 
 export default function Home() {
   const { products } = useProducts();
@@ -74,8 +75,8 @@ export default function Home() {
         zIndex: 0, pointerEvents: 'none'
       }} />
 
+      <Navbar />
       <div style={{ position: 'relative', zIndex: 10 }}>
-        <Navbar />
 
         {/* ═══ ADMIN COMMAND BAR ═══ */}
         {isAdmin && (
@@ -132,34 +133,43 @@ export default function Home() {
         {showWelcome && <WelcomeOffer />}
         <Hero />
         
+        {/* ═══ SECTION: Nearby Sellers (الأقرب إليك) ═══ */}
+        <NearbySellers />
+
         {/* ═══ SECTION 2: Interactive Engineering Discovery ═══ */}
         <EngineeringSystems />
 
         {/* ═══ SECTION 3: Featured Precision Parts ═══ */}
         <section style={{
-          background: 'rgba(5, 5, 5, 0.95)',
+          background: '#050508',
           padding: '8rem 0',
-          borderTop: '1px solid var(--border)',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
           position: 'relative', zIndex: 10
         }}>
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-            padding: '0 2rem 3rem',
+            padding: '0 2rem 4rem',
             maxWidth: '1200px', margin: '0 auto', width: '100%',
           }}>
             <div>
-              <span style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.85rem' }}>المطابقة الرائجة</span>
-              <h2 style={{ margin: '0.5rem 0 0', fontSize: '2.5rem', fontWeight: 950, color: 'white' }}>
-                القطع الأكثر طلباً <span style={{ color: 'var(--primary)', WebkitTextStroke: '1px var(--primary)', WebkitTextFillColor: 'transparent' }}>عالمياً</span>
+              <span style={{ color: '#e11d48', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '4px', opacity: 0.8 }}>المطابقة الرائجة</span>
+              <h2 style={{ margin: '1rem 0 0', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 950, color: '#ffffff' }}>
+                القطع الأكثر طلباً <span style={{ color: '#e11d48' }}>عالمياً</span>
               </h2>
+              {/* Gold underline */}
+              <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', marginTop: '1rem', boxShadow: '0 0 15px rgba(212,175,55,0.3)' }} />
             </div>
             <a href="/products" style={{
-              color: 'white', fontWeight: 800, fontSize: '1rem',
+              color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '0.9rem',
               textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.8rem',
-              padding: '1rem 2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '20px',
-              border: '1px solid var(--border)', transition: '0.3s',
-            }}>
-              اكتشف الكتالوج الكامل <ArrowUpRight size={20} />
+              padding: '0.9rem 2rem', background: 'rgba(255,255,255,0.04)', borderRadius: '14px',
+              border: '1px solid rgba(255,255,255,0.08)', transition: 'all 0.3s ease',
+              letterSpacing: '0.3px',
+            }}
+              onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+              onMouseOut={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+            >
+              اكتشف الكتالوج الكامل <ArrowUpRight size={18} />
             </a>
           </div>
 

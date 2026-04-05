@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -121,7 +121,6 @@ export default function DealerFormPage() {
              }}>تسجيل الدخول / إنشاء حساب</button>
           </div>
         </div>
-        <Footer />
       </main>
     );
   }
@@ -294,7 +293,6 @@ export default function DealerFormPage() {
           </div>
         )}
       </div>
-      <Footer />
     </main>
   );
 }

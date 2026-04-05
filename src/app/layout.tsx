@@ -15,7 +15,7 @@ import { ToastProvider } from '@/context/ToastContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { AuthProvider } from '@/context/AuthContext';
 import Footer from '@/components/Footer';
-import { MessageCircle } from 'lucide-react';
+
 import AdminToastListener from '@/components/AdminToastListener';
 import BackButton from '@/components/BackButton';
 import AdminGodModeEnforcer from '@/components/AdminGodModeEnforcer';
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -54,11 +54,10 @@ export default function RootLayout({
                   <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer" style={{
                     position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000,
                     background: '#25D366', color: 'white', width: '60px', height: '60px', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem',
-                    boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)', textDecoration: 'none', transition: 'transform 0.2s',
-                    animation: 'pulse 2s infinite'
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem',
+                    boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)', textDecoration: 'none',
                   }}>
-                    <MessageCircle size={28} />
+                    💬
                   </a>
                   
                   {children}

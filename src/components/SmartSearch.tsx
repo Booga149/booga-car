@@ -106,7 +106,7 @@ export default function SmartSearch() {
   ];
 
   const buttonStyle: React.CSSProperties = {
-    background: 'var(--primary)',
+    background: 'linear-gradient(135deg, #be123c, #e11d48)',
     color: 'white',
     border: 'none',
     padding: '1.1rem 2.5rem',
@@ -114,8 +114,8 @@ export default function SmartSearch() {
     fontWeight: 900,
     fontSize: '1.1rem',
     cursor: 'pointer',
-    transition: '0.2s',
-    boxShadow: '0 8px 20px rgba(244, 63, 94, 0.25)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 8px 25px rgba(225,29,72,0.35), 0 0 20px rgba(225,29,72,0.15)',
     display: 'flex',
     alignItems: 'center',
     gap: '0.6rem'
@@ -241,7 +241,12 @@ export default function SmartSearch() {
             </div>
           )}
           
-          <button type="submit" style={{ ...buttonStyle, width: activeTab === 'manual' ? '100%' : 'auto', justifyContent: 'center' }}>
+          <button 
+            type="submit" 
+            style={{ ...buttonStyle, width: activeTab === 'manual' ? '100%' : 'auto', justifyContent: 'center' }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(225,29,72,0.5), 0 0 30px rgba(225,29,72,0.25)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(225,29,72,0.35), 0 0 20px rgba(225,29,72,0.15)'; }}
+          >
             {activeTab === 'manual' ? 'ابحث عن قطع الغيار' : 'بحث ذكي'} <Zap size={18} />
           </button>
         </form>

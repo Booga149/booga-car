@@ -1,6 +1,6 @@
 "use client";
-import React from 'react';
-import { Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, X, SlidersHorizontal } from 'lucide-react';
 
 type FiltersProps = {
   filters: any;
@@ -11,90 +11,209 @@ type FiltersProps = {
 };
 
 export default function Filters({ filters, setFilters, clearFilters, brands, categories }: FiltersProps) {
+  const [priceRange, setPriceRange] = useState(500);
+
+  const sectionTitle: React.CSSProperties = {
+    margin: '0 0 1rem', fontSize: '0.85rem', fontWeight: 800,
+    color: '#ffffff', letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+  };
+
+  const chipStyle = (active: boolean): React.CSSProperties => ({
+    padding: '0.55rem 1rem',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    border: active ? '1px solid rgba(225,29,72,0.4)' : '1px solid rgba(255,255,255,0.08)',
+    background: active ? 'rgba(225,29,72,0.15)' : 'rgba(255,255,255,0.03)',
+    color: active ? '#e11d48' : 'rgba(255,255,255,0.5)',
+    fontWeight: active ? 800 : 600,
+    fontSize: '0.82rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.3rem',
+  });
+
   return (
-    <aside className="glass-panel" style={{
+    <aside style={{
       width: '280px',
       flexShrink: 0,
-      padding: '1.5rem',
-      borderRadius: '16px',
-      border: '1px solid var(--border)',
-      background: 'var(--surface)',
+      padding: '1.8rem',
+      borderRadius: '20px',
+      border: '1px solid rgba(255,255,255,0.06)',
+      background: 'rgba(12,12,16,0.95)',
       position: 'sticky',
       top: '100px',
       height: 'fit-content',
       maxHeight: 'calc(100vh - 120px)',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold' }}>تصفية النتائج</h3>
-        <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}>مسح الفلاتر</button>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 950, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <SlidersHorizontal size={18} color="#e11d48" /> تصفية النتائج
+        </h3>
+        <button 
+          onClick={clearFilters} 
+          style={{ 
+            background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)', 
+            color: '#e11d48', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800,
+            padding: '0.4rem 0.8rem', borderRadius: '10px',
+            display: 'flex', alignItems: 'center', gap: '0.3rem',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <X size={12} /> مسح
+        </button>
       </div>
 
       {/* Category */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>القسم</h4>
-        <select value={filters.category} onChange={e => setFilters({...filters, category: e.target.value})} style={{ width: '100%', padding: '0.8rem', background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h4 style={sectionTitle}>القسم</h4>
+        <select 
+          value={filters.category} 
+          onChange={e => setFilters({...filters, category: e.target.value})} 
+          style={{ 
+            width: '100%', padding: '0.8rem 1rem', 
+            background: 'rgba(255,255,255,0.04)', 
+            border: '1px solid rgba(255,255,255,0.08)', 
+            borderRadius: '12px', color: '#ffffff', 
+            outline: 'none', fontSize: '0.88rem', fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
           <option value="">الكل</option>
           {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </select>
       </div>
 
-      {/* Price Range */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>السعر (ر.س)</h4>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <input type="number" placeholder="من" value={filters.minPrice} onChange={e => setFilters({...filters, minPrice: e.target.value})} style={{ width: '100%', padding: '0.8rem', background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }} />
-          <span>-</span>
-          <input type="number" placeholder="إلى" value={filters.maxPrice} onChange={e => setFilters({...filters, maxPrice: e.target.value})} style={{ width: '100%', padding: '0.8rem', background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', outline: 'none' }} />
+      {/* Price Range Slider */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h4 style={sectionTitle}>السعر (ر.س)</h4>
+        <div style={{ padding: '0 0.2rem' }}>
+          <input 
+            type="range" 
+            min="0" max="2000" step="50"
+            value={filters.maxPrice || 2000}
+            onChange={e => {
+              const val = Number(e.target.value);
+              setFilters({...filters, maxPrice: val < 2000 ? String(val) : '', minPrice: ''});
+            }}
+            style={{
+              width: '100%', height: '4px',
+              appearance: 'none', WebkitAppearance: 'none',
+              background: `linear-gradient(to left, rgba(225,29,72,0.5) ${((Number(filters.maxPrice) || 2000) / 2000) * 100}%, rgba(255,255,255,0.08) 0%)`,
+              borderRadius: '4px', outline: 'none', cursor: 'pointer',
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.6rem' }}>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>0</span>
+            <span style={{ fontSize: '0.85rem', color: '#e11d48', fontWeight: 900 }}>
+              {filters.maxPrice ? `حتى ${filters.maxPrice} ر.س` : 'الكل'}
+            </span>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>2000+</span>
+          </div>
         </div>
       </div>
 
-      {/* Brand */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>الماركة</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+      {/* Brand Chips */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h4 style={sectionTitle}>الماركة</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto', paddingRight: '0.3rem' }}>
+          <button 
+            onClick={() => setFilters({...filters, brand: ''})}
+            style={chipStyle(filters.brand === '')}
+          >
+            {filters.brand === '' && '✔'} الكل
+          </button>
           {brands.map(brand => (
-            <label key={brand} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-              <input type="radio" name="brand" checked={filters.brand === brand} onChange={() => setFilters({...filters, brand})} style={{ accentColor: 'var(--primary)' }} />
-              <span style={{ fontSize: '0.95rem' }}>{brand}</span>
-            </label>
-          ))}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="radio" name="brand" checked={filters.brand === ''} onChange={() => setFilters({...filters, brand: ''})} style={{ accentColor: 'var(--primary)' }} />
-            <span style={{ fontSize: '0.95rem' }}>الكل</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Condition */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>حالة المنتج</h4>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['الكل', 'جديد', 'مستعمل'].map(cond => (
-            <button key={cond} onClick={() => setFilters({...filters, condition: cond === 'الكل' ? '' : cond})} style={{
-              flex: 1, padding: '0.5rem', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', border: '1px solid var(--border)',
-              background: (filters.condition === cond || (cond === 'الكل' && !filters.condition)) ? 'var(--primary)' : 'var(--surface-hover)',
-              color: 'var(--text-primary)', fontWeight: (filters.condition === cond || (cond === 'الكل' && !filters.condition)) ? 'bold' : 'normal',
-            }}>
-              {cond}
+            <button 
+              key={brand}
+              onClick={() => setFilters({...filters, brand})}
+              style={chipStyle(filters.brand === brand)}
+            >
+              {filters.brand === brand && '✔'} {brand}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Rating */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>التقييم</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {[4, 3, 2, 1].map(stars => (
-            <label key={stars} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-              <input type="radio" name="rating" checked={filters.minRating === stars} onChange={() => setFilters({...filters, minRating: stars})} style={{ accentColor: 'var(--primary)' }} />
-              <span style={{ display: 'flex', gap: '0.1rem' }}>{[...Array(stars)].map((_,i) => <Star key={i} size={16} fill="#FFD700" color="#FFD700" />)}</span>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>وأكثر</span>
-            </label>
-          ))}
+      {/* Condition Chips */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h4 style={sectionTitle}>حالة المنتج</h4>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {['الكل', 'جديد', 'مستعمل'].map(cond => {
+            const active = filters.condition === cond || (cond === 'الكل' && !filters.condition);
+            return (
+              <button 
+                key={cond} 
+                onClick={() => setFilters({...filters, condition: cond === 'الكل' ? '' : cond})} 
+                style={{
+                  flex: 1, padding: '0.6rem', borderRadius: '12px', cursor: 'pointer', 
+                  transition: 'all 0.3s ease', 
+                  border: active ? '1px solid rgba(225,29,72,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                  background: active ? 'linear-gradient(135deg, #be123c, #e11d48)' : 'rgba(255,255,255,0.03)',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.5)', 
+                  fontWeight: 800, fontSize: '0.82rem',
+                  boxShadow: active ? '0 4px 15px rgba(225,29,72,0.25)' : 'none',
+                }}
+              >
+                {cond}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Rating Buttons */}
+      <div style={{ marginBottom: '1rem' }}>
+        <h4 style={sectionTitle}>التقييم</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {[4, 3, 2, 1].map(stars => {
+            const active = filters.minRating === stars;
+            return (
+              <button 
+                key={stars}
+                onClick={() => setFilters({...filters, minRating: active ? 0 : stars})}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.6rem',
+                  padding: '0.6rem 0.8rem', borderRadius: '12px', cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  border: active ? '1px solid rgba(201,161,74,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                  background: active ? 'rgba(201,161,74,0.1)' : 'transparent',
+                  color: active ? '#C9A14A' : 'rgba(255,255,255,0.5)',
+                  fontWeight: 700, fontSize: '0.82rem',
+                  width: '100%', textAlign: 'right',
+                }}
+              >
+                <span style={{ display: 'flex', gap: '2px' }}>
+                  {[...Array(stars)].map((_,i) => <Star key={i} size={14} fill="#C9A14A" color="#C9A14A" />)}
+                  {[...Array(5-stars)].map((_,i) => <Star key={i} size={14} fill="transparent" color="rgba(255,255,255,0.15)" />)}
+                </span>
+                <span>وأكثر</span>
+                {active && <span style={{ marginRight: 'auto', fontSize: '0.7rem' }}>✔</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Custom Scrollbar */}
+      <style jsx>{`
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-track { background: transparent; }
+        aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        aside::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        input[type=range]::-webkit-slider-thumb {
+          appearance: none; -webkit-appearance: none;
+          width: 18px; height: 18px; border-radius: 50%;
+          background: #e11d48; cursor: pointer;
+          box-shadow: 0 0 10px rgba(225,29,72,0.4);
+          border: 2px solid rgba(255,255,255,0.2);
+        }
+        select option { background: #0c0c10; color: #fff; }
+      `}</style>
     </aside>
   );
 }

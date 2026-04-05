@@ -22,6 +22,14 @@ const GoogleIcon = () => (
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
   const [isLoginMode, setIsLoginMode] = useState(initialMode === 'login');
+
+  // Sync with initialMode when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoginMode(initialMode === 'login');
+      setAuthError('');
+    }
+  }, [isOpen, initialMode]);
   const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -62,17 +70,28 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   // --- Google Auth ---
   const handleGoogleSignIn = async () => {
+    console.log('🔵 Google Sign-In clicked!');
     setLoading(true);
     setAuthError('');
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('🔵 Calling supabase.auth.signInWithOAuth...');
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          redirectTo: typeof window !== 'undefined' 
+            ? `${window.location.origin}/auth/callback` 
+            : undefined,
         }
       });
+      console.log('🔵 OAuth response:', { data, error });
       if (error) throw error;
+      // If we get here with a URL, redirect manually
+      if (data?.url) {
+        console.log('🔵 Redirecting to:', data.url);
+        window.location.href = data.url;
+      }
     } catch (err: any) {
+      console.error('🔴 Google Auth Error:', err);
       setAuthError(err.message || 'فشل تسجيل الدخول بجوجل');
       setLoading(false);
     }
@@ -157,6 +176,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             title: 'فشل دخول (إيميل)',
             account: email
           });
+          // Better Arabic error messages
+          if (error.message.includes('Invalid login credentials')) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+          }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('لم يتم تأكيد بريدك الإلكتروني بعد. تحقق من صندوق الوارد');
+          }
           throw error;
         }
         await logSecurityEvent(supabase, {
@@ -164,13 +190,52 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
           title: 'دخول ناجح (إيميل)',
           account: email
         });
+        onClose();
+        location.reload();
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        setAuthError('تم إرسال رابط التأكيد لبريدك الإلكتروني ✅');
+        // Sign up with metadata for profile trigger
+        const { data, error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' 
+              ? `${window.location.origin}/auth/callback` 
+              : undefined,
+            data: {
+              full_name: email.split('@')[0],
+            }
+          }
+        });
+        if (error) {
+          // Better Arabic error messages
+          if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+            throw new Error('هذا البريد مسجل مسبقاً. جرب تسجيل الدخول');
+          }
+          if (error.message.includes('Password should be at least')) {
+            throw new Error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+          }
+          if (error.message.includes('valid email')) {
+            throw new Error('يرجى إدخال بريد إلكتروني صحيح');
+          }
+          throw error;
+        }
+        
+        // Check if user was auto-confirmed (no email confirmation required)
+        if (data?.user?.confirmed_at || data?.session) {
+          await logSecurityEvent(supabase, {
+            type: 'AUTH_SUCCESS',
+            title: 'تسجيل حساب جديد',
+            account: email
+          });
+          onClose();
+          location.reload();
+          return;
+        }
+        
+        // Email confirmation is required
+        setAuthError('تم إرسال رابط التأكيد لبريدك الإلكتروني ✅ تحقق من صندوق الوارد أو مجلد السبام');
         return;
       }
-      onClose();
     } catch (err: any) {
       setAuthError(err.message || 'خطأ في المصادقة');
     } finally {
@@ -808,6 +873,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 }}>
                   {loading ? 'جاري التحقق...' : (<>{isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب'} <ArrowRight size={18} /></>)}
                 </button>
+                {/* Toggle login/signup for email */}
+                <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+                    {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
+                    <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
+                      background: 'transparent', border: 'none', color: '#FFD700', 
+                      cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
+                      textDecoration: 'underline', textUnderlineOffset: '3px',
+                    }}>
+                      {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
+                    </button>
+                  </p>
+                </div>
               </form>
             </>
           )}

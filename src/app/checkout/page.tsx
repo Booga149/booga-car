@@ -33,8 +33,9 @@ export default function CheckoutPage() {
 
   // Shipping cost logic
   const shippingCost = cartTotal > 500 ? 0 : 35; // Free shipping over 500 SAR
-  const discountAmount = Math.round(cartTotal * appliedDiscount); // Exact rounded number
-  const finalTotal = cartTotal - discountAmount + shippingCost;
+  const totalBeforeDiscount = cartTotal + shippingCost;
+  const discountAmount = Math.round(totalBeforeDiscount * appliedDiscount * 100) / 100;
+  const finalTotal = Math.round((totalBeforeDiscount - discountAmount) * 100) / 100;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();

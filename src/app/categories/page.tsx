@@ -1,5 +1,4 @@
 "use client";
-import dynamic from 'next/dynamic';
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import {

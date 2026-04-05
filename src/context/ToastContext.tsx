@@ -38,17 +38,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div key={t.id} style={{ 
             background: t.type === 'success' ? '#1f2937' : t.type === 'error' ? '#3d161a' : '#1e3a5f',
             border: `1px solid ${t.type === 'success' ? '#4cc9f0' : t.type === 'error' ? '#e63946' : '#4361ee'}`,
-            color: 'var(--text-primary)', padding: '1rem 1.5rem', borderRadius: '8px', 
+            color: '#ffffff', padding: '1rem 1.5rem', borderRadius: '12px', 
             boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
             display: 'flex', alignItems: 'center', gap: '0.8rem', minWidth: '280px',
             animation: 'slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', direction: 'rtl'
           }}>
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {t.type === 'success' && <CheckCircle2 size={24} color="#4cc9f0" />}
               {t.type === 'error' && <XCircle size={24} color="#e63946" />}
               {t.type === 'info' && <Info size={24} color="#4361ee" />}
             </span>
-            <span style={{ fontWeight: 'bold' }}>{t.message}</span>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff' }}>{t.message}</span>
           </div>
         ))}
       </div>

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
-import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin, Phone } from 'lucide-react';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
@@ -12,7 +12,7 @@ type ProductProps = Product & {
 };
 
 export default function ProductCard({
-  id, name, price, oldPrice, brand, category, condition, stock, shipping, rating, reviews, image, imagePlaceholderColor, is_verified_seller = false, seller_name, part_number, seller_id
+  id, name, price, oldPrice, brand, category, condition, stock, shipping, rating, reviews, image, imagePlaceholderColor, is_verified_seller = false, seller_name, part_number, seller_id, seller_distance, seller_city, seller_phone
 }: ProductProps) {
   const { addToCart } = useCart();
   const { user, openLoginModal } = useAuth();
@@ -46,17 +46,17 @@ export default function ProductCard({
       <div
         className="gm-product-card"
         style={{
-          background: 'var(--surface)',
-          borderRadius: '16px',
+          background: 'rgba(18,18,24,0.95)',
+          borderRadius: '20px',
           overflow: 'hidden',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          border: '1px solid var(--border)',
+          border: isHovered ? '1px solid rgba(225,29,72,0.2)' : '1px solid rgba(255,255,255,0.06)',
           boxShadow: isHovered
-            ? '0 20px 40px -10px rgba(0,0,0,0.2)'
-            : 'var(--card-shadow)',
+            ? '0 25px 60px -15px rgba(0,0,0,0.5), 0 0 20px rgba(225,29,72,0.08)'
+            : '0 4px 20px rgba(0,0,0,0.3)',
           transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
         }}
         onMouseEnter={() => setIsHovered(true)}
@@ -83,7 +83,7 @@ export default function ProductCard({
         <div style={{
           position: 'relative',
           height: '240px',
-          background: 'var(--background)',
+          background: 'rgba(10,10,14,0.9)',
           overflow: 'hidden',
         }}>
           <img
@@ -98,6 +98,33 @@ export default function ProductCard({
             }}
           />
 
+          {/* Distance Badge Bottom-Left */}
+          {seller_distance !== undefined && seller_distance > 0 && (
+            <div style={{
+              position: 'absolute',
+              bottom: '12px',
+              left: '12px',
+              zIndex: 5,
+              padding: '5px 10px',
+              borderRadius: '8px',
+              background: seller_distance <= 5 ? 'rgba(16,185,129,0.9)' : seller_distance <= 15 ? 'rgba(245,158,11,0.9)' : 'rgba(100,116,139,0.9)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            }}>
+              <MapPin size={12} color="#fff" />
+              <span style={{
+                color: '#fff',
+                fontSize: '0.7rem',
+                fontWeight: 900,
+              }}>
+                {seller_distance < 1 ? `${Math.round(seller_distance * 1000)} م` : seller_distance < 10 ? `${seller_distance.toFixed(1)} كم` : `${Math.round(seller_distance)} كم`}
+              </span>
+            </div>
+          )}
+
           {/* Top-Left Badges */}
           <div style={{
             position: 'absolute', top: '12px', left: '12px',
@@ -105,13 +132,13 @@ export default function ProductCard({
           }}>
             {discount > 0 && (
               <span style={{
-                background: 'var(--primary)',
+                background: 'linear-gradient(135deg, #e11d48, #be123c)',
                 color: '#fff',
-                fontSize: '0.75rem',
+                fontSize: '0.72rem',
                 fontWeight: 800,
-                padding: '4px 10px',
-                borderRadius: '6px',
-                boxShadow: '0 4px 10px rgba(244, 63, 94, 0.3)'
+                padding: '4px 12px',
+                borderRadius: '20px',
+                boxShadow: '0 4px 12px rgba(225,29,72,0.3)'
               }}>
                 -{discount}%
               </span>
@@ -122,12 +149,12 @@ export default function ProductCard({
                 color: '#fff',
                 fontSize: '0.75rem',
                 fontWeight: 800,
-                padding: '4px 10px',
-                borderRadius: '6px',
+                padding: '4px 12px',
+                borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                boxShadow: '0 4px 10px rgba(5, 150, 105, 0.3)'
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
               }}>
                 <Truck size={14} /> مجاني
               </span>
@@ -138,8 +165,8 @@ export default function ProductCard({
                 color: '#000',
                 fontSize: '0.75rem',
                 fontWeight: 900,
-                padding: '4px 10px',
-                borderRadius: '6px',
+                padding: '4px 12px',
+                borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -162,7 +189,7 @@ export default function ProductCard({
             fontSize: '0.7rem',
             fontWeight: 800,
             padding: '4px 12px',
-            borderRadius: '6px',
+            borderRadius: '20px',
             border: 'none',
             boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
           }}>
@@ -225,8 +252,8 @@ export default function ProductCard({
             <span style={{
               fontSize: '0.75rem',
               fontWeight: 800,
-              color: 'var(--primary)',
-              background: 'rgba(244, 63, 94, 0.08)',
+              color: '#e11d48',
+              background: 'rgba(225,29,72,0.1)',
               padding: '3px 10px',
               borderRadius: '6px',
             }}>
@@ -235,7 +262,7 @@ export default function ProductCard({
             <span style={{
               fontSize: '0.75rem',
               fontWeight: 600,
-              color: 'var(--text-secondary)',
+              color: 'rgba(255,255,255,0.45)',
             }}>
               {seller_name ? `بواسطة: ${seller_name}` : category}
             </span>
@@ -248,7 +275,7 @@ export default function ProductCard({
               fontSize: '1.05rem',
               fontWeight: 800,
               lineHeight: 1.4,
-              color: 'var(--text-primary)',
+              color: '#ffffff',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -260,14 +287,14 @@ export default function ProductCard({
             {part_number && (
               <div style={{ 
                 fontSize: '0.7rem', 
-                color: 'var(--text-secondary)', 
+                color: 'rgba(255,255,255,0.5)', 
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.3rem',
                 opacity: 0.8
               }}>
-                رقم القطعة: <span style={{ color: 'var(--text-primary)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{part_number}</span>
+                رقم القطعة: <span style={{ color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{part_number}</span>
               </div>
             )}
           </div>
@@ -283,13 +310,13 @@ export default function ProductCard({
                 <Star
                   key={s}
                   size={14}
-                  fill={s <= Math.round(rating) ? '#fbbf24' : 'transparent'}
-                  stroke={s <= Math.round(rating) ? '#fbbf24' : 'var(--border)'}
+                  fill={s <= Math.round(rating) ? '#C9A14A' : 'transparent'}
+                  stroke={s <= Math.round(rating) ? '#C9A14A' : 'var(--border)'}
                   strokeWidth={2}
                 />
               ))}
             </div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
               ({reviews})
             </span>
           </div>
@@ -298,7 +325,7 @@ export default function ProductCard({
           <div style={{
             marginTop: 'auto',
             paddingTop: '1rem',
-            borderTop: '1px solid var(--border)',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -307,7 +334,7 @@ export default function ProductCard({
               {oldPrice && (
                 <span style={{
                   fontSize: '0.85rem',
-                  color: 'var(--text-secondary)',
+                  color: 'rgba(255,255,255,0.35)',
                   textDecoration: 'line-through',
                   fontWeight: 500,
                 }}>
@@ -316,16 +343,16 @@ export default function ProductCard({
               )}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                 <span style={{
-                  fontSize: '1.4rem',
-                  fontWeight: 900,
-                  color: 'var(--text-primary)',
+                  fontSize: '1.6rem',
+                  fontWeight: 950,
+                  color: '#ffffff',
                   lineHeight: 1,
                 }}>
                   {formatCurrency(price).replace('$', '')}
                 </span>
                 <span style={{
                   fontSize: '0.85rem',
-                  color: 'var(--text-secondary)',
+                  color: 'rgba(255,255,255,0.4)',
                   fontWeight: 800,
                 }}>
                   ر.س
@@ -338,7 +365,7 @@ export default function ProductCard({
               <span style={{
                 fontSize: '0.75rem',
                 fontWeight: 800,
-                color: stock === 'متوفر' ? '#10b981' : 'var(--primary)',
+                color: stock === 'متوفر' ? '#10b981' : '#e11d48',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -348,13 +375,52 @@ export default function ProductCard({
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: stock === 'متوفر' ? '#10b981' : 'var(--primary)',
+                  background: stock === 'متوفر' ? '#10b981' : '#e11d48',
                   display: 'inline-block',
                 }} />
                 {stock}
               </span>
             </div>
           </div>
+          {/* Seller Contact Info */}
+          {seller_phone && (
+            <div
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.6rem 0.8rem',
+                marginTop: '0.3rem',
+                background: 'rgba(16, 185, 129, 0.06)',
+                borderRadius: '10px',
+                border: '1px solid rgba(16, 185, 129, 0.15)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Phone size={14} color="#10b981" />
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
+                  {seller_phone}
+                </span>
+              </div>
+              <a
+                href={`tel:${seller_phone}`}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 900,
+                  color: '#10b981',
+                  textDecoration: 'none',
+                  padding: '0.3rem 0.6rem',
+                  borderRadius: '6px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                اتصل الآن
+              </a>
+            </div>
+          )}
 
           {/* Add to Cart Button */}
           {user?.id === seller_id ? (
@@ -369,7 +435,7 @@ export default function ProductCard({
                 width: '100%',
                 padding: '1rem',
                 borderRadius: '12px',
-                border: '1px solid var(--primary)',
+                border: '1px solid rgba(225,29,72,0.3)',
                 fontWeight: 950,
                 fontSize: '1rem',
                 cursor: 'pointer',
@@ -378,8 +444,8 @@ export default function ProductCard({
                 justifyContent: 'center',
                 gap: '8px',
                 transition: 'all 0.3s ease',
-                background: 'rgba(244, 63, 94, 0.05)',
-                color: 'var(--primary)',
+                background: 'rgba(225,29,72,0.08)',
+                color: '#e11d48',
                 textDecoration: 'none'
               }}
               onMouseOver={e => {
@@ -414,22 +480,22 @@ export default function ProductCard({
                 background: justAdded
                   ? '#059669'
                   : stock === 'متوفر'
-                    ? 'var(--primary)'
-                    : 'var(--surface-hover)',
-                color: stock === 'متوفر' ? '#ffffff' : 'var(--text-secondary)',
+                    ? 'linear-gradient(135deg, #be123c, #e11d48)'
+                    : 'rgba(255,255,255,0.05)',
+                color: stock === 'متوفر' ? '#ffffff' : 'rgba(255,255,255,0.3)',
                 boxShadow: stock === 'متوفر'
-                  ? '0 6px 20px rgba(244, 63, 94, 0.25)'
+                  ? '0 6px 20px rgba(225,29,72,0.3)'
                   : 'none',
               }}
               onMouseOver={e => {
                  if (stock === 'متوفر' && !justAdded) {
-                   e.currentTarget.style.background = 'var(--primary-hover)';
+                   e.currentTarget.style.background = '#be123c';
                    e.currentTarget.style.transform = 'scale(1.02)';
                  }
               }}
               onMouseOut={e => {
                  if (stock === 'متوفر' && !justAdded) {
-                   e.currentTarget.style.background = 'var(--primary)';
+                   e.currentTarget.style.background = 'linear-gradient(135deg, #be123c, #e11d48)';
                    e.currentTarget.style.transform = 'scale(1)';
                  }
               }}

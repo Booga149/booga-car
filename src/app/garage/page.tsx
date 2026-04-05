@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/context/ToastContext';
-import { Car, Settings, Toolbox, Hash, Calendar, ChevronRight, AlertTriangle, Plus, ShoppingCart, RefreshCw, Trash2 } from 'lucide-react';
+import { Car, Wrench, Hash, AlertTriangle, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface UserVehicle {
@@ -175,7 +175,7 @@ export default function GaragePage() {
                   {/* Right: Maintenance Tracker */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <Toolbox size={20} color="var(--primary)" /> حالة الصيانة الدورية
+                      <Wrench size={20} color="var(--primary)" /> حالة الصيانة الدورية
                     </h3>
 
                     {/* Oil Change */}

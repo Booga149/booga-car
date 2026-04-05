@@ -1,19 +1,20 @@
 import { Metadata } from 'next';
-import { supabase } from '@/lib/supabase';
 import ProductDetailsClient from './ProductDetailsClient';
 
 export const dynamic = 'force-dynamic';
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const id = params.id;
+  const { id } = await params;
 
   try {
+    // Dynamic import to avoid server-side issues
+    const { supabase } = await import('@/lib/supabase');
     const { data } = await supabase.from('products').select('name, brand, category, price, image_url').eq('id', id).single();
 
     if (!data) {
@@ -39,6 +40,8 @@ export async function generateMetadata(
   }
 }
 
-export default function ProductDetailsServerPage({ params }: Props) {
-  return <ProductDetailsClient id={params.id} />;
+export default async function ProductDetailsServerPage({ params }: Props) {
+  const { id } = await params;
+  return <ProductDetailsClient id={id} />;
 }
+

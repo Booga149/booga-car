@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { 
   ChevronRight, 
   Save, 
@@ -308,8 +308,6 @@ export default function SellerProductEditPage() {
           </form>
         </div>
       </div>
-      
-      <Footer />
       
       <style jsx>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

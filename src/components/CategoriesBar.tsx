@@ -8,26 +8,26 @@ import {
 } from 'lucide-react';
 
 const allCategories = [
-  { name: 'الكل', icon: <LayoutGrid size={24} /> },
-  { name: 'الأكثر مبيعاً', icon: <Flame size={24} color="var(--primary)" /> },
-  { name: 'فحص كمبيوتر', icon: <Monitor size={24} /> },
-  { name: 'صيانة دورية', icon: <PenTool size={24} /> },
-  { name: 'تظليل وحماية', icon: <Droplets size={24} /> },
-  { name: 'الصدامات والواجهة', icon: <Shield size={24} /> },
-  { name: 'الشمعات والإضاءة', icon: <Lightbulb size={24} /> },
-  { name: 'الفرامل والأقمشة', icon: <Circle size={24} /> },
-  { name: 'الأبواب والرفرف', icon: <CarFront size={24} /> },
-  { name: 'المساعدات والمقصات', icon: <Wrench size={24} /> },
-  { name: 'البواجي والفلاتر', icon: <Filter size={24} /> },
-  { name: 'نظام التكييف والتبريد', icon: <Wind size={24} /> },
-  { name: 'نظام الوقود', icon: <Fuel size={24} /> },
-  { name: 'الدركسون وملحقاته', icon: <Radio size={24} /> },
-  { name: 'الكهرباء والحساسات', icon: <CircuitBoard size={24} /> },
-  { name: 'البطاريات وملحقاتها', icon: <BatteryCharging size={24} /> },
-  { name: 'الديكور الداخلي والمقاعد', icon: <Armchair size={24} /> },
-  { name: 'البودي والطلاء', icon: <PaintBucket size={24} /> },
-  { name: 'العكس والدفرنس', icon: <Disc3 size={24} /> },
-  { name: 'الجنوط والكفرات', icon: <Cog size={24} /> },
+  { name: 'الكل', icon: <LayoutGrid size={20} /> },
+  { name: 'الأكثر مبيعاً', icon: <Flame size={20} /> },
+  { name: 'فحص كمبيوتر', icon: <Monitor size={20} /> },
+  { name: 'صيانة دورية', icon: <PenTool size={20} /> },
+  { name: 'تظليل وحماية', icon: <Droplets size={20} /> },
+  { name: 'الصدامات والواجهة', icon: <Shield size={20} /> },
+  { name: 'الشمعات والإضاءة', icon: <Lightbulb size={20} /> },
+  { name: 'الفرامل والأقمشة', icon: <Circle size={20} /> },
+  { name: 'الأبواب والرفرف', icon: <CarFront size={20} /> },
+  { name: 'المساعدات والمقصات', icon: <Wrench size={20} /> },
+  { name: 'البواجي والفلاتر', icon: <Filter size={20} /> },
+  { name: 'نظام التكييف والتبريد', icon: <Wind size={20} /> },
+  { name: 'نظام الوقود', icon: <Fuel size={20} /> },
+  { name: 'الدركسون وملحقاته', icon: <Radio size={20} /> },
+  { name: 'الكهرباء والحساسات', icon: <CircuitBoard size={20} /> },
+  { name: 'البطاريات وملحقاتها', icon: <BatteryCharging size={20} /> },
+  { name: 'الديكور الداخلي والمقاعد', icon: <Armchair size={20} /> },
+  { name: 'البودي والطلاء', icon: <PaintBucket size={20} /> },
+  { name: 'العكس والدفرنس', icon: <Disc3 size={20} /> },
+  { name: 'الجنوط والكفرات', icon: <Cog size={20} /> },
 ];
 
 function CategoriesBarInner() {
@@ -36,7 +36,6 @@ function CategoriesBarInner() {
   const activeCategory = searchParams.get('category') || '';
   const [navHeight, setNavHeight] = useState(73);
 
-  // Dynamically measure navbar height (works for both regular + merchant navbars)
   useEffect(() => {
     const measure = () => {
       const navbar = document.querySelector('header');
@@ -59,13 +58,14 @@ function CategoriesBarInner() {
 
   return (
     <section style={{
-      background: 'var(--background)',
-      borderBottom: '1px solid var(--border)',
+      background: 'rgba(8,8,12,0.95)',
+      backdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(255,255,255,0.04)',
       padding: '0',
       position: 'sticky',
       top: `${navHeight}px`,
       zIndex: 90,
-      boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+      boxShadow: '0 4px 30px rgba(0,0,0,0.4)'
     }}>
       <div style={{
         maxWidth: '1400px', margin: '0 auto',
@@ -80,20 +80,21 @@ function CategoriesBarInner() {
               onClick={() => handleCategoryClick(cat.name)}
               className="cat-item"
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem',
-                padding: '1.5rem 2rem', minWidth: '140px',
-                textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                fontSize: '0.85rem', fontWeight: 800, textAlign: 'center',
-                borderLeft: '1px solid var(--border)',
-                background: isActive ? 'rgba(244, 63, 94, 0.05)' : 'transparent',
-                borderBottom: isActive ? '3px solid var(--primary)' : '3px solid transparent',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+                padding: '1.2rem 1.8rem', minWidth: '120px',
+                textDecoration: 'none', 
+                color: isActive ? '#e11d48' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.78rem', fontWeight: 700, textAlign: 'center',
+                borderLeft: '1px solid rgba(255,255,255,0.04)',
+                background: isActive ? 'rgba(225,29,72,0.06)' : 'transparent',
+                borderBottom: isActive ? '2px solid #e11d48' : '2px solid transparent',
+                transition: 'all 0.3s ease',
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
               <span style={{ 
-                color: isActive ? 'var(--primary)' : 'var(--text-secondary)', 
-                transition: 'all 0.3s' 
+                color: isActive ? '#e11d48' : 'rgba(255,255,255,0.35)', 
+                transition: 'all 0.3s ease',
               }} className="cat-icon-container">
                 {cat.icon}
               </span>
@@ -105,12 +106,12 @@ function CategoriesBarInner() {
       <style jsx>{`
         div::-webkit-scrollbar { display: none; }
         .cat-item:hover { 
-          color: var(--primary) !important;
-          background: var(--surface-hover) !important;
+          color: #e11d48 !important;
+          background: rgba(225,29,72,0.04) !important;
         }
         .cat-item:hover .cat-icon-container { 
-          transform: scale(1.15) translateY(-2px);
-          color: var(--primary) !important;
+          transform: scale(1.15);
+          color: #e11d48 !important;
         }
       `}</style>
     </section>
@@ -119,9 +120,8 @@ function CategoriesBarInner() {
 
 export default function CategoriesBar() {
   return (
-    <Suspense fallback={<div style={{ height: '80px', background: 'var(--surface)' }} />}>
+    <Suspense fallback={<div style={{ height: '70px', background: 'rgba(8,8,12,0.95)' }} />}>
       <CategoriesBarInner />
     </Suspense>
   );
 }
-

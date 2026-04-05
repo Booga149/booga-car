@@ -19,6 +19,11 @@ export interface Product {
   seller_name?: string;
   part_number?: string;
   stock_quantity?: number;
+  seller_latitude?: number;
+  seller_longitude?: number;
+  seller_city?: string;
+  seller_phone?: string;  // رقم تلفون التاجر
+  seller_distance?: number; // المسافة من المشتري بالكيلومتر
 }
 
 // User Types

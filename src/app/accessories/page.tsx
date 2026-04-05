@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import AccessoryGrid from '@/components/AccessoryGrid';
 import WhatsAppHub from '@/components/WhatsAppHub';
 import { ACCESSORY_DATA } from '@/lib/accessoryData';
@@ -182,7 +182,6 @@ export default function AccessoriesPage() {
          </div>
       </section>
 
-      <Footer />
       <WhatsAppHub />
 
       <style jsx>{`

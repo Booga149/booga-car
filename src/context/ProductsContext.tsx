@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { Product } from '@/types';
 import { ENGINEER_SYSTEMS_PRODUCTS } from '@/lib/engineerData';
 import { ACCESSORY_DATA } from '@/lib/accessoryData';
+import { getAutoImage, isValidImage } from '@/lib/autoImage';
 
 type ProductsContextType = {
   products: Product[];
@@ -32,7 +33,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, profiles(role, business_name, city)')
+          .select('*, profiles(role, business_name, city, phone)')
           .eq('is_active', true)
           .order('created_at', { ascending: false });
 
@@ -50,14 +51,18 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
             shipping: d.shipping || 'عادي',
             rating: d.rating || 0,
             reviews: d.reviews_count || 0,
-            image: d.image_url || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80',
+            image: isValidImage(d.image_url) ? d.image_url : getAutoImage(d.category, d.name),
             color: '#' + Math.floor(Math.random()*16777215).toString(16),
             description: d.description || undefined,
             part_number: d.part_number || undefined,
             stock_quantity: d.stock_quantity || 0,
             seller_id: d.seller_id || undefined,
             is_verified_seller: d.profiles?.role === 'seller',
-            seller_name: d.profiles?.business_name || undefined
+            seller_name: d.profiles?.business_name || undefined,
+            seller_latitude: d.seller_latitude || undefined,
+            seller_longitude: d.seller_longitude || undefined,
+            seller_city: d.seller_city || d.profiles?.city || undefined,
+            seller_phone: d.profiles?.phone || undefined,
           }));
           setProducts(mapped);
         }
@@ -83,7 +88,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       condition: product.condition || 'جديد',
       stock: product.stock || 'متوفر',
       shipping: product.shipping || 'عادي',
-      image_url: product.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80',
+      image_url: isValidImage(product.image) ? product.image : getAutoImage(product.category, product.name),
       is_active: true,
       seller_id: user?.id || null,
       part_number: product.part_number || null,
@@ -103,7 +108,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
           condition: data.condition || 'جديد',
           stock: data.stock || 'متوفر',
           shipping: data.shipping || 'عادي',
-          image: data.image_url || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80',
+          image: isValidImage(data.image_url) ? data.image_url : getAutoImage(data.category, data.name),
           rating: 0,
           reviews: 0,
           color: optimisticColor,
@@ -127,7 +132,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       condition: product.condition || 'جديد',
       stock: 'متوفر',
       shipping: 'عادي',
-      image: product.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80',
+      image: isValidImage(product.image) ? product.image! : getAutoImage(product.category || '', product.name),
       rating: 0,
       reviews: 0,
       color: optimisticColor,

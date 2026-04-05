@@ -1,6 +1,6 @@
 "use client";
-import React from 'react';
-import { Zap, Shield, Cpu, Activity, ArrowLeft, Disc3 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Zap, Shield, Cpu, Disc3, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const SYSTEMS = [
@@ -8,42 +8,47 @@ const SYSTEMS = [
     id: 'power', 
     name: 'القوة والأداء', 
     eng: 'Power & Engine', 
-    icon: <Zap size={32} />, 
+    icon: <Zap size={28} />, 
     categories: ['بواجي', 'فلاتر زيت', 'تيربو', 'كويلات'],
-    color: '#f43f5e',
+    color: '#e11d48',
+    glow: 'rgba(225,29,72,0.08)',
     desc: 'تحسين كفاءة المحرك وزيادة القدرة الحصانية.'
   },
   { 
     id: 'dynamics', 
     name: 'الديناميكا والتحكم', 
     eng: 'Suspension & Steering', 
-    icon: <Disc3 size={32} />, 
+    icon: <Disc3 size={28} />, 
     categories: ['مساعدات', 'مقصات', 'ميزان', 'عكوس'],
     color: '#3b82f6',
-    desc: 'ثبات فائق للسائق وتجربة قيادة مريحة.'
+    glow: 'rgba(59,130,246,0.08)',
+    desc: 'ثبات فائق وتجربة قيادة مريحة.'
   },
   { 
     id: 'safety', 
     name: 'الأمان والفرملة', 
     eng: 'Safety & Braking', 
-    icon: <Shield size={32} />, 
+    icon: <Shield size={28} />, 
     categories: ['فحمات', 'هوبات', 'ABS', 'زيوت فرامل'],
     color: '#10b981',
-    desc: 'تكنولوجيا إيقاف متطورة لضمان سلامتك.'
+    glow: 'rgba(16,185,129,0.08)',
+    desc: 'تكنولوجيا إيقاف متطورة لسلامتك.'
   },
   { 
     id: 'connection', 
     name: 'الأنظمة الذكية', 
     eng: 'Electronics & Sensors', 
-    icon: <Cpu size={32} />, 
+    icon: <Cpu size={28} />, 
     categories: ['حساسات', 'كمبيوترات', 'برمجة', 'إضاءة'],
-    color: '#fbbf24',
+    color: '#eab308',
+    glow: 'rgba(234,179,8,0.06)',
     desc: 'الربط الكهربائي العصبي للمركبات الحديثة.'
   }
 ];
 
 export default function EngineeringSystems() {
   const router = useRouter();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const handleCategoryClick = (cat: string) => {
     router.push(`/products?search=${encodeURIComponent(cat)}`);
@@ -52,151 +57,162 @@ export default function EngineeringSystems() {
   return (
     <section style={{ 
       padding: '8rem 2rem', 
-      background: 'var(--background)',
-      position: 'relative'
+      background: '#050508',
+      position: 'relative',
     }}>
-      {/* Blueprint Grid Background */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'radial-gradient(var(--border) 1px, transparent 1px)',
-        backgroundSize: '30px 30px',
-        opacity: 0.1, pointerEvents: 'none'
-      }} />
-
       <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         
-        <div style={{ textAlign: 'left', marginBottom: '4rem', maxWidth: '800px' }}>
-          <div style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', fontSize: '0.8rem', marginBottom: '1rem' }}>
+        {/* Section Header */}
+        <div style={{ textAlign: 'left', marginBottom: '5rem', maxWidth: '800px' }}>
+          <div style={{ 
+            color: '#e11d48', fontWeight: 900, textTransform: 'uppercase', 
+            letterSpacing: '4px', fontSize: '0.75rem', marginBottom: '1.2rem',
+            opacity: 0.8,
+          }}>
              الهندسة الميكانيكية الدقيقة
           </div>
-          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 950, color: 'white', lineHeight: 1.1, marginBottom: '1.5rem' }}>
-             حدد <span style={{ color: 'var(--primary)', WebkitTextStroke: '1px var(--primary)', WebkitTextFillColor: 'transparent' }}>النظام</span> الذي ترغب في ترقيته
+          <h2 style={{ 
+            fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 950, 
+            color: '#ffffff', lineHeight: 1.1, marginBottom: '1.5rem' 
+          }}>
+             حدد <span style={{ color: '#e11d48' }}>النظام</span> الذي ترغب في ترقيته
           </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 600 }}>
+          <p style={{ 
+            color: 'rgba(255,255,255,0.35)', fontSize: '1rem', lineHeight: 1.7, fontWeight: 500 
+          }}>
              استكشف عالم الأجزاء المعقدة المصممة خصيصاً لتفوق سيارتك.
           </p>
         </div>
 
+        {/* Cards Grid */}
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '2rem' 
+          gap: '1.5rem' 
         }}>
-          {SYSTEMS.map((system) => (
-            <div 
-              key={system.id}
-              style={{
-                background: 'rgba(15, 15, 15, 0.8)',
-                borderRadius: '32px',
-                padding: '2.5rem',
-                border: '1px solid var(--border)',
-                transition: '0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                position: 'relative',
-                overflow: 'hidden',
-                cursor: 'default'
-              }}
-              className="blueprint-card"
-            >
-              {/* Technical HUD Details */}
-              <div style={{ 
-                position: 'absolute', top: '1.5rem', right: '1.5rem', 
-                fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-secondary)',
-                opacity: 0.4, letterSpacing: '2px', textTransform: 'uppercase'
-              }}>
-                [ {system.eng} ]
-              </div>
-
-              {/* Glowing Icon Container */}
-              <div style={{ 
-                color: system.color, marginBottom: '2.5rem',
-                display: 'inline-flex', padding: '1.5rem',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)',
-                boxShadow: `0 10px 30px rgba(0,0,0,0.5), 0 0 10px ${system.color}33`
-              }}>
-                {system.icon}
-              </div>
-
-              <h3 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '1.5rem', color: 'white', letterSpacing: '-0.5px' }}>
-                {system.name}
-              </h3>
-
-              <p style={{ color: 'rgba(156, 163, 175, 0.8)', lineHeight: 1.6, marginBottom: '2.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                {system.desc}
-              </p>
-
-              {/* Blueprint Sub-categories HUD */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '3rem' }}>
-                {system.categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => handleCategoryClick(cat)}
-                    style={{
-                      background: 'rgba(25, 25, 25, 0.8)',
-                      border: '1px solid var(--border)',
-                      padding: '0.6rem 1.4rem',
-                      borderRadius: '16px',
-                      fontSize: '0.9rem',
-                      fontWeight: 700,
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      transition: '0.3s'
-                    }}
-                    onMouseOver={e => {
-                      e.currentTarget.style.borderColor = system.color;
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.borderColor = 'var(--border)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              <button 
-                onClick={() => router.push(`/products?categories=${encodeURIComponent(system.categories.join(','))}`)}
-                style={{ 
-                  background: 'none', border: 'none', color: system.color, 
-                  fontWeight: 900, fontSize: '1.05rem', cursor: 'pointer', 
-                  display: 'flex', alignItems: 'center', gap: '0.8rem',
-                  padding: '0 0.5rem', borderLeft: `2px solid ${system.color}`
+          {SYSTEMS.map((system) => {
+            const isHovered = hoveredId === system.id;
+            return (
+              <div 
+                key={system.id}
+                onMouseEnter={() => setHoveredId(system.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                style={{
+                  background: isHovered ? 'rgba(20,20,25,0.95)' : 'rgba(12,12,16,0.9)',
+                  borderRadius: '24px',
+                  padding: '2.5rem',
+                  border: `1px solid ${isHovered ? `${system.color}40` : 'rgba(255,255,255,0.04)'}`,
+                  transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'default',
+                  transform: isHovered ? 'translateY(-12px)' : 'translateY(0)',
+                  boxShadow: isHovered 
+                    ? `0 30px 80px rgba(0,0,0,0.6), 0 0 40px ${system.glow}` 
+                    : '0 4px 20px rgba(0,0,0,0.3)',
                 }}
               >
-                 استكشف النظام كاملاً <ArrowLeft size={18} />
-              </button>
-            </div>
-          ))}
+                {/* Muted Glow Background */}
+                <div style={{
+                  position: 'absolute', top: '-30%', right: '-30%',
+                  width: '60%', height: '60%',
+                  background: `radial-gradient(circle, ${system.color}${isHovered ? '12' : '06'}, transparent 70%)`,
+                  transition: 'all 0.5s ease',
+                  pointerEvents: 'none',
+                }} />
+
+                {/* Technical Label */}
+                <div style={{ 
+                  position: 'absolute', top: '1.5rem', right: '1.5rem', 
+                  fontSize: '0.6rem', fontWeight: 800, color: 'rgba(255,255,255,0.15)',
+                  letterSpacing: '2px', textTransform: 'uppercase'
+                }}>
+                  [ {system.eng} ]
+                </div>
+
+                {/* Icon with Glow */}
+                <div style={{ 
+                  color: system.color, marginBottom: '2rem',
+                  display: 'inline-flex', padding: '1.2rem',
+                  background: `${system.color}08`,
+                  borderRadius: '18px', 
+                  border: `1px solid ${system.color}15`,
+                  boxShadow: isHovered ? `0 8px 25px ${system.color}20` : 'none',
+                  transition: 'all 0.4s ease',
+                }}>
+                  {system.icon}
+                </div>
+
+                {/* Title */}
+                <h3 style={{ 
+                  fontSize: '1.6rem', fontWeight: 950, marginBottom: '1rem', 
+                  color: '#fff', letterSpacing: '-0.3px' 
+                }}>
+                  {system.name}
+                </h3>
+
+                {/* Description - smaller, more transparent */}
+                <p style={{ 
+                  color: 'rgba(255,255,255,0.3)', lineHeight: 1.7, 
+                  marginBottom: '2rem', fontSize: '0.92rem', fontWeight: 500 
+                }}>
+                  {system.desc}
+                </p>
+
+                {/* Sub-categories */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '2.5rem' }}>
+                  {system.categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => handleCategoryClick(cat)}
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        padding: '0.5rem 1.2rem',
+                        borderRadius: '12px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: 'rgba(255,255,255,0.45)',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.borderColor = `${system.color}60`;
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.background = `${system.color}10`;
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Explore Button - appears on hover */}
+                <button 
+                  onClick={() => router.push(`/products?categories=${encodeURIComponent(system.categories.join(','))}`)}
+                  style={{ 
+                    background: 'none', border: 'none', color: system.color, 
+                    fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', 
+                    display: 'flex', alignItems: 'center', gap: '0.8rem',
+                    padding: '0.5rem 0',
+                    opacity: isHovered ? 1 : 0,
+                    transform: isHovered ? 'translateX(0)' : 'translateX(10px)',
+                    transition: 'all 0.4s ease',
+                    letterSpacing: '0.3px',
+                  }}
+                >
+                   استكشف النظام <ArrowLeft size={16} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
-
-      <style jsx>{`
-        .blueprint-card:hover {
-          transform: translateY(-15px) scale(1.02);
-          border-color: var(--primary);
-          background: rgba(244, 63, 94, 0.04);
-          box-shadow: 0 50px 100px rgba(0,0,0,0.6);
-        }
-        .blueprint-card:before {
-          content: "";
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle at center, rgba(244, 63, 94, 0.05) 0%, transparent 60%);
-          opacity: 0;
-          transition: 0.4s;
-          pointer-events: none;
-        }
-        .blueprint-card:hover:before {
-          opacity: 1;
-        }
-      `}</style>
     </section>
   );
 }

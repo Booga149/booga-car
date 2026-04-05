@@ -6,6 +6,7 @@ type AuthContextType = {
   user: any;
   loading: boolean;
   isAuthModalOpen: boolean;
+  authMode: 'login' | 'signup';
   openLoginModal: () => void;
   openSignUpModal: () => void;
   closeAuthModal: () => void;
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user, 
       loading, 
       isAuthModalOpen, 
+      authMode,
       openLoginModal, 
       openSignUpModal, 
       closeAuthModal,

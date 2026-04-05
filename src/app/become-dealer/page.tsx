@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import Link from 'next/link';
 import { 
   BarChart3, 
@@ -89,8 +89,6 @@ export default function BecomeDealerPage() {
               borderRadius: '16px', fontWeight: 800, fontSize: '1.2rem', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'all 0.3s ease'
             }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface-hover)'} onMouseOut={e => e.currentTarget.style.background = 'var(--surface)'}>
-              اكتشف المزايا
-            </a>
               اكتشف المزايا
             </a>
           </div>
@@ -225,7 +223,6 @@ export default function BecomeDealerPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

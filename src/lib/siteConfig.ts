@@ -22,16 +22,17 @@ export const siteConfig = {
   navigation: {
     quickLinks: [
       { name: 'تصفح محرك القطع', href: '/products' },
-      { name: 'افتح متجرك و بيع قطعك', href: '/sell' },
+      { name: 'من نحن', href: '/about' },
       { name: 'بوجا للأعمال (للتجار)', href: '/become-dealer' },
-      { name: 'قائمة أمنياتي (المفضلة)', href: '/wishlist' },
-      { name: 'لوحة التحكم للمديرين', href: '/admin' },
+      { name: 'الأسئلة الشائعة', href: '/faq' },
+      { name: 'تواصل معنا', href: '/contact' },
     ],
     policies: [
-      { name: 'سياسة الاسترجاع والضمان', href: '/return-policy', highlight: true },
-      { name: 'الخصوصية ومعالجة البيانات', href: '/privacy' },
-      { name: 'الشروط والأحكام', href: '/terms' },
-      { name: 'مركز خدمة العملاء المتواصل', href: '/support' },
+      { name: 'سياسة الاسترجاع', href: '/return-policy', highlight: true },
+      { name: 'سياسة الضمان', href: '/warranty', highlight: false },
+      { name: 'الشحن والتوصيل', href: '/shipping', highlight: false },
+      { name: 'سياسة الخصوصية', href: '/privacy', highlight: false },
+      { name: 'الشروط والأحكام', href: '/terms', highlight: false },
     ]
   },
   seo: {

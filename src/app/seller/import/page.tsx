@@ -4,8 +4,9 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { processRow, mapHeader } from '@/utils/smartImport';
+import { getAutoImage, isValidImage } from '@/lib/autoImage';
 import { 
   Upload, 
   FileText, 
@@ -237,7 +238,7 @@ export default function MerchantImportPage() {
           category: p.category,
           price: p.price,
           old_price: p.old_price || null,
-          image_url: allImages[0] || null,
+          image_url: allImages[0] || getAutoImage(p.category, p.name),
           images: allImages,
           part_number: (p.part_number && (p.part_number as string).trim() !== '')
             ? (p.part_number as string).trim()
@@ -657,7 +658,6 @@ export default function MerchantImportPage() {
         )}
       </div>
 
-      <Footer />
     </main>
   );
 }

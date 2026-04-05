@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -13,7 +13,8 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertCircle,
-  Loader2
+  Loader2,
+  Phone
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,7 +26,8 @@ export default function MerchantSettingsPage() {
   const [formData, setFormData] = useState({
     business_name: '',
     cr_number: '',
-    city: ''
+    city: '',
+    phone: ''
   });
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function MerchantSettingsPage() {
     async function loadProfile() {
       const { data, error } = await supabase
         .from('profiles')
-        .select('business_name, cr_number, city')
+        .select('business_name, cr_number, city, phone')
         .eq('id', user.id)
         .single();
       
@@ -44,7 +46,8 @@ export default function MerchantSettingsPage() {
         setFormData({
           business_name: data.business_name || '',
           cr_number: data.cr_number || '',
-          city: data.city || ''
+          city: data.city || '',
+          phone: data.phone || ''
         });
       }
       setLoading(false);
@@ -64,6 +67,7 @@ export default function MerchantSettingsPage() {
         business_name: formData.business_name,
         cr_number: formData.cr_number,
         city: formData.city,
+        phone: formData.phone,
         updated_at: new Date().toISOString()
       })
       .eq('id', user.id);
@@ -165,6 +169,27 @@ export default function MerchantSettingsPage() {
               </div>
             </div>
 
+            {/* Phone Number */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                <Phone size={20} color="#10b981" /> رقم التواصل (يظهر على المنتجات)
+              </label>
+              <input 
+                type="tel"
+                placeholder="05XXXXXXXX"
+                value={formData.phone}
+                onChange={e => setFormData({...formData, phone: e.target.value})}
+                style={{ 
+                  padding: '1.2rem', borderRadius: '14px', background: 'var(--background)', 
+                  border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600,
+                  fontSize: '1rem', direction: 'ltr'
+                }}
+              />
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                💡 رقم التلفون يظهر على كل منتجاتك لزيادة المصداقية وتسهيل التواصل مع المشترين
+              </p>
+            </div>
+
             <button 
               type="submit"
               disabled={saving}
@@ -226,7 +251,6 @@ export default function MerchantSettingsPage() {
         </div>
       </div>
 
-      <Footer />
     </main>
   );
 }
