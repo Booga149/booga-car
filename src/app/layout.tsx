@@ -19,6 +19,7 @@ import Footer from '@/components/Footer';
 import AdminToastListener from '@/components/AdminToastListener';
 import BackButton from '@/components/BackButton';
 import AdminGodModeEnforcer from '@/components/AdminGodModeEnforcer';
+import MobileBottomNav from '@/components/MobileBottomNav';
 
 export default function RootLayout({
   children,
@@ -51,10 +52,10 @@ export default function RootLayout({
                   </Script>
                   
                   {/* Floating WhatsApp Support Module */}
-                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer" style={{
-                    position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000,
-                    background: '#25D366', color: 'white', width: '60px', height: '60px', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem',
+                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer" className="desktop-whatsapp" style={{
+                    position: 'fixed', bottom: '1.5rem', left: '1rem', zIndex: 1000,
+                    background: '#25D366', color: 'white', width: '50px', height: '50px', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem',
                     boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)', textDecoration: 'none',
                   }}>
                     💬
@@ -66,6 +67,7 @@ export default function RootLayout({
                   <Footer />
                   <AdminToastListener />
                   <AdminGodModeEnforcer />
+                  <MobileBottomNav />
                 </CartProvider>
               </ProductsProvider>
             </WishlistProvider>

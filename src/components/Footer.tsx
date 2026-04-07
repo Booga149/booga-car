@@ -140,7 +140,7 @@ export default function Footer() {
 
   /* ═══ REGULAR FOOTER ═══ */
   return (
-    <footer style={{ background: 'var(--background)', borderTop: '1px solid var(--border)', padding: '6rem 2rem 3rem', marginTop: 'auto' }}>
+    <footer className="mobile-hide-section" style={{ background: 'var(--background)', borderTop: '1px solid var(--border)', padding: '6rem 2rem 3rem', marginTop: 'auto' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '4rem' }}>
         {/* Brand & Mission */}
         <div>

@@ -89,7 +89,7 @@ export default function Navbar() {
 
         {/* ═══ ADMIN GOD MODE TOP BAR ═══ */}
         {isAdmin && !pathname?.startsWith('/become-dealer') ? (
-          <div style={{
+          <div className="desktop-top-bar" style={{
             background: 'linear-gradient(90deg, rgba(76,201,240,0) 0%, rgba(76,201,240,0.07) 20%, rgba(76,201,240,0.15) 50%, rgba(76,201,240,0.07) 80%, rgba(76,201,240,0) 100%)',
             borderBottom: '1px solid rgba(76,201,240,0.1)',
             padding: '0.38rem 2.5rem',
@@ -128,7 +128,7 @@ export default function Navbar() {
           </div>
         ) : isMerchant ? (
           /* ═══ MERCHANT GOLD TOP BAR ═══ */
-          <div style={{
+          <div className="desktop-top-bar" style={{
             background: 'linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.07) 20%, rgba(212,175,55,0.1) 50%, rgba(212,175,55,0.07) 80%, rgba(212,175,55,0) 100%)',
             borderBottom: '1px solid rgba(212,175,55,0.1)',
             padding: '0.38rem 2.5rem',
@@ -167,7 +167,7 @@ export default function Navbar() {
         ) : null}
 
         {/* ═══ MAIN NAV ROW ═══ */}
-        <div style={{
+        <div className="mobile-nav-padding" style={{
           padding: '1rem 3.5rem',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
@@ -175,7 +175,7 @@ export default function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ position: 'relative' }}>
-                <h1 style={{ 
+                <h1 className="mobile-logo-size" style={{ 
                   color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : '#ffffff', 
                   margin: 0, fontSize: '1.9rem', fontWeight: 950, letterSpacing: '-1px',
                   textShadow: isAdmin ? '0 0 20px rgba(76,201,240,0.5)' : isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : '0 0 30px rgba(255,255,255,0.15)',
@@ -217,7 +217,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <nav className="desktop-nav" style={{ display: 'flex', gap: '2.5rem' }}>
+            <nav className="desktop-nav" style={{ gap: '2.5rem' }}>
               {(isAdmin && !pathname?.startsWith('/become-dealer') ? [
                 { href: '/admin', label: '🛡️ مركز القيادة' },
                 { href: '/admin/products', label: 'ترسانة المنتجات' },
@@ -281,7 +281,7 @@ export default function Navbar() {
           </div>
 
           {/* Right Side Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
             {!isMerchant && (
               <Link href="/wishlist" style={{ 
                 textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', 

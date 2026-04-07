@@ -8,7 +8,7 @@ export default function Hero() {
   const router = useRouter();
   
   return (
-    <section style={{
+    <section className="hero-section" style={{
       minHeight: '100vh',
       width: '100%',
       position: 'relative',
@@ -21,7 +21,7 @@ export default function Hero() {
     }}>
 
       {/* ─── Car Background Image ─── */}
-      <div style={{
+      <div className="hero-bg-image" style={{
         position: 'absolute', inset: 0,
         backgroundImage: 'url("https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1920&q=80")',
         backgroundSize: 'cover',
@@ -30,14 +30,14 @@ export default function Hero() {
       }} />
 
       {/* ─── Dark Overlay ─── */}
-      <div style={{
+      <div className="hero-bg-image" style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.8) 100%)',
         zIndex: 1,
       }} />
 
       {/* ─── Red Accent Glow ─── */}
-      <div style={{
+      <div className="hero-bg-image" style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
         background: 'radial-gradient(ellipse at 50% 100%, rgba(225,29,72,0.15) 0%, transparent 70%)',
         zIndex: 2, pointerEvents: 'none',
@@ -46,11 +46,11 @@ export default function Hero() {
       {/* ─── Content ─── */}
       <div style={{ 
         position: 'relative', zIndex: 10, textAlign: 'center', 
-        maxWidth: '1100px', width: '100%', padding: '0 2rem',
+        maxWidth: '1100px', width: '100%', padding: '0 clamp(1rem, 3vw, 2rem)',
       }}>
 
         {/* ──── LUXURY LOGO ──── */}
-        <div style={{ marginBottom: '3rem' }}>
+        <div className="hero-logo-section" style={{ marginBottom: 'clamp(1.5rem, 4vw, 3rem)' }}>
           {/* Gear Icon */}
           <div style={{ 
             fontSize: '2.5rem', marginBottom: '1.5rem', 
@@ -100,7 +100,7 @@ export default function Hero() {
           fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
           color: 'rgba(255,255,255,0.6)',
           maxWidth: '600px',
-          margin: '0 auto 4rem',
+          margin: '0 auto clamp(2rem, 5vw, 4rem)',
           lineHeight: 1.8,
           fontWeight: 500,
           letterSpacing: '0.5px',
@@ -124,11 +124,11 @@ export default function Hero() {
         {/* ──── Category Cards ──── */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(4, 1fr)', 
-          gap: '1rem',
-          marginTop: '4rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 45%), 1fr))', 
+          gap: 'clamp(0.5rem, 2vw, 1rem)',
+          marginTop: 'clamp(2rem, 5vw, 4rem)',
           maxWidth: '800px',
-          margin: '4rem auto 0',
+          margin: 'clamp(2rem, 5vw, 4rem) auto 0',
         }}>
           {[
             { name: 'محركات', img: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&q=80', cat: 'المساعدات والمقصات' },
@@ -142,7 +142,7 @@ export default function Hero() {
               className="cat-card"
               style={{
                 position: 'relative',
-                height: '120px',
+                height: 'clamp(80px, 15vw, 120px)',
                 borderRadius: '16px',
                 overflow: 'hidden',
                 cursor: 'pointer',
@@ -176,9 +176,10 @@ export default function Hero() {
         </div>
 
         {/* ──── Stats ──── */}
-        <div style={{ 
-          display: 'flex', justifyContent: 'center', gap: '5rem', 
-          marginTop: '5rem',
+        <div className="hero-stats-section" style={{ 
+          display: 'flex', justifyContent: 'center', gap: 'clamp(2rem, 5vw, 5rem)', 
+          marginTop: 'clamp(2.5rem, 5vw, 5rem)',
+          flexWrap: 'wrap',
         }}>
           {[
             { label: 'دقة المطابقة', val: '99.9%', icon: <Shield size={14}/> },
@@ -203,7 +204,7 @@ export default function Hero() {
       </div>
 
       {/* ──── Scroll Indicator ──── */}
-      <div style={{ 
+      <div className="hero-scroll-indicator" style={{ 
         position: 'absolute', bottom: '2.5rem', zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center', 
         gap: '0.6rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: 600,
@@ -230,6 +231,24 @@ export default function Hero() {
         }
         @media (max-width: 640px) {
           .cat-card { height: 90px !important; }
+        }
+        @media (max-width: 768px) {
+          .hero-section {
+            min-height: auto !important;
+            padding: 5rem 0 1.5rem !important;
+          }
+          .hero-bg-image {
+            display: none !important;
+          }
+          .hero-logo-section {
+            display: none !important;
+          }
+          .hero-stats-section {
+            display: none !important;
+          }
+          .hero-scroll-indicator {
+            display: none !important;
+          }
         }
       `}</style>
     </section>

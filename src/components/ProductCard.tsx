@@ -1,15 +1,40 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
-import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin, Phone } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin, Phone, MessageCircle, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 type ProductProps = Product & {
   imagePlaceholderColor: string;
 };
+
+/** Mask a phone number: show first 4 and last 2 digits, stars in between */
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length <= 6) return phone; // too short to mask
+  const prefix = digits.slice(0, 4);
+  const suffix = digits.slice(-2);
+  const stars = '●'.repeat(Math.max(digits.length - 6, 4));
+  return `${prefix}${stars}${suffix}`;
+}
+
+/** Fire-and-forget click tracking to Supabase */
+async function trackClick(productId: string, sellerId: string | undefined, clickType: 'call' | 'whatsapp' | 'reveal_phone') {
+  if (!isSupabaseConfigured) return;
+  try {
+    await supabase.from('seller_click_analytics').insert({
+      product_id: productId,
+      seller_id: sellerId || null,
+      click_type: clickType,
+    });
+  } catch {
+    // Silent — analytics should never block UX
+  }
+}
 
 export default function ProductCard({
   id, name, price, oldPrice, brand, category, condition, stock, shipping, rating, reviews, image, imagePlaceholderColor, is_verified_seller = false, seller_name, part_number, seller_id, seller_distance, seller_city, seller_phone
@@ -19,6 +44,7 @@ export default function ProductCard({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [phoneRevealed, setPhoneRevealed] = useState(false);
 
   const discount = oldPrice ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
   const wishlisted = isInWishlist(id);
@@ -38,6 +64,28 @@ export default function ProductCard({
     setTimeout(() => setJustAdded(false), 1500);
   };
 
+  const handleRevealPhone = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setPhoneRevealed(true);
+    trackClick(id, seller_id, 'reveal_phone');
+  }, [id, seller_id]);
+
+  const handleCallClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackClick(id, seller_id, 'call');
+  }, [id, seller_id]);
+
+  const handleWhatsAppClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackClick(id, seller_id, 'whatsapp');
+  }, [id, seller_id]);
+
+  const cleanPhone = seller_phone?.replace(/\D/g, '') || '';
+  // Build WhatsApp URL — Saudi numbers: remove leading 0 and prepend 966
+  const waPhone = cleanPhone.startsWith('0') ? `966${cleanPhone.slice(1)}` : cleanPhone;
+  const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحبًا، أنا مهتم بالمنتج: ${name}`)}`;
+
   return (
     <a
       href={`/products/${id}`}
@@ -46,22 +94,36 @@ export default function ProductCard({
       <div
         className="gm-product-card"
         style={{
-          background: 'rgba(18,18,24,0.95)',
+          background: isHovered ? 'rgba(22,22,30,0.98)' : 'rgba(18,18,24,0.95)',
           borderRadius: '20px',
           overflow: 'hidden',
           transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          border: isHovered ? '1px solid rgba(225,29,72,0.2)' : '1px solid rgba(255,255,255,0.06)',
+          border: isHovered ? '1px solid rgba(225,29,72,0.35)' : '1px solid rgba(255,255,255,0.08)',
           boxShadow: isHovered
-            ? '0 25px 60px -15px rgba(0,0,0,0.5), 0 0 20px rgba(225,29,72,0.08)'
-            : '0 4px 20px rgba(0,0,0,0.3)',
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+            ? '0 25px 60px -15px rgba(0,0,0,0.6), 0 0 30px rgba(225,29,72,0.12)'
+            : '0 4px 24px rgba(0,0,0,0.35)',
+          transform: isHovered ? 'translateY(-8px) scale(1.01)' : 'translateY(0) scale(1)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Top accent line */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: isHovered
+            ? 'linear-gradient(90deg, #e11d48, #f97316, #e11d48)'
+            : 'linear-gradient(90deg, transparent, rgba(225,29,72,0.4), transparent)',
+          transition: 'all 0.5s ease',
+          zIndex: 10,
+          opacity: isHovered ? 1 : 0.5,
+        }} />
         {/* Admin-only info bar — hidden by default, shown via god-mode CSS */}
         <div className="gm-admin-info" style={{
           display: 'none',
@@ -80,7 +142,7 @@ export default function ProductCard({
           {seller_id && <span>SELLER: {seller_id?.substring(0, 8)}</span>}
         </div>
         {/* ─── Image Section ─── */}
-        <div style={{
+        <div className="card-image-wrap" style={{
           position: 'relative',
           height: '240px',
           background: 'rgba(10,10,14,0.9)',
@@ -88,7 +150,8 @@ export default function ProductCard({
         }}>
           <img
             src={image}
-            alt=""
+            alt={name}
+            loading="lazy"
             style={{
               width: '100%',
               height: '100%',
@@ -204,6 +267,7 @@ export default function ProductCard({
               toggleWishlist(id);
             }}
             aria-label="إضافة للمفضلة"
+            className="card-wishlist-btn"
             style={{
               position: 'absolute',
               bottom: '12px',
@@ -285,7 +349,7 @@ export default function ProductCard({
               {name}
             </h3>
             {part_number && (
-              <div style={{ 
+              <div className="card-desktop-only" style={{ 
                 fontSize: '0.7rem', 
                 color: 'rgba(255,255,255,0.5)', 
                 fontWeight: 700,
@@ -300,7 +364,7 @@ export default function ProductCard({
           </div>
 
           {/* Rating */}
-          <div style={{
+          <div className="card-desktop-only" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -321,14 +385,17 @@ export default function ProductCard({
             </span>
           </div>
 
-          {/* Price Section */}
+          {/* ─── PRIMARY: Price Section ─── */}
           <div style={{
             marginTop: 'auto',
             paddingTop: '1rem',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            background: 'rgba(225,29,72,0.03)',
+            margin: '0 -1.2rem',
+            padding: '1rem 1.2rem 0',
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {oldPrice && (
@@ -343,16 +410,19 @@ export default function ProductCard({
               )}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                 <span style={{
-                  fontSize: '1.6rem',
+                  fontSize: '1.7rem',
                   fontWeight: 950,
-                  color: '#ffffff',
+                  background: discount > 0 ? 'linear-gradient(135deg, #f97316, #ef4444)' : 'linear-gradient(135deg, #10b981, #14b8a6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                   lineHeight: 1,
+                  filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.2))',
                 }}>
                   {formatCurrency(price).replace('$', '')}
                 </span>
                 <span style={{
                   fontSize: '0.85rem',
-                  color: 'rgba(255,255,255,0.4)',
+                  color: discount > 0 ? '#f97316' : '#10b981',
                   fontWeight: 800,
                 }}>
                   ر.س
@@ -382,47 +452,8 @@ export default function ProductCard({
               </span>
             </div>
           </div>
-          {/* Seller Contact Info */}
-          {seller_phone && (
-            <div
-              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.6rem 0.8rem',
-                marginTop: '0.3rem',
-                background: 'rgba(16, 185, 129, 0.06)',
-                borderRadius: '10px',
-                border: '1px solid rgba(16, 185, 129, 0.15)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Phone size={14} color="#10b981" />
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
-                  {seller_phone}
-                </span>
-              </div>
-              <a
-                href={`tel:${seller_phone}`}
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 900,
-                  color: '#10b981',
-                  textDecoration: 'none',
-                  padding: '0.3rem 0.6rem',
-                  borderRadius: '6px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                اتصل الآن
-              </a>
-            </div>
-          )}
 
-          {/* Add to Cart Button */}
+          {/* ─── PRIMARY: Add to Cart Button ─── */}
           {user?.id === seller_id ? (
             <div
               onClick={(e) => {
@@ -463,6 +494,7 @@ export default function ProductCard({
             <button
               disabled={stock !== 'متوفر'}
               onClick={handleAddToCart}
+              className="btn-tap"
               style={{
                 marginTop: '0.5rem',
                 width: '100%',
@@ -476,33 +508,40 @@ export default function ProductCard({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
                 background: justAdded
-                  ? '#059669'
+                  ? 'linear-gradient(135deg, #059669, #10b981)'
                   : stock === 'متوفر'
-                    ? 'linear-gradient(135deg, #be123c, #e11d48)'
+                    ? 'linear-gradient(135deg, #e11d48, #f43f5e, #e11d48)'
                     : 'rgba(255,255,255,0.05)',
+                backgroundSize: stock === 'متوفر' ? '200% 100%' : 'auto',
                 color: stock === 'متوفر' ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                boxShadow: stock === 'متوفر'
-                  ? '0 6px 20px rgba(225,29,72,0.3)'
-                  : 'none',
+                boxShadow: justAdded
+                  ? '0 8px 25px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  : stock === 'متوفر'
+                    ? '0 8px 25px rgba(225,29,72,0.35), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    : 'none',
+                letterSpacing: '0.3px',
+                textShadow: stock === 'متوفر' ? '0 1px 2px rgba(0,0,0,0.2)' : 'none',
               }}
               onMouseOver={e => {
                  if (stock === 'متوفر' && !justAdded) {
-                   e.currentTarget.style.background = '#be123c';
-                   e.currentTarget.style.transform = 'scale(1.02)';
+                   e.currentTarget.style.background = 'linear-gradient(135deg, #be123c, #e11d48, #f43f5e)';
+                   e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                   e.currentTarget.style.boxShadow = '0 12px 35px rgba(225,29,72,0.45), inset 0 1px 0 rgba(255,255,255,0.15)';
                  }
               }}
               onMouseOut={e => {
                  if (stock === 'متوفر' && !justAdded) {
-                   e.currentTarget.style.background = 'linear-gradient(135deg, #be123c, #e11d48)';
-                   e.currentTarget.style.transform = 'scale(1)';
+                   e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48, #f43f5e, #e11d48)';
+                   e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                   e.currentTarget.style.boxShadow = '0 8px 25px rgba(225,29,72,0.35), inset 0 1px 0 rgba(255,255,255,0.1)';
                  }
               }}
             >
               {justAdded ? (
                 <>
-                  <Check size={20} /> تمت الإضافة
+                  <Check size={20} /> تمت الإضافة ✓
                 </>
               ) : stock === 'متوفر' ? (
                 <>
@@ -512,6 +551,162 @@ export default function ProductCard({
                 'غير متوفر حالياً'
               )}
             </button>
+          )}
+
+          {/* ─── SECONDARY: Seller Contact Section (desktop only) ─── */}
+          {seller_phone && seller_phone.trim() !== '' && (
+            <div
+              className="card-desktop-only"
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                marginTop: '0.3rem',
+                padding: '0.7rem 0.8rem',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
+                borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {/* Header: "تواصل مع التاجر" + masked/revealed phone */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '7px',
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Phone size={13} color="#10b981" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.3px' }}>
+                      تواصل مع التاجر
+                    </span>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      color: phoneRevealed ? '#10b981' : 'rgba(255,255,255,0.55)',
+                      letterSpacing: '1px',
+                      direction: 'ltr',
+                      fontFamily: 'monospace',
+                      transition: 'color 0.3s ease',
+                    }}>
+                      {phoneRevealed ? seller_phone : maskPhone(seller_phone)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Reveal phone button */}
+                {!phoneRevealed && (
+                  <button
+                    onClick={handleRevealPhone}
+                    style={{
+                      fontSize: '0.62rem',
+                      fontWeight: 800,
+                      color: '#10b981',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.2)',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.18)';
+                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                    }}
+                  >
+                    <Eye size={11} />
+                    إظهار الرقم
+                  </button>
+                )}
+              </div>
+
+              {/* Action buttons: Call + WhatsApp */}
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                {/* Call button */}
+                <a
+                  href={`tel:${seller_phone}`}
+                  onClick={handleCallClick}
+                  style={{
+                    flex: 1,
+                    fontSize: '0.68rem',
+                    fontWeight: 900,
+                    color: '#fff',
+                    textDecoration: 'none',
+                    padding: '0.45rem 0',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #059669, #10b981)',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 3px 10px rgba(16, 185, 129, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem',
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(16, 185, 129, 0.35)';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 3px 10px rgba(16, 185, 129, 0.2)';
+                  }}
+                >
+                  <Phone size={13} />
+                  اتصال
+                </a>
+
+                {/* WhatsApp button */}
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleWhatsAppClick}
+                  style={{
+                    flex: 1,
+                    fontSize: '0.68rem',
+                    fontWeight: 900,
+                    color: '#fff',
+                    textDecoration: 'none',
+                    padding: '0.45rem 0',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #128C7E, #25D366)',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 3px 10px rgba(37, 211, 102, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem',
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(37, 211, 102, 0.35)';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 3px 10px rgba(37, 211, 102, 0.2)';
+                  }}
+                >
+                  <MessageCircle size={13} />
+                  واتساب
+                </a>
+              </div>
+            </div>
           )}
         </div>
       </div>

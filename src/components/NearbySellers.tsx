@@ -33,6 +33,11 @@ export default function NearbySellers() {
   const [showAll, setShowAll] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const [animateIn, setAnimateIn] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // تحميل البائعين القريبين
   useEffect(() => {
@@ -79,8 +84,8 @@ export default function NearbySellers() {
 
   const displayedSellers = showAll ? sellers : sellers.slice(0, 4);
 
-  // حالة: المتصفح لا يدعم
-  if (!isSupported) return null;
+  // حالة: المتصفح لا يدعم أو لم يتم التحميل بعد
+  if (!mounted || !isSupported) return null;
 
   return (
     <section id="nearby-sellers" style={{
@@ -437,7 +442,7 @@ export default function NearbySellers() {
                     </h3>
 
                     {/* المدينة */}
-                    <p style={{
+                    <div style={{
                       color: 'rgba(255,255,255,0.4)',
                       fontSize: '0.85rem',
                       fontWeight: 600,
@@ -449,7 +454,7 @@ export default function NearbySellers() {
                       <MapPin size={14} />
                       {seller.city || 'غير محدد'}
                       {seller.address_text && ` — ${seller.address_text}`}
-                    </p>
+                    </div>
 
                     {/* المعلومات السفلية */}
                     <div style={{

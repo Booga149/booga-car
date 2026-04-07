@@ -164,7 +164,7 @@ export default function ProductsPage() {
       <Navbar />
       <CategoriesBar />
       
-      <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2.5rem 2rem 5rem', flex: 1 }}>
+      <div className="products-page-container" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2.5rem 2rem 5rem', flex: 1 }}>
         
         {/* Fitment & Global Banner */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
@@ -339,9 +339,9 @@ export default function ProductsPage() {
         </div>
 
         {/* Main Content Layout */}
-        <div style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start' }}>
+        <div className="products-page-layout" style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start' }}>
           {/* Sidebar */}
-          <div className="sidebar-container" style={{ width: '300px', flexShrink: 0 }}>
+          <div className="sidebar-container desktop-only" style={{ width: '300px', flexShrink: 0 }}>
              <Filters filters={filters} setFilters={setFilters} clearFilters={clearFilters} brands={brands} categories={categories} />
           </div>
 

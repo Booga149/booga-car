@@ -13,7 +13,8 @@ export default function WelcomeOffer() {
 
   useEffect(() => {
     const hasShown = localStorage.getItem('booga_welcome_shown');
-    if (!hasShown) {
+    const isMobile = window.innerWidth <= 768;
+    if (!hasShown && !isMobile) {
       const timer = setTimeout(() => {
         setIsOpen(true);
         // Reveal animation after modal appears
@@ -71,7 +72,7 @@ export default function WelcomeOffer() {
     }}>
       <div style={{
         width: '100%', maxWidth: '560px',
-        margin: '6rem auto 2rem', /* Added margin to push it down */
+        margin: 'clamp(2rem, 10vw, 6rem) auto 2rem',
         borderRadius: '36px', 
         border: '1px solid rgba(255,215,0,0.15)',
         boxShadow: '0 50px 100px rgba(0,0,0,0.7), 0 0 80px rgba(255,215,0,0.05)',
@@ -85,7 +86,7 @@ export default function WelcomeOffer() {
         
         {/* === HEADER: Cinematic Gold Background === */}
         <div style={{ 
-          height: '240px', position: 'relative', overflow: 'hidden',
+          height: 'clamp(160px, 35vw, 240px)', position: 'relative', overflow: 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>
           {/* Base gradient */}
@@ -202,9 +203,9 @@ export default function WelcomeOffer() {
         </div>
 
         {/* === CONTENT === */}
-        <div style={{ padding: '2.5rem 2.5rem 2rem', textAlign: 'center' }}>
+        <div style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)', textAlign: 'center' }}>
           <h2 style={{ 
-            fontSize: '2rem', fontWeight: 950, marginBottom: '0.8rem', 
+            fontSize: 'clamp(1.3rem, 4vw, 2rem)', fontWeight: 950, marginBottom: '0.8rem', 
             color: 'white', lineHeight: 1.2 
           }}>
             مرحباً بك في{' '}

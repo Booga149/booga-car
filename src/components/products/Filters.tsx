@@ -14,24 +14,28 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
   const [priceRange, setPriceRange] = useState(500);
 
   const sectionTitle: React.CSSProperties = {
-    margin: '0 0 1rem', fontSize: '0.85rem', fontWeight: 800,
-    color: '#ffffff', letterSpacing: '0.5px',
+    margin: '0 0 1rem', fontSize: '0.8rem', fontWeight: 900,
+    color: '#e11d48', letterSpacing: '1px',
     textTransform: 'uppercase',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
   };
 
   const chipStyle = (active: boolean): React.CSSProperties => ({
     padding: '0.55rem 1rem',
     borderRadius: '12px',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    border: active ? '1px solid rgba(225,29,72,0.4)' : '1px solid rgba(255,255,255,0.08)',
-    background: active ? 'rgba(225,29,72,0.15)' : 'rgba(255,255,255,0.03)',
-    color: active ? '#e11d48' : 'rgba(255,255,255,0.5)',
+    transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
+    border: active ? '1px solid rgba(225,29,72,0.5)' : '1px solid rgba(255,255,255,0.12)',
+    background: active ? 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(225,29,72,0.1))' : 'rgba(255,255,255,0.05)',
+    color: active ? '#f43f5e' : 'rgba(255,255,255,0.6)',
     fontWeight: active ? 800 : 600,
     fontSize: '0.82rem',
     display: 'flex',
     alignItems: 'center',
     gap: '0.3rem',
+    boxShadow: active ? '0 4px 15px rgba(225,29,72,0.15)' : 'none',
   });
 
   return (
@@ -40,47 +44,49 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
       flexShrink: 0,
       padding: '1.8rem',
       borderRadius: '20px',
-      border: '1px solid rgba(255,255,255,0.06)',
-      background: 'rgba(12,12,16,0.95)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      background: 'linear-gradient(180deg, rgba(16,16,22,0.98), rgba(10,10,14,0.95))',
       position: 'sticky',
       top: '100px',
       height: 'fit-content',
       maxHeight: 'calc(100vh - 120px)',
       overflowY: 'auto',
-      boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+      boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(225,29,72,0.15)' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 950, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <SlidersHorizontal size={18} color="#e11d48" /> تصفية النتائج
         </h3>
         <button 
           onClick={clearFilters} 
           style={{ 
-            background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)', 
-            color: '#e11d48', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800,
-            padding: '0.4rem 0.8rem', borderRadius: '10px',
+            background: 'linear-gradient(135deg, rgba(225,29,72,0.15), rgba(225,29,72,0.08))', border: '1px solid rgba(225,29,72,0.3)', 
+            color: '#f43f5e', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800,
+            padding: '0.45rem 0.9rem', borderRadius: '10px',
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             transition: 'all 0.3s ease',
+            boxShadow: '0 2px 8px rgba(225,29,72,0.1)',
           }}
         >
-          <X size={12} /> مسح
+          <X size={12} /> مسح الكل
         </button>
       </div>
 
       {/* Category */}
       <div style={{ marginBottom: '2rem' }}>
-        <h4 style={sectionTitle}>القسم</h4>
+        <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#e11d48', borderRadius: '2px', display: 'inline-block' }} />القسم</h4>
         <select 
           value={filters.category} 
           onChange={e => setFilters({...filters, category: e.target.value})} 
           style={{ 
             width: '100%', padding: '0.8rem 1rem', 
-            background: 'rgba(255,255,255,0.04)', 
-            border: '1px solid rgba(255,255,255,0.08)', 
+            background: 'rgba(255,255,255,0.06)', 
+            border: '1px solid rgba(255,255,255,0.12)', 
             borderRadius: '12px', color: '#ffffff', 
             outline: 'none', fontSize: '0.88rem', fontWeight: 700,
             cursor: 'pointer',
+            transition: 'all 0.3s ease',
           }}
         >
           <option value="">الكل</option>
@@ -90,7 +96,7 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
 
       {/* Price Range Slider */}
       <div style={{ marginBottom: '2rem' }}>
-        <h4 style={sectionTitle}>السعر (ر.س)</h4>
+        <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#f97316', borderRadius: '2px', display: 'inline-block' }} />السعر (ر.س)</h4>
         <div style={{ padding: '0 0.2rem' }}>
           <input 
             type="range" 
@@ -119,7 +125,7 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
 
       {/* Brand Chips */}
       <div style={{ marginBottom: '2rem' }}>
-        <h4 style={sectionTitle}>الماركة</h4>
+        <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#e11d48', borderRadius: '2px', display: 'inline-block' }} />الماركة</h4>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto', paddingRight: '0.3rem' }}>
           <button 
             onClick={() => setFilters({...filters, brand: ''})}
@@ -141,7 +147,7 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
 
       {/* Condition Chips */}
       <div style={{ marginBottom: '2rem' }}>
-        <h4 style={sectionTitle}>حالة المنتج</h4>
+        <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#10b981', borderRadius: '2px', display: 'inline-block' }} />حالة المنتج</h4>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {['الكل', 'جديد', 'مستعمل'].map(cond => {
             const active = filters.condition === cond || (cond === 'الكل' && !filters.condition);
@@ -168,7 +174,7 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
 
       {/* Rating Buttons */}
       <div style={{ marginBottom: '1rem' }}>
-        <h4 style={sectionTitle}>التقييم</h4>
+        <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#C9A14A', borderRadius: '2px', display: 'inline-block' }} />التقييم</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {[4, 3, 2, 1].map(stars => {
             const active = filters.minRating === stars;
@@ -207,12 +213,25 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
         aside::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         input[type=range]::-webkit-slider-thumb {
           appearance: none; -webkit-appearance: none;
-          width: 18px; height: 18px; border-radius: 50%;
-          background: #e11d48; cursor: pointer;
-          box-shadow: 0 0 10px rgba(225,29,72,0.4);
-          border: 2px solid rgba(255,255,255,0.2);
+          width: 20px; height: 20px; border-radius: 50%;
+          background: linear-gradient(135deg, #e11d48, #f43f5e); cursor: pointer;
+          box-shadow: 0 0 12px rgba(225,29,72,0.5);
+          border: 2px solid rgba(255,255,255,0.3);
+          transition: all 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 0 20px rgba(225,29,72,0.6);
         }
         select option { background: #0c0c10; color: #fff; }
+        aside button:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        }
+        aside select:hover {
+          border-color: rgba(225,29,72,0.3) !important;
+          background: rgba(255,255,255,0.08) !important;
+        }
       `}</style>
     </aside>
   );

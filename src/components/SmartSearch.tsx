@@ -109,10 +109,10 @@ export default function SmartSearch() {
     background: 'linear-gradient(135deg, #be123c, #e11d48)',
     color: 'white',
     border: 'none',
-    padding: '1.1rem 2.5rem',
+    padding: '0.9rem clamp(1.2rem, 3vw, 2.5rem)',
     borderRadius: '18px',
     fontWeight: 900,
-    fontSize: '1.1rem',
+    fontSize: 'clamp(0.85rem, 2vw, 1.1rem)',
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     boxShadow: '0 8px 25px rgba(225,29,72,0.35), 0 0 20px rgba(225,29,72,0.15)',
@@ -165,7 +165,7 @@ export default function SmartSearch() {
           </button>
         </div>
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.4rem', flexDirection: activeTab === 'manual' ? 'column' : 'row' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.4rem', flexDirection: activeTab === 'manual' ? 'column' : 'column' }}>
           
           {activeTab === 'smart' ? (
             <div style={{ flex: 1, position: 'relative', width: '100%' }}>
@@ -243,7 +243,7 @@ export default function SmartSearch() {
           
           <button 
             type="submit" 
-            style={{ ...buttonStyle, width: activeTab === 'manual' ? '100%' : 'auto', justifyContent: 'center' }}
+            style={{ ...buttonStyle, width: '100%', justifyContent: 'center' }}
             onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(225,29,72,0.5), 0 0 30px rgba(225,29,72,0.25)'; }}
             onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(225,29,72,0.35), 0 0 20px rgba(225,29,72,0.15)'; }}
           >
@@ -251,10 +251,10 @@ export default function SmartSearch() {
           </button>
         </form>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.8rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.8rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 700 }}>بحث سريع:</span>
-            <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
               {categories.map(cat => (
                 <button 
                   key={cat.id} 

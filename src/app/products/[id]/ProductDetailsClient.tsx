@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import ProductCard from '@/components/ProductCard';
 import { Frown, Flame, ShoppingCart, Star, Package, Truck, Lock, CreditCard, Landmark, Smartphone, Globe, ShieldCheck, RefreshCw } from 'lucide-react';
+import { saveRecentlyViewed } from '@/components/RecentlyViewed';
 
 export default function ProductDetailsClient({ id }: { id: string }) {
   const { products } = useProducts();
@@ -87,6 +88,18 @@ export default function ProductDetailsClient({ id }: { id: string }) {
     fetchProductDetails();
   }, [id, products]);
 
+  // Save to recently viewed
+  useEffect(() => {
+    if (product) {
+      saveRecentlyViewed({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      });
+    }
+  }, [product]);
+
   if (loading) {
     return (
       <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -129,8 +142,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
       
-      <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '6rem 2rem 4rem', flex: 1 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
+      <div className="product-detail-container" style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '6rem 2rem 4rem', flex: 1 }}>
+        <div className="product-detail-breadcrumb" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             <a href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>الرئيسية</a> 
             <span style={{ margin: '0 0.5rem' }}>&gt;</span>
@@ -140,10 +153,10 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'start', marginBottom: '6rem' }}>
+        <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start', marginBottom: '6rem' }}>
           
           {/* Main Image Gallery */}
-          <div style={{ background: 'var(--surface-hover)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '500px' }}>
+          <div className="product-detail-image" style={{ background: 'var(--surface-hover)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '500px' }}>
             <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', maxHeight: '450px', objectFit: 'contain', mixBlendMode: 'screen', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))' }} />
           </div>
 
@@ -154,7 +167,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
               ماركة: <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{product.brand}</span>
             </div>
             
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 1rem', lineHeight: 1.3 }}>{product.name}</h1>
+            <h1 className="product-detail-title" style={{ fontSize: '2.5rem', margin: '0 0 1rem', lineHeight: 1.3 }}>{product.name}</h1>
             
             {/* Merchant Info */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
@@ -183,9 +196,9 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             </div>
 
             {/* Social Proof & Urgency Box */}
-            <div style={{ background: 'linear-gradient(90deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.02))', borderRight: '4px solid #e63946', padding: '1rem 1.5rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ff4d4d', fontWeight: 'bold' }}>
-                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff4d4d', animation: 'pulse 1.5s infinite' }}></div>
+            <div className="product-detail-urgency" style={{ background: 'linear-gradient(90deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.02))', borderRight: '4px solid #e63946', padding: '1rem 1.5rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ff4d4d', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff4d4d', animation: 'pulse 1.5s infinite', flexShrink: 0 }}></div>
                  {Math.floor(Math.random() * 8) + 3} أشخاص يشاهدون هذا المنتج الآن! <Flame size={18} />
                </div>
                <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -204,7 +217,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginBottom: '3rem' }}>
+            <div className="product-detail-price" style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginBottom: '3rem' }}>
               <div style={{ fontSize: '3rem', fontWeight: 'bold', color: 'var(--primary)', lineHeight: 1 }}>
                 {product.price} <span style={{ fontSize: '1.2rem', fontWeight: 'normal' }}>ر.س</span>
               </div>
@@ -216,16 +229,16 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             </div>
 
             {/* Badges / Condition */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
+            <div className="product-detail-badges" style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
                <div style={{ flex: 1, padding: '1rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={32} color="var(--primary)" /></div>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Package size={32} color="var(--primary)" /></div>
                  <div>
                    <h4 style={{ margin: '0 0 0.3rem', color: 'var(--text-primary)' }}>حالة القطعة</h4>
                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{product.condition}</p>
                  </div>
                </div>
                <div style={{ flex: 1, padding: '1rem', background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Truck size={32} color="var(--primary)" /></div>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Truck size={32} color="var(--primary)" /></div>
                  <div>
                    <h4 style={{ margin: '0 0 0.3rem', color: 'var(--text-primary)' }}>الشحن</h4>
                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{product.shipping === 'مجاني' ? 'شحن سريع ومجاني' : 'يتم احتساب التوصيل عند الدفع'}</p>
@@ -233,8 +246,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                </div>
             </div>
 
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+            {/* Actions — Desktop */}
+            <div className="product-detail-actions-desktop" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', height: '60px' }}>
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1.5rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>-</button>
                 <div style={{ padding: '0 2rem', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'var(--surface-hover)' }}>{quantity}</div>
@@ -283,10 +296,10 @@ export default function ProductDetailsClient({ id }: { id: string }) {
         </div>
 
         {/* Real User Reviews Section (UGC) */}
-        <div style={{ marginTop: '2rem', paddingTop: '4rem', borderTop: '1px solid var(--border)' }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+        <div className="product-detail-reviews" style={{ marginTop: '2rem', paddingTop: '4rem', borderTop: '1px solid var(--border)' }}>
+           <div className="product-detail-reviews-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
              <div>
-               <h2 style={{ fontSize: '2.2rem', color: 'var(--text-primary)', margin: '0 0 0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+               <h2 className="product-detail-reviews-title" style={{ fontSize: '2.2rem', color: 'var(--text-primary)', margin: '0 0 0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                  تقييمات مجتمع Booga Car <Star size={28} fill="#FFD700" color="#FFD700" />
                </h2>
                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>آراء حقيقية من عشاق السيارات اللي جربوا القطعة دي</p>
@@ -296,7 +309,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
              </div>
            </div>
            
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+           <div className="product-detail-reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
              {/* Review 1 */}
              <div style={{ background: 'linear-gradient(145deg, var(--surface-hover), transparent)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.03)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
@@ -362,6 +375,43 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           </div>
         )}
 
+      </div>
+
+      {/* ═══ MOBILE STICKY ADD TO CART ═══ */}
+      <div className="mobile-sticky-cta" style={{ display: 'none' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.8rem',
+          padding: '0.8rem 1rem',
+          background: 'rgba(10,10,15,0.98)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          {/* Quantity controls */}
+          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', overflow: 'hidden', height: '48px', flexShrink: 0 }}>
+            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>-</button>
+            <div style={{ padding: '0 1rem', fontSize: '1rem', fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{quantity}</div>
+            <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderRight: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>+</button>
+          </div>
+          {/* CTA button */}
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock !== 'متوفر'}
+            className="btn-tap"
+            style={{
+              flex: 1, height: '48px',
+              background: product.stock === 'متوفر' ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'rgba(255,255,255,0.1)',
+              color: product.stock === 'متوفر' ? '#fff' : 'rgba(255,255,255,0.3)',
+              border: 'none', borderRadius: '12px',
+              fontWeight: 900, fontSize: '1rem',
+              cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+              boxShadow: product.stock === 'متوفر' ? '0 6px 20px rgba(225,29,72,0.4)' : 'none',
+            }}
+          >
+            <ShoppingCart size={20} />
+            {product.stock === 'متوفر' ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر'}
+          </button>
+        </div>
       </div>
     </main>
   );

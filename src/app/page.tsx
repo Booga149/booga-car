@@ -14,6 +14,8 @@ import KSATrustBar from '@/components/KSATrustBar';
 import WhatsAppHub from '@/components/WhatsAppHub';
 import WelcomeOffer from '@/components/WelcomeOffer';
 import NearbySellers from '@/components/NearbySellers';
+import RecentlyViewed from '@/components/RecentlyViewed';
+import SkeletonCard from '@/components/SkeletonCard';
 
 export default function Home() {
   const { products } = useProducts();
@@ -133,23 +135,50 @@ export default function Home() {
         {showWelcome && <WelcomeOffer />}
         <Hero />
         
-        {/* ═══ SECTION: Nearby Sellers (الأقرب إليك) ═══ */}
-        <NearbySellers />
+        {/* ═══ SECTION: Nearby Sellers (الأقرب إليك) — Hidden on mobile ═══ */}
+        <div className="mobile-hide-section">
+          <NearbySellers />
+        </div>
 
-        {/* ═══ SECTION 2: Interactive Engineering Discovery ═══ */}
-        <EngineeringSystems />
+        {/* ═══ SECTION 2: Interactive Engineering Discovery — Hidden on mobile ═══ */}
+        <div className="mobile-hide-section">
+          <EngineeringSystems />
+        </div>
+
+        {/* ═══ MOBILE SIMPLE HEADING (Speero-style) ═══ */}
+        <div className="mobile-only" style={{
+          display: 'none',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          padding: '0 1.5rem 1rem',
+        }}>
+          <h2 style={{ 
+            color: 'white', fontSize: '1.3rem', fontWeight: 900, 
+            margin: '0 0 0.5rem', lineHeight: 1.3
+          }}>
+            اشترِ قطع غيار سيارات أصلية
+          </h2>
+          <p style={{ 
+            color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', 
+            fontWeight: 600, margin: 0, lineHeight: 1.5
+          }}>
+            تصفح تشكيلتنا الواسعة من قطع غيار السيارات الأصلية
+          </p>
+        </div>
 
         {/* ═══ SECTION 3: Featured Precision Parts ═══ */}
         <section style={{
           background: '#050508',
-          padding: '8rem 0',
+          padding: 'clamp(3rem, 8vw, 8rem) 0',
           borderTop: '1px solid rgba(255,255,255,0.04)',
           position: 'relative', zIndex: 10
         }}>
-          <div style={{
+          <div className="mobile-hide-section" style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-            padding: '0 2rem 4rem',
+            padding: '0 clamp(1rem, 3vw, 2rem) clamp(2rem, 4vw, 4rem)',
             maxWidth: '1200px', margin: '0 auto', width: '100%',
+            flexWrap: 'wrap', gap: '1.5rem',
           }}>
             <div>
               <span style={{ color: '#e11d48', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '4px', opacity: 0.8 }}>المطابقة الرائجة</span>
@@ -173,104 +202,145 @@ export default function Home() {
             </a>
           </div>
 
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+            {/* Recently Viewed (mobile only) */}
+            <RecentlyViewed />
+
             <div className="product-grid" style={{
                display: 'grid', 
-               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-               gap: '3rem'
+               gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', 
+               gap: 'clamp(1rem, 3vw, 3rem)'
             }}>
-              {products.slice(0, 4).map((prod) => (
-                <ProductCard
-                  key={prod.id}
-                  {...prod}
-                  imagePlaceholderColor={prod.color || 'var(--border)'}
-                />
-              ))}
+              {products.length === 0 ? (
+                /* Skeleton loading cards */
+                Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))
+              ) : (
+                products.slice(0, 8).map((prod) => (
+                  <ProductCard
+                    key={prod.id}
+                    {...prod}
+                    imagePlaceholderColor={prod.color || 'var(--border)'}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Mobile 'Show All' button */}
+            <div className="mobile-only" style={{
+              display: 'none',
+              justifyContent: 'center',
+              padding: '1.5rem 0 0',
+            }}>
+              <a
+                href="/products"
+                className="btn-tap"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  width: '100%',
+                  padding: '0.8rem',
+                  borderRadius: '12px',
+                  background: 'rgba(225,29,72,0.08)',
+                  border: '1px solid rgba(225,29,72,0.2)',
+                  color: '#e11d48',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
+                عرض كل المنتجات <ArrowUpRight size={16} />
+              </a>
             </div>
           </div>
         </section>
         
-        {/* ═══ SECTION 4: Professional Support & Delivery ═══ */}
-        <section style={{
-          padding: '8rem 2rem', maxWidth: '1400px', margin: '0 auto',
-          width: '100%', position: 'relative', zIndex: 10
-        }}>
-          <div style={{
-            background: 'var(--surface)',
-            borderRadius: '60px', padding: '6rem',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-            flexWrap: 'wrap', gap: '5rem', border: '1px solid var(--border)',
-            boxShadow: 'var(--card-shadow)'
+        {/* ═══ SECTION 4-5: Hidden on mobile ═══ */}
+        <div className="mobile-hide-section">
+          {/* Support section */}
+          <section style={{
+            padding: 'clamp(3rem, 8vw, 8rem) clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto',
+            width: '100%', position: 'relative', zIndex: 10
           }}>
-            <div style={{ flex: 1, minWidth: '400px' }}>
-               <h2 style={{ color: 'var(--text-primary)', fontSize: '3.5rem', fontWeight: 950, marginBottom: '2rem', lineHeight: 1.1 }}>
-                 خبيرك الخاص في <br /> <span style={{ color: 'var(--primary)' }}>توافقية</span> القطع
-               </h2>
-               <p style={{ color: 'var(--text-secondary)', fontSize: '1.3rem', lineHeight: 1.8, marginBottom: '3.5rem', fontWeight: 500 }}>
-                 سواء كنت تمتلك سيارة نادرة أو حديثة، فريقنا الهندسي متصل بشبكة توريد عالمية تضمن لك الحصول على القطع الصحيحة بالرقم التسلسلي الأصلي.
-               </p>
-               <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+            <div className="support-section-inner" style={{
+              background: 'var(--surface)',
+              borderRadius: 'clamp(24px, 5vw, 60px)', padding: 'clamp(2rem, 5vw, 6rem)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+              flexWrap: 'wrap', gap: 'clamp(2rem, 5vw, 5rem)', border: '1px solid var(--border)',
+              boxShadow: 'var(--card-shadow)'
+            }}>
+              <div style={{ flex: 1, minWidth: 'min(400px, 100%)' }}>
+                <h2 style={{ color: 'var(--text-primary)', fontSize: 'clamp(1.8rem, 5vw, 3.5rem)', fontWeight: 950, marginBottom: 'clamp(1rem, 3vw, 2rem)', lineHeight: 1.1 }}>
+                  خبيرك الخاص في <br /> <span style={{ color: 'var(--primary)' }}>توافقية</span> القطع
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(0.95rem, 2vw, 1.3rem)', lineHeight: 1.8, marginBottom: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 500 }}>
+                  سواء كنت تمتلك سيارة نادرة أو حديثة، فريقنا الهندسي متصل بشبكة توريد عالمية تضمن لك الحصول على القطع الصحيحة بالرقم التسلسلي الأصلي.
+                </p>
+                <div style={{ display: 'flex', gap: 'clamp(1rem, 3vw, 2rem)', alignItems: 'center', flexWrap: 'wrap' }}>
                   <a href="https://wa.me/966500000000" style={{
-                     background: 'var(--primary)', color: 'white', padding: '1.2rem 3rem',
-                     borderRadius: '20px', fontWeight: 900, textDecoration: 'none',
-                     boxShadow: '0 15px 35px rgba(244, 63, 94, 0.4)', fontSize: '1.2rem',
-                     transition: '0.3s'
+                    background: 'var(--primary)', color: 'white', padding: '1.2rem 3rem',
+                    borderRadius: '20px', fontWeight: 900, textDecoration: 'none',
+                    boxShadow: '0 15px 35px rgba(244, 63, 94, 0.4)', fontSize: '1.2rem',
+                    transition: '0.3s'
                   }}>تحدث مع المهندس</a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-primary)', fontWeight: 800 }}>
-                     <Award size={28} color="#FFD700" /> موثق من تجارة
+                    <Award size={28} color="#FFD700" /> موثق من تجارة
                   </div>
-               </div>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-               {[
-                 { title: 'شحن قاري', icon: <Globe size={28} /> },
-                 { title: 'دقة VIN', icon: <Zap size={28} /> },
-                 { title: 'ضمان سنة', icon: <ShieldCheck size={28} /> },
-                 { title: 'دعم مباشر', icon: <Zap size={28} /> },
-               ].map((item, i) => (
-                 <div key={i} style={{ 
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {[
+                  { title: 'شحن قاري', icon: <Globe size={28} /> },
+                  { title: 'دقة VIN', icon: <Zap size={28} /> },
+                  { title: 'ضمان سنة', icon: <ShieldCheck size={28} /> },
+                  { title: 'دعم مباشر', icon: <Zap size={28} /> },
+                ].map((item, i) => (
+                  <div key={i} style={{ 
                     background: 'var(--background)', padding: '2.5rem', 
                     borderRadius: '32px', border: '1px solid var(--border)',
                     textAlign: 'center', color: 'var(--text-primary)', transition: '0.3s'
                   }}>
                     <div style={{ color: 'var(--primary)', marginBottom: '1.2rem', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
                     <div style={{ fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{item.title}</div>
-                 </div>
-               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ SECTION 5: Trust & Market Stats ═══ */}
-        <KSATrustBar />
-        <section style={{
-          background: '#000',
-          padding: '6rem 2rem',
-          borderTop: '1px solid rgba(255,255,255,0.05)'
-        }}>
-          <div style={{
-            maxWidth: '1200px', margin: '0 auto',
-            display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '4rem',
-            textAlign: 'center',
-          }}>
-            {[
-              { num: '+124,000', label: 'عملية مطابقة ناجحة' },
-              { num: '0.04s', label: 'سرعة كشف رقم الهيكل' },
-              { num: '100%', label: 'ضمان التوافق الهندسي' },
-              { num: 'World', label: 'تغطية السوق العالمية' },
-            ].map((stat, i) => (
-              <div key={i} style={{ flex: 1, minWidth: '180px' }}>
-                <div style={{ fontSize: '3.5rem', fontWeight: 950, color: 'white', marginBottom: '0.8rem', letterSpacing: '-2px' }}>
-                  {stat.num}
-                </div>
-                <div style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>{stat.label}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
 
-        <WhatsAppHub />
+          <KSATrustBar />
+          <section style={{
+            background: '#000',
+            padding: 'clamp(3rem, 6vw, 6rem) clamp(1rem, 3vw, 2rem)',
+            borderTop: '1px solid rgba(255,255,255,0.05)'
+          }}>
+            <div style={{
+              maxWidth: '1200px', margin: '0 auto',
+              display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '4rem',
+              textAlign: 'center',
+            }}>
+              {[
+                { num: '+124,000', label: 'عملية مطابقة ناجحة' },
+                { num: '0.04s', label: 'سرعة كشف رقم الهيكل' },
+                { num: '100%', label: 'ضمان التوافق الهندسي' },
+                { num: 'World', label: 'تغطية السوق العالمية' },
+              ].map((stat, i) => (
+                <div key={i} style={{ flex: 1, minWidth: '180px' }}>
+                  <div style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, color: 'white', marginBottom: '0.8rem', letterSpacing: '-2px' }}>
+                    {stat.num}
+                  </div>
+                  <div style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <WhatsAppHub />
+        </div>
       </div>
 
       <style jsx>{`

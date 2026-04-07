@@ -62,7 +62,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
             seller_latitude: d.seller_latitude || undefined,
             seller_longitude: d.seller_longitude || undefined,
             seller_city: d.seller_city || d.profiles?.city || undefined,
-            seller_phone: d.profiles?.phone || undefined,
+            seller_phone: d.profiles?.phone || d.seller_phone || undefined,
           }));
           setProducts(mapped);
         }
