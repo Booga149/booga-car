@@ -17,22 +17,22 @@ import {
 export default function BecomeDealerPage() {
   const benefits = [
     {
-      icon: <BarChart3 size={32} />,
+      IconComponent: BarChart3,
       title: "لوحة تحكم احترافية",
       desc: "إدارة متكاملة لمنتجاتك، مبيعاتك، وتقارير أداء متجرك لحظة بلحظة."
     },
     {
-      icon: <ShieldCheck size={32} />,
+      IconComponent: ShieldCheck,
       title: "توثيق ومصداقية",
       desc: "احصل على شارة 'تاجر موثوق' لرفع مبيعاتك وبناء ثقة قوية مع عملائك."
     },
     {
-      icon: <Rocket size={32} />,
+      IconComponent: Rocket,
       title: "انتشار واسع",
       desc: "اعرض قطعك لملايين الباحثين عن قطع الغيار في المملكة والخليج."
     },
     {
-      icon: <Target size={32} />,
+      IconComponent: Target,
       title: "عمولات منافسة",
       desc: "نحن نهتم بنمو تجارتك، لذا نوفر لك أفضل هيكل عمولات في السوق."
     }
@@ -118,7 +118,7 @@ export default function BecomeDealerPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 marginBottom: '2rem'
               }}>
-                {benefit.icon}
+                <benefit.IconComponent size={32} />
               </div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.2rem' }}>{benefit.title}</h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontWeight: 500 }}>{benefit.desc}</p>
