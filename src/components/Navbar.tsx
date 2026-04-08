@@ -534,7 +534,7 @@ export default function Navbar() {
                         ))}
 
                         {/* Admin links */}
-                        {(user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin')) && (
+                        {isAdmin && (
                           <>
                             <div style={{ padding: '0.8rem 0.5rem 0.3rem', color: 'rgba(244,63,94,0.4)', fontSize: '0.62rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>
                               الإدارة
@@ -584,7 +584,7 @@ export default function Navbar() {
                       }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                         <User size={18} /> حسابي الشخصي
                       </Link>
-                      {(user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin')) && (
+                      {isAdmin && (
                         <>
                           <Link href="/admin" onClick={() => setShowProfileMenu(false)} style={{ 
                             padding: '0.8rem 1rem', color: 'var(--primary)', textDecoration: 'none', 
