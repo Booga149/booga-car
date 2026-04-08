@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { AliExpressSDK } from '@/lib/aliexpress';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * OAuth Callback from AliExpress
  * After the user authorizes, AliExpress redirects here with ?code=xxx
