@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { logSecurityEvent } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { Heart, ShoppingCart, User, Settings, LogOut, Tag, Trophy, Zap, Hand, Rocket, Lock, Eye, EyeOff, X as XIcon, Car, Wallet, Landmark, ShieldCheck, BarChart3, PackagePlus, Store, Crown, TrendingUp, Package } from 'lucide-react';
+import { Heart, ShoppingCart, User, Settings, LogOut, Tag, Crown, Zap, Package, BarChart3, PackagePlus, Store, ShieldCheck, Users, Activity, Ticket, Bell, ChevronDown } from 'lucide-react';
 import AuthModal from './AuthModal';
 import NotificationBell from './NotificationBell';
 
@@ -41,241 +40,151 @@ export default function Navbar() {
 
   const isAdmin = role === 'admin';
   const isMerchant = role === 'seller' || !!profile?.cr_number;
-  const merchantName = profile?.business_name || profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0];
-  const merchantInitial = (profile?.business_name?.charAt(0) || profile?.full_name?.charAt(0) || user?.email?.charAt(0) || '?').toUpperCase();
+  const displayName = profile?.business_name || profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0];
+  const initial = (profile?.business_name?.charAt(0) || profile?.full_name?.charAt(0) || user?.email?.charAt(0) || '?').toUpperCase();
 
-  // Merchant Command Panel link item style
-  const cmdLink = (accent?: string) => ({
-    padding: '0.75rem 0.9rem',
-    color: 'rgba(255,255,255,0.75)',
-    textDecoration: 'none',
-    borderRadius: '12px',
-    transition: 'all 0.2s',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.9rem',
-    fontWeight: 600,
-    fontSize: '0.88rem',
-    cursor: 'pointer',
-    background: 'transparent',
-    border: 'none',
-    width: '100%',
-    textAlign: 'right' as const,
-  });
+  // Unified nav links per role
+  const navLinks = isAdmin ? [
+    { href: '/admin', label: 'لوحة الإدارة' },
+    { href: '/admin/products', label: 'المنتجات' },
+    { href: '/admin/users', label: 'المستخدمين' },
+    { href: '/products', label: 'المتجر' },
+  ] : isMerchant ? [
+    { href: '/seller/dashboard', label: 'لوحة التحكم' },
+    { href: '/sell', label: 'إضافة منتج' },
+    { href: '/seller/products', label: 'منتجاتي' },
+    { href: '/products', label: 'المتجر' },
+  ] : [
+    { href: '/', label: 'الرئيسية' },
+    { href: '/products', label: 'قطع الغيار' },
+    { href: '/accessories', label: 'أكسسوارات', isNew: true },
+    { href: '/price-request', label: 'سعّرلي', isNew: true },
+    { href: '/track-order', label: 'تتبع الطلبات' },
+    { href: '/garage', label: 'كراجي' },
+    { href: '/sell', label: 'اعرض قطعة' },
+  ];
 
   return (
     <>
       <header style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0,
-        zIndex: 99999,
-        display: 'flex',
-        flexDirection: 'column',
-        background: isAdmin 
-          ? 'rgba(5, 5, 12, 0.85)'
-          : isMerchant
-            ? '#080702'
-            : 'rgba(255, 255, 255, 0.9)',
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
+        display: 'flex', flexDirection: 'column',
+        background: 'rgba(255, 255, 255, 0.92)',
         backdropFilter: 'blur(20px)',
-        borderBottom: isAdmin
-          ? '1px solid rgba(76,201,240,0.2)'
-          : isMerchant
-            ? '1px solid rgba(212,175,55,0.18)'
-            : '1px solid rgba(0,0,0,0.08)',
-        boxShadow: isAdmin
-          ? '0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(76,201,240,0.05) inset'
-          : isMerchant
-            ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
-            : '0 4px 30px rgba(0,0,0,0.05)',
-        transition: 'all 0.5s ease',
+        borderBottom: '1px solid var(--border)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        transition: 'all 0.3s ease',
       }}>
 
-        {/* ═══ ADMIN GOD MODE TOP BAR ═══ */}
-        {isAdmin && !pathname?.startsWith('/become-dealer') ? (
+        {/* Top Bar for Admin/Merchant */}
+        {(isAdmin || isMerchant) && (
           <div className="desktop-top-bar" style={{
-            background: 'linear-gradient(90deg, rgba(76,201,240,0) 0%, rgba(76,201,240,0.07) 20%, rgba(76,201,240,0.15) 50%, rgba(76,201,240,0.07) 80%, rgba(76,201,240,0) 100%)',
-            borderBottom: '1px solid rgba(76,201,240,0.1)',
-            padding: '0.38rem 2.5rem',
+            background: 'var(--primary-lighter)',
+            borderBottom: '1px solid var(--border)',
+            padding: '0.35rem 2.5rem',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.8rem' }}>
-              {/* Live dot + label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f43f5e', boxShadow: '0 0 8px rgba(244,63,94,0.8)' }} />
-                  <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1.5px solid #f43f5e', opacity: 0.4, animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite' }} />
-                </div>
-                <span style={{ color: '#4cc9f0', fontSize: '0.68rem', fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Crown size={12} color="#f43f5e" /> System Admin
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
+                <span style={{ color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  {isAdmin ? '👑 مدير النظام' : '🛒 تاجر معتمد'}
                 </span>
               </div>
-              {/* Quick Admin links */}
-              {[
-                { href: '/admin', label: 'مركز القيادة' },
-                { href: '/admin/finances', label: 'الماليات والعمولات' },
-                { href: '/admin/users', label: 'سجلات المستهدفين' },
-              ].map(link => (
-                <Link key={link.href} href={link.href} style={{
-                  color: 'rgba(76,201,240,0.5)', fontSize: '0.68rem', fontWeight: 700,
-                  textDecoration: 'none', letterSpacing: '0.3px', transition: '0.2s',
-                  display: 'flex', alignItems: 'center', gap: '0.3rem'
-                }}
-                  onMouseOver={e => e.currentTarget.style.color = '#4cc9f0'}
-                  onMouseOut={e => e.currentTarget.style.color = 'rgba(76,201,240,0.5)'}
-                >{link.label}</Link>
-              ))}
-            </div>
-            <div style={{ color: '#f43f5e', fontSize: '0.65rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', letterSpacing: '1px' }}>
-              <ShieldCheck size={10} /> صلاحيات عليا (GOD MODE)
-            </div>
-          </div>
-        ) : isMerchant ? (
-          /* ═══ MERCHANT GOLD TOP BAR ═══ */
-          <div className="desktop-top-bar" style={{
-            background: 'linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.07) 20%, rgba(212,175,55,0.1) 50%, rgba(212,175,55,0.07) 80%, rgba(212,175,55,0) 100%)',
-            borderBottom: '1px solid rgba(212,175,55,0.1)',
-            padding: '0.38rem 2.5rem',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.8rem' }}>
-              {/* Live dot + label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px rgba(16,185,129,0.8)' }} />
-                  <div style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1.5px solid #10b981', opacity: 0.4, animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite' }} />
-                </div>
-                <span style={{ color: '#D4AF37', fontSize: '0.68rem', fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-                  Merchant Pro
-                </span>
-              </div>
-              {/* Quick merchant links */}
-              {[
+              {/* Quick links */}
+              {(isAdmin ? [
+                { href: '/admin', label: 'لوحة القيادة' },
+                { href: '/admin/logs', label: 'المراقبة' },
+                { href: '/admin/users', label: 'المستخدمين' },
+              ] : [
                 { href: '/seller/dashboard', label: 'لوحة التحكم' },
                 { href: '/sell', label: 'إضافة منتج' },
                 { href: '/seller/products', label: 'المخزن' },
-              ].map(link => (
+              ]).map(link => (
                 <Link key={link.href} href={link.href} style={{
-                  color: 'rgba(212,175,55,0.45)', fontSize: '0.68rem', fontWeight: 700,
-                  textDecoration: 'none', letterSpacing: '0.3px', transition: '0.2s',
-                }}
-                  onMouseOver={e => e.currentTarget.style.color = '#D4AF37'}
-                  onMouseOut={e => e.currentTarget.style.color = 'rgba(212,175,55,0.45)'}
-                >{link.label}</Link>
+                  color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 600,
+                  textDecoration: 'none', transition: '0.2s',
+                }}>
+                  {link.label}
+                </Link>
               ))}
             </div>
-            <div style={{ color: 'rgba(212,175,55,0.35)', fontSize: '0.65rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <ShieldCheck size={10} /> سجل تجاري موثق {profile.cr_number}
+            <div style={{ color: 'var(--text-tertiary)', fontSize: '0.65rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldCheck size={10} /> {isAdmin ? 'صلاحيات كاملة' : `س.ت: ${profile?.cr_number || ''}`}
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* ═══ MAIN NAV ROW ═══ */}
+        {/* Main Nav Row */}
         <div className="mobile-nav-padding" style={{
-          padding: '1rem 3.5rem',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          padding: '0.8rem 3.5rem',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
-          {/* Branding Area */}
+          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ position: 'relative' }}>
-                <h1 className="mobile-logo-size" style={{ 
-                  color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--text-primary)', 
-                  margin: 0, fontSize: '1.9rem', fontWeight: 950, letterSpacing: '-1px',
-                  textShadow: isAdmin ? '0 0 20px rgba(76,201,240,0.5)' : isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : 'none',
-                  display: 'flex', alignItems: 'center', gap: '0.4rem'
+                <h1 className="mobile-logo-size" style={{
+                  color: 'var(--text-primary)', margin: 0, fontSize: '1.8rem', fontWeight: 900,
+                  letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '0.3rem',
                 }}>
-                  BOOGA <span style={{ color: isAdmin ? '#f43f5e' : isMerchant ? '#FFD700' : '#D4AF37' }}>CAR</span>
+                  BOOGA <span style={{ color: 'var(--primary)' }}>CAR</span>
                 </h1>
-                {/* Badge */}
                 {isAdmin ? (
-                  <div style={{ 
-                    position: 'absolute', top: -14, right: -40, 
-                    fontSize: '0.6rem', fontWeight: 900, 
-                    background: 'linear-gradient(90deg, #f43f5e, #be123c)', color: '#fff',
-                    padding: '0.2rem 0.6rem', borderRadius: '40px',
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    boxShadow: '0 2px 15px rgba(244,63,94,0.5)',
-                    letterSpacing: '0.5px'
-                  }}>GOD MODE</div>
+                  <div style={{
+                    position: 'absolute', top: -12, right: -35,
+                    fontSize: '0.6rem', fontWeight: 800,
+                    background: 'var(--primary)', color: '#fff',
+                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
+                  }}>ADMIN</div>
                 ) : isMerchant ? (
-                  <div style={{ 
-                    position: 'absolute', top: -14, right: -30, 
-                    fontSize: '0.6rem', fontWeight: 900, 
-                    background: 'linear-gradient(90deg, #D4AF37, #AA7C11)', color: '#000',
-                    padding: '0.2rem 0.6rem', borderRadius: '40px',
-                    border: '2px solid rgba(212,175,55,0.3)',
-                    boxShadow: '0 2px 10px rgba(212,175,55,0.3)',
-                    letterSpacing: '0.5px'
-                  }}>B2B PRO</div>
+                  <div style={{
+                    position: 'absolute', top: -12, right: -20,
+                    fontSize: '0.6rem', fontWeight: 800,
+                    background: 'var(--primary)', color: '#fff',
+                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
+                  }}>PRO</div>
                 ) : (
-                  <div style={{ 
-                    position: 'absolute', top: -14, right: -25, 
-                    fontSize: '0.65rem', fontWeight: 900, 
-                    background: 'linear-gradient(90deg, #10b981, #059669)', color: 'white',
-                    padding: '0.2rem 0.6rem', borderRadius: '40px',
-                    border: '2px solid var(--surface)',
-                    boxShadow: '0 2px 10px rgba(16, 185, 129, 0.3)'
-                  }}>🇸🇦 KSA STORE</div>
+                  <div style={{
+                    position: 'absolute', top: -12, right: -25,
+                    fontSize: '0.6rem', fontWeight: 800,
+                    background: 'var(--primary)', color: '#fff',
+                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
+                  }}>🇸🇦 KSA</div>
                 )}
               </div>
             </Link>
 
-            <nav className="desktop-nav" style={{ gap: '2.5rem' }}>
-              {(isAdmin && !pathname?.startsWith('/become-dealer') ? [
-                { href: '/admin', label: '🛡️ مركز القيادة' },
-                { href: '/admin/products', label: 'ترسانة المنتجات' },
-                { href: '/admin/users', label: 'سجلات المستهدفين' },
-                { href: '/products', label: 'تصفح كالمستخدم' },
-              ] : isMerchant ? [
-                { href: '/seller/dashboard', label: '⚡ لوحة التحكم' },
-                { href: '/sell', label: 'إضافة منتج' },
-                { href: '/seller/products', label: 'منتجاتي' },
-                { href: '/products', label: 'المتجر' },
-              ] : [
-                { href: '/', label: 'الرئيسية' },
-                { href: '/products', label: 'قطع الغيار' },
-                { href: '/accessories', label: 'أكسسوارات', isNew: true },
-                { href: '/price-request', label: 'سعّرلي', isNew: true },
-                { href: '/track-order', label: 'تتبع الطلبات' },
-                { href: '/garage', label: 'كراجي' },
-                { href: '/sell', label: 'اعرض قطعة' },
-              ]).map((link: any) => {
+            <nav className="desktop-nav" style={{ gap: '2rem' }}>
+              {navLinks.map((link: any) => {
                 const isActive = pathname === link.href;
-                const isCTA = link.href === '/sell' || (isMerchant && link.href === '/seller/dashboard') || (isAdmin && link.href === '/admin');
-                const isRegular = !isAdmin && !isMerchant;
                 return (
                   <Link key={link.href} href={link.href} style={{
-                    color: isCTA
-                      ? (isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : '#e11d48')
-                      : isActive 
-                        ? 'var(--text-primary)' 
-                        : 'var(--text-secondary)',
-                    fontWeight: isActive || isCTA ? 800 : 600,
-                    fontSize: '0.88rem',
-                    padding: '1rem 0.3rem',
-                    transition: 'all 0.3s ease',
+                    color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                    fontWeight: isActive ? 700 : 500,
+                    fontSize: '0.9rem',
+                    padding: '0.8rem 0.2rem',
+                    transition: 'all 0.2s',
                     position: 'relative',
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    letterSpacing: '0.3px',
-                    textShadow: isCTA && isAdmin ? '0 0 15px rgba(76,201,240,0.4)' : isCTA && isMerchant ? '0 0 15px rgba(212,175,55,0.4)' : 'none',
-                  }}
-                    onMouseOver={e => { if (isRegular) { e.currentTarget.style.color = 'var(--primary)'; } }}
-                    onMouseOut={e => { if (isRegular && !isActive && !isCTA) { e.currentTarget.style.color = 'var(--text-secondary)'; } }}
-                  >
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  }}>
                     {link.label}
-                    {link.href === '/sell' && !isMerchant && !isAdmin && <Tag size={16} />}
-                    {(link as any).isNew && !isMerchant && !isAdmin && (
-                      <span style={{ 
-                        fontSize: '0.55rem', background: '#e11d48', color: 'white', 
-                        padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900,
-                        position: 'absolute', top: 2, right: -15
+                    {link.href === '/sell' && !isMerchant && !isAdmin && <Tag size={14} />}
+                    {(link as any).isNew && (
+                      <span style={{
+                        fontSize: '0.55rem', background: 'var(--primary)', color: 'white',
+                        padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 800,
+                        position: 'absolute', top: 2, right: -15,
                       }}>جديد</span>
                     )}
                     {isActive && (
-                      <span style={{ 
-                        position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', 
-                        background: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : '#e11d48', borderRadius: '2px',
-                        boxShadow: isAdmin ? '0 2px 8px rgba(76,201,240,0.5)' : isMerchant ? '0 2px 8px rgba(212,175,55,0.5)' : '0 2px 8px rgba(225,29,72,0.4)'
+                      <span style={{
+                        position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px',
+                        background: 'var(--primary)', borderRadius: '2px',
+                        boxShadow: '0 1px 6px rgba(37,99,235,0.3)',
                       }} />
                     )}
                   </Link>
@@ -284,364 +193,171 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Right Side Actions */}
-          <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          {/* Right Actions */}
+          <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             {user && <NotificationBell />}
-            {!isMerchant && (
-              <Link href="/wishlist" style={{ 
-                textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                width: '46px', height: '46px', borderRadius: '14px', 
-                background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(0,0,0,0.02)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
-                border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(0,0,0,0.05)', 
-                cursor: 'pointer',
-                color: isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'
+            
+            {/* Wishlist */}
+            <Link href="/wishlist" style={{
+              textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '42px', height: '42px', borderRadius: '12px',
+              background: 'var(--surface-hover)', transition: 'all 0.2s',
+              border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-secondary)',
+            }}>
+              <Heart size={20} />
+            </Link>
+
+            {/* Cart */}
+            <div
+              onClick={() => setIsCartOpen(true)}
+              style={{
+                position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '42px', height: '42px', borderRadius: '12px',
+                background: 'var(--surface-hover)', transition: 'all 0.2s',
+                border: '1px solid var(--border)', color: 'var(--text-secondary)',
               }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'; e.currentTarget.style.borderColor = isAdmin || isMerchant ? 'var(--border)' : 'rgba(0,0,0,0.05)'; }}
-              >
-                <Heart size={24} />
-              </Link>
-            )}
+            >
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: -5, right: -5, background: 'var(--primary)', color: 'white',
+                  borderRadius: '7px', minWidth: '20px', height: '20px', padding: '0 4px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.72rem', fontWeight: 800, border: '2px solid var(--surface)',
+                }}>
+                  {cartCount}
+                </span>
+              )}
+            </div>
 
-            {!isMerchant && (
-              <div 
-                onClick={() => setIsCartOpen(true)}
-                style={{ 
-                  position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  width: '46px', height: '46px', borderRadius: '14px', 
-                  background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(0,0,0,0.02)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
-                  border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(0,0,0,0.05)',
-                  color: isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'
-                }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'; }}
-              >
-                <ShoppingCart size={24} />
-                {cartCount > 0 && (
-                  <span style={{ 
-                    position: 'absolute', top: -6, right: -6, background: '#e11d48', color: 'white', 
-                    borderRadius: '8px', minWidth: '22px', height: '22px', padding: '0 4px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    fontSize: '0.75rem', fontWeight: 900, border: '2px solid rgba(0,0,0,0.5)',
-                    boxShadow: '0 4px 12px rgba(225,29,72,0.5)'
-                  }}>
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Merchant quick action buttons */}
-            {isMerchant && (
-              <>
-                <Link href="/sell" style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.55rem 1.1rem', borderRadius: '12px',
-                  background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)',
-                  color: '#D4AF37', fontSize: '0.82rem', fontWeight: 800, textDecoration: 'none',
-                  transition: 'all 0.25s',
-                }} onMouseOver={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                   onMouseOut={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.1)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                  <PackagePlus size={16} /> إضافة منتج
-                </Link>
-                <div 
-                  onClick={() => setIsCartOpen(true)}
-                  style={{ 
-                    position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    width: '42px', height: '42px', borderRadius: '12px', 
-                    background: 'rgba(212,175,55,0.06)',
-                    transition: 'all 0.3s', border: '1px solid rgba(212,175,55,0.15)',
-                    color: 'rgba(212,175,55,0.7)'
-                  }}
-                >
-                  <ShoppingCart size={20} />
-                  {cartCount > 0 && (
-                    <span style={{ 
-                      position: 'absolute', top: -5, right: -5, background: '#D4AF37', color: '#000', 
-                      borderRadius: '6px', minWidth: '18px', height: '18px', padding: '0 3px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      fontSize: '0.7rem', fontWeight: 900,
-                    }}>
-                      {cartCount}
-                    </span>
-                  )}
-                </div>
-              </>
-            )}
-
-            <div style={{ width: '1px', height: '24px', background: isMerchant ? 'rgba(212,175,55,0.15)' : 'var(--border)', margin: '0 0.5rem' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 0.3rem' }} />
 
             {user ? (
               <div style={{ position: 'relative' }}>
-                {/* ═══ MERCHANT AVATAR BUTTON ═══ */}
-                {isMerchant ? (
-                  <div 
-                    onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.9rem', cursor: 'pointer', 
-                      background: 'linear-gradient(135deg, rgba(20,16,4,0.95), rgba(12,10,2,0.98))',
-                      padding: '0.4rem 1.2rem 0.4rem 0.5rem', borderRadius: '16px', 
-                      border: '1px solid rgba(212,175,55,0.3)', 
-                      transition: 'all 0.3s',
-                      boxShadow: '0 4px 20px rgba(212,175,55,0.1), inset 0 1px 0 rgba(255,215,0,0.08)',
-                    }}
-                    onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.6)'; e.currentTarget.style.boxShadow = '0 6px 30px rgba(212,175,55,0.2)'; }}
-                    onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.3)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,175,55,0.1)'; }}
-                  >
-                    {/* Gold animated avatar */}
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ 
-                        position: 'absolute', inset: '-3px', borderRadius: '12px',
-                        background: 'conic-gradient(from 0deg, #D4AF37, #FFD700, #AA7C11, #D4AF37)',
-                        animation: 'spinRing 4s linear infinite',
-                        opacity: 0.8,
-                      }} />
-                      <div style={{ 
-                        width: '38px', height: '38px', borderRadius: '10px', position: 'relative',
-                        background: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #AA7C11 100%)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        color: '#111', fontWeight: 900, fontSize: '1.1rem', textTransform: 'uppercase',
-                        boxShadow: '0 4px 15px rgba(212,175,55,0.4)',
-                        zIndex: 1,
-                      }}>
-                        {merchantInitial}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                      <span style={{ color: '#FFD700', fontWeight: 900, fontSize: '0.9rem', lineHeight: 1, textShadow: '0 0 10px rgba(212,175,55,0.3)' }}>
-                        {merchantName}
-                      </span>
-                      <span style={{ fontSize: '0.62rem', color: '#10b981', fontWeight: 900, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px', letterSpacing: '0.3px' }}>
-                        <ShieldCheck size={9} /> تاجر موثق PRO
-                      </span>
-                    </div>
-                    <Crown size={14} style={{ color: '#D4AF37', opacity: 0.7 }} />
+                {/* Avatar Button */}
+                <div
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.7rem', cursor: 'pointer',
+                    background: 'var(--surface-hover)', padding: '0.4rem 1rem 0.4rem 0.5rem', borderRadius: '14px',
+                    border: '1px solid var(--border)', transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: 'var(--primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'white', fontWeight: 800, fontSize: '1rem',
+                    boxShadow: '0 2px 8px rgba(37,99,235,0.25)',
+                  }}>
+                    {initial}
                   </div>
-                ) : (
-                  /* Regular user avatar button */
-                  <div 
-                    onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', 
-                      background: 'var(--surface-hover)', padding: '0.4rem 1.2rem 0.4rem 0.6rem', borderRadius: '14px', 
-                      border: '1px solid var(--border)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}
-                  >
-                    <div style={{ 
-                      width: '36px', height: '36px', borderRadius: '10px', 
-                      background: 'var(--primary)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: 'white', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase',
-                      boxShadow: '0 4px 12px rgba(244, 63, 94, 0.2)',
-                    }}>
-                      {merchantInitial}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                       <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1 }}>
-                         {merchantName}
-                       </span>
-                       <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '3px' }}>
-                         عميل مميز
-                       </span>
-                    </div>
-                    <User size={16} style={{ opacity: 0.5 }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.88rem', lineHeight: 1 }}>
+                      {displayName}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 600, marginTop: '2px' }}>
+                      {isAdmin ? 'مدير النظام' : isMerchant ? 'تاجر معتمد' : 'عميل'}
+                    </span>
                   </div>
-                )}
-                
-                {/* ═══ DROPDOWN ═══ */}
+                  <ChevronDown size={14} style={{ color: 'var(--text-tertiary)' }} />
+                </div>
+
+                {/* Dropdown Menu */}
                 {showProfileMenu && (
-                  isMerchant ? (
-                    /* MERCHANT COMMAND PANEL */
-                    <div style={{ 
-                      position: 'absolute', top: 'calc(100% + 14px)', left: 0, width: '300px', 
-                      background: 'linear-gradient(180deg, #0e0b02 0%, #080601 100%)', 
-                      border: '1px solid rgba(212,175,55,0.2)', 
-                      borderRadius: '20px', 
-                      overflow: 'hidden',
-                      boxShadow: '0 25px 80px rgba(0,0,0,0.95), 0 0 60px rgba(212,175,55,0.06)', 
-                      zIndex: 999999,
-                      animation: 'fadeInScale 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}>
-                      {/* Panel Header */}
-                      <div style={{ 
-                        padding: '1.2rem 1.2rem 1rem',
-                        background: 'linear-gradient(135deg, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0.03) 100%)',
-                        borderBottom: '1px solid rgba(212,175,55,0.08)',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-                          <div style={{ 
-                            width: '46px', height: '46px', borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #D4AF37, #AA7C11)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: '#111', fontWeight: 900, fontSize: '1.3rem',
-                            boxShadow: '0 6px 20px rgba(212,175,55,0.3)',
-                          }}>
-                            {merchantInitial}
-                          </div>
-                          <div>
-                            <div style={{ color: '#FFD700', fontWeight: 900, fontSize: '1rem', lineHeight: 1.2 }}>{merchantName}</div>
-                            <div style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 800, marginTop: '0.3rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                              <ShieldCheck size={10} /> موثق • س.ت: {profile.cr_number}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Commands */}
-                      <div style={{ padding: '0.6rem' }}>
-                        {/* Section: Store */}
-                        <div style={{ padding: '0.5rem 0.5rem 0.3rem', color: 'rgba(212,175,55,0.4)', fontSize: '0.62rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>
-                          إدارة المتجر
-                        </div>
-                        {[
-                          { href: '/seller/dashboard', label: 'لوحة التحكم', desc: 'المبيعات والأرباح الفورية', icon: <BarChart3 size={16}/>, color: '#D4AF37' },
-                          { href: '/seller/products', label: 'مخزن المنتجات', desc: 'إدارة وتعديل قطعك', icon: <Package size={16}/>, color: '#3b82f6' },
-                          { href: '/sell', label: 'إضافة منتج جديد', desc: 'يدوي أو رفع ملف بالجملة', icon: <PackagePlus size={16}/>, color: '#10b981' },
-                        ].map(item => (
-                          <Link key={item.href} href={item.href} onClick={() => setShowProfileMenu(false)} style={{ ...cmdLink(), display: 'flex' }}
-                            onMouseOver={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.06)'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
-                          >
-                            <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `rgba(${item.color === '#D4AF37' ? '212,175,55' : item.color === '#3b82f6' ? '59,130,246' : '16,185,129'},0.12)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
-                              {item.icon}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'rgba(255,255,255,0.9)' }}>{item.label}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '1px' }}>{item.desc}</div>
-                            </div>
-                          </Link>
-                        ))}
-
-                        {/* Section: Account */}
-                        <div style={{ padding: '0.8rem 0.5rem 0.3rem', color: 'rgba(212,175,55,0.4)', fontSize: '0.62rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', marginTop: '0.3rem' }}>
-                          الحساب
-                        </div>
-                        {[
-                          { href: '/profile', label: 'الملف الشخصي', icon: <User size={16}/> },
-                          { href: '/seller/settings', label: 'إعدادات المحل', icon: <Settings size={16}/> },
-                        ].map(item => (
-                          <Link key={item.href} href={item.href} onClick={() => setShowProfileMenu(false)} style={{ ...cmdLink(), display: 'flex' }}
-                            onMouseOver={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.06)'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
-                          >
-                            <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(212,175,55,0.6)', flexShrink: 0 }}>
-                              {item.icon}
-                            </div>
-                            <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>{item.label}</div>
-                          </Link>
-                        ))}
-
-                        {/* Admin links */}
-                        {isAdmin && (
-                          <>
-                            <div style={{ padding: '0.8rem 0.5rem 0.3rem', color: 'rgba(244,63,94,0.4)', fontSize: '0.62rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>
-                              الإدارة
-                            </div>
-                            <Link href="/admin" onClick={() => setShowProfileMenu(false)} style={{ ...cmdLink(), display: 'flex', color: 'rgba(244,63,94,0.8)' }}
-                              onMouseOver={e => { e.currentTarget.style.background = 'rgba(244,63,94,0.06)'; }}
-                              onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
-                            >
-                              <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'rgba(244,63,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <Settings size={16} color="#f43f5e" />
-                              </div>
-                              لوحة الإدارة
-                            </Link>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Logout */}
-                      <div style={{ padding: '0.5rem 0.6rem 0.7rem', borderTop: '1px solid rgba(212,175,55,0.08)' }}>
-                        <button onClick={handleLogout} style={{ 
-                          ...cmdLink(), display: 'flex', color: 'rgba(255,80,80,0.6)',
-                          borderRadius: '10px', padding: '0.7rem 0.9rem',
-                        }}
-                          onMouseOver={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.07)'; e.currentTarget.style.color = '#ff5555'; }}
-                          onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,80,80,0.6)'; }}
-                        >
-                          <LogOut size={15} /> تسجيل الخروج
-                        </button>
-                      </div>
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 8px)', left: 0, width: '260px',
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: '14px', overflow: 'hidden',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                    zIndex: 999999, animation: 'fadeInScale 0.2s ease',
+                  }}>
+                    {/* User info header */}
+                    <div style={{ padding: '1rem 1.2rem', borderBottom: '1px solid var(--border)', background: 'var(--primary-lighter)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{displayName}</div>
+                      <div style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{user?.email}</div>
                     </div>
-                  ) : (
-                    /* REGULAR USER DROPDOWN */
-                    <div style={{ 
-                      position: 'absolute', top: 'calc(100% + 12px)', left: 0, width: '220px', 
-                      background: 'var(--surface)', 
-                      border: '1px solid var(--border)', 
-                      borderRadius: '16px', 
-                      padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', 
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.15)', 
-                      zIndex: 999999,
-                      animation: 'fadeInScale 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}>
-                      <Link href="/profile" onClick={() => setShowProfileMenu(false)} style={{ 
-                        padding: '0.8rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', 
-                        borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.8rem',
-                        fontWeight: 600, fontSize: '0.95rem'
-                      }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <User size={18} /> حسابي الشخصي
+
+                    <div style={{ padding: '0.5rem' }}>
+                      {/* Profile */}
+                      <Link href="/profile" onClick={() => setShowProfileMenu(false)} style={{
+                        padding: '0.7rem 0.9rem', color: 'var(--text-primary)', textDecoration: 'none',
+                        borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.7rem',
+                        fontWeight: 600, fontSize: '0.88rem',
+                      }}>
+                        <User size={18} color="var(--text-secondary)" /> الملف الشخصي
                       </Link>
-                      {isAdmin && (
+
+                      {/* Merchant links */}
+                      {isMerchant && (
                         <>
-                          <Link href="/admin" onClick={() => setShowProfileMenu(false)} style={{ 
-                            padding: '0.8rem 1rem', color: 'var(--primary)', textDecoration: 'none', 
-                            borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.8rem',
-                            fontWeight: 800, fontSize: '0.95rem', background: 'rgba(244, 63, 94, 0.05)'
+                          <Link href="/seller/dashboard" onClick={() => setShowProfileMenu(false)} style={{
+                            padding: '0.7rem 0.9rem', color: 'var(--text-primary)', textDecoration: 'none',
+                            borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.7rem',
+                            fontWeight: 600, fontSize: '0.88rem',
                           }}>
-                            <Settings size={18} /> لوحة الإدارة
+                            <BarChart3 size={18} color="var(--primary)" /> لوحة التحكم
                           </Link>
-                          <Link href="/admin/finances" onClick={() => setShowProfileMenu(false)} style={{ 
-                            padding: '0.8rem 1rem', color: 'var(--success)', textDecoration: 'none', 
-                            borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.8rem',
-                            fontWeight: 800, fontSize: '0.95rem', background: 'rgba(16, 185, 129, 0.05)'
+                          <Link href="/seller/settings" onClick={() => setShowProfileMenu(false)} style={{
+                            padding: '0.7rem 0.9rem', color: 'var(--text-primary)', textDecoration: 'none',
+                            borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.7rem',
+                            fontWeight: 600, fontSize: '0.88rem',
                           }}>
-                            <Landmark size={18} /> تسويات العمولات
+                            <Settings size={18} color="var(--text-secondary)" /> إعدادات المحل
                           </Link>
                         </>
                       )}
-                      <div style={{ height: '1px', background: 'var(--border)', margin: '0.2rem 0.4rem' }} />
-                      <button onClick={handleLogout} style={{ 
-                        padding: '0.8rem 1rem', color: 'var(--text-secondary)', background: 'transparent', 
-                        border: 'none', borderRadius: '10px', cursor: 'pointer', textAlign: 'right', 
-                        transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.8rem', 
-                        fontSize: '0.95rem', width: '100%', fontWeight: 600
-                      }} onMouseOver={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; e.currentTarget.style.color = '#ff5555'; }}
-                         onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}>
+
+                      {/* Admin links */}
+                      {isAdmin && (
+                        <>
+                          <div style={{ height: '1px', background: 'var(--border)', margin: '0.3rem 0.5rem' }} />
+                          <Link href="/admin" onClick={() => setShowProfileMenu(false)} style={{
+                            padding: '0.7rem 0.9rem', color: 'var(--primary)', textDecoration: 'none',
+                            borderRadius: '10px', transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.7rem',
+                            fontWeight: 700, fontSize: '0.88rem', background: 'var(--primary-lighter)',
+                          }}>
+                            <BarChart3 size={18} /> لوحة الإدارة
+                          </Link>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Logout */}
+                    <div style={{ padding: '0.3rem 0.5rem 0.5rem', borderTop: '1px solid var(--border)' }}>
+                      <button onClick={handleLogout} style={{
+                        padding: '0.7rem 0.9rem', color: 'var(--error)', background: 'transparent',
+                        border: 'none', borderRadius: '10px', cursor: 'pointer', textAlign: 'right',
+                        transition: '0.2s', display: 'flex', alignItems: 'center', gap: '0.7rem',
+                        fontSize: '0.88rem', width: '100%', fontWeight: 600,
+                      }}>
                         <LogOut size={18} /> تسجيل الخروج
                       </button>
                     </div>
-                  )
+                  </div>
                 )}
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <button 
-                  onClick={openLoginModal} 
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                <button
+                  onClick={openLoginModal}
                   style={{
-                    background: 'transparent', color: 'var(--text-primary)', 
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    padding: '0.7rem 1.6rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, 
-                    transition: 'all 0.3s ease', fontSize: '0.88rem'
+                    background: 'transparent', color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
+                    padding: '0.65rem 1.5rem', borderRadius: '10px', cursor: 'pointer', fontWeight: 600,
+                    transition: 'all 0.2s', fontSize: '0.88rem',
                   }}
-                  onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'; }}
-                  onMouseOut={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'; }}
                 >
                   دخول
                 </button>
-                <button 
-                  onClick={openSignUpModal} 
+                <button
+                  onClick={openSignUpModal}
                   style={{
-                    background: 'linear-gradient(135deg, #be123c, #e11d48)', color: 'white', border: 'none', 
-                    padding: '0.75rem 2rem', borderRadius: '12px', cursor: 'pointer', 
-                    fontWeight: 900, transition: 'all 0.3s ease', fontSize: '0.9rem',
-                    boxShadow: '0 6px 20px rgba(225,29,72,0.4), 0 0 15px rgba(225,29,72,0.15)',
-                    letterSpacing: '0.3px',
+                    background: 'var(--primary)', color: 'white', border: 'none',
+                    padding: '0.7rem 1.8rem', borderRadius: '10px', cursor: 'pointer',
+                    fontWeight: 700, transition: 'all 0.2s', fontSize: '0.9rem',
+                    boxShadow: '0 4px 14px rgba(37,99,235,0.3)',
                   }}
-                  onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(225,29,72,0.5)'; }}
-                  onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(225,29,72,0.4)'; }}
                 >
                   انضم الآن
                 </button>
@@ -651,23 +367,16 @@ export default function Navbar() {
         </div>
       </header>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={closeAuthModal} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
         initialMode={authMode}
       />
 
       <style jsx>{`
         @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+          from { opacity: 0; transform: scale(0.95) translateY(-8px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes spinRing {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes ping {
-          75%, 100% { transform: scale(2); opacity: 0; }
         }
       `}</style>
     </>
