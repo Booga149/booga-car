@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAliExpressSDK, calculateDropshipPrice } from '@/lib/aliexpress';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const body = await req.json();
   const { productId, customName, customDescription, customCategory, customBrand, markupPercent } = body;
 
@@ -127,7 +123,8 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Import error:', error);
 
-    await supabaseAdmin.from('dropship_sync_log').insert({
+    const supabaseAdmin2 = getSupabaseAdmin();
+    await supabaseAdmin2.from('dropship_sync_log').insert({
       action: 'product_import',
       provider: 'aliexpress',
       status: 'error',

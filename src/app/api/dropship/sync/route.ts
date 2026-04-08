@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAliExpressSDK, calculateDropshipPrice } from '@/lib/aliexpress';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const startTime = Date.now();
   let successCount = 0;
   let errorCount = 0;
@@ -100,7 +96,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ synced: successCount, errors: errorCount, duration });
   } catch (error: any) {
-    await supabaseAdmin.from('dropship_sync_log').insert({
+    const supabaseAdmin2 = getSupabaseAdmin();
+    await supabaseAdmin2.from('dropship_sync_log').insert({
       action: 'price_sync',
       provider: 'aliexpress',
       status: 'error',

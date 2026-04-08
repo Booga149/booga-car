@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 // GET — fetch config
 export async function GET(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const { data, error } = await supabaseAdmin
     .from('dropship_config')
     .select('id, provider, app_key, is_active, auto_fulfill, auto_sync_prices, auto_sync_stock, default_markup_percent, sync_interval_hours, token_expires_at, updated_at')
@@ -19,6 +15,7 @@ export async function GET(req: NextRequest) {
 
 // POST — save/update config
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const body = await req.json();
   const { provider, app_key, app_secret, default_markup_percent, auto_fulfill, auto_sync_prices, auto_sync_stock } = body;
 
