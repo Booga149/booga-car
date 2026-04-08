@@ -55,6 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/products', icon: <Package size={20} />, label: 'المنتجات' },
     { href: '/admin/users', icon: <Users size={20} />, label: 'المستخدمين' },
     { href: '/admin/import', icon: <Upload size={20} />, label: 'استيراد المنتجات' },
+    { href: '/admin/dropship', icon: <Globe size={20} />, label: 'الدروب شيبنج' },
     { href: '/admin/coupons', icon: <Ticket size={20} />, label: 'الكوبونات' },
     { href: '/admin/logs', icon: <Activity size={20} />, label: 'سجل المراقبة' },
   ];
