@@ -356,27 +356,17 @@ export default function ProductCard({
                   textDecoration: 'line-through',
                   fontWeight: 500,
                 }}>
-                  {formatCurrency(oldPrice).replace('$', '')} ر.س
+                  {formatCurrency(oldPrice)}
                 </span>
               )}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                 <span style={{
                   fontSize: '1.7rem',
                   fontWeight: 950,
-                  background: discount > 0 ? 'linear-gradient(135deg, #f97316, #ef4444)' : 'linear-gradient(135deg, #10b981, #14b8a6)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  color: '#10b981',
                   lineHeight: 1,
-                  filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.2))',
                 }}>
-                  {formatCurrency(price).replace('$', '')}
-                </span>
-                <span style={{
-                  fontSize: '0.85rem',
-                  color: discount > 0 ? '#f97316' : '#10b981',
-                  fontWeight: 800,
-                }}>
-                  ر.س
+                  {formatCurrency(price)}
                 </span>
               </div>
             </div>
