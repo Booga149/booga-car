@@ -20,6 +20,7 @@ import AdminToastListener from '@/components/AdminToastListener';
 import BackButton from '@/components/BackButton';
 import AdminGodModeEnforcer from '@/components/AdminGodModeEnforcer';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import VisitorTracker from '@/components/VisitorTracker';
 
 export default function RootLayout({
   children,
@@ -68,6 +69,7 @@ export default function RootLayout({
                   <AdminToastListener />
                   <AdminGodModeEnforcer />
                   <MobileBottomNav />
+                  <VisitorTracker />
                 </CartProvider>
               </ProductsProvider>
             </WishlistProvider>
