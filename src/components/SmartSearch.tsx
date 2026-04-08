@@ -138,7 +138,7 @@ export default function SmartSearch() {
         gap: '0.8rem'
       }}>
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', padding: '0.4rem' }}>
+        <div className="search-tabs" style={{ display: 'flex', gap: '0.5rem', padding: '0.4rem' }}>
           <button 
             type="button" 
             onClick={() => setActiveTab('smart')}
@@ -243,15 +243,16 @@ export default function SmartSearch() {
           
           <button 
             type="submit" 
+            className="search-submit-btn"
             style={{ ...buttonStyle, width: '100%', justifyContent: 'center' }}
             onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(225,29,72,0.5), 0 0 30px rgba(225,29,72,0.25)'; }}
             onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(225,29,72,0.35), 0 0 20px rgba(225,29,72,0.15)'; }}
           >
-            {activeTab === 'manual' ? 'ابحث عن قطع الغيار' : 'بحث ذكي'} <Zap size={18} />
+            <Search size={18} /> <span className="search-btn-text">{activeTab === 'manual' ? 'ابحث عن قطع الغيار' : 'بحث'}</span>
           </button>
         </form>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.8rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="search-quick-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.8rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 700 }}>بحث سريع:</span>
             <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>

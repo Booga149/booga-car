@@ -8,7 +8,7 @@ import { Product } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import ProductCard from '@/components/ProductCard';
-import { Frown, Flame, ShoppingCart, Star, Package, Truck, Lock, CreditCard, Landmark, Smartphone, Globe, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Frown, Flame, ShoppingCart, Star, Package, Truck, Lock, CreditCard, Landmark, Smartphone, Globe, ShieldCheck, RefreshCw, Send, MessageSquare } from 'lucide-react';
 import { saveRecentlyViewed } from '@/components/RecentlyViewed';
 
 export default function ProductDetailsClient({ id }: { id: string }) {
@@ -22,6 +22,10 @@ export default function ProductDetailsClient({ id }: { id: string }) {
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [userReview, setUserReview] = useState<any>(null);
 
   useEffect(() => {
     async function fetchProductDetails() {
@@ -87,6 +91,46 @@ export default function ProductDetailsClient({ id }: { id: string }) {
     }
     fetchProductDetails();
   }, [id, products]);
+
+  // Fetch reviews
+  useEffect(() => {
+    if (!id) return;
+    supabase.from('reviews').select('*').eq('product_id', id).order('created_at', { ascending: false }).then(({ data }) => {
+      if (data) {
+        setReviews(data);
+        if (user) {
+          const mine = data.find((r: any) => r.user_id === user.id);
+          if (mine) setUserReview(mine);
+        }
+      }
+    });
+  }, [id, user]);
+
+  const handleSubmitReview = async () => {
+    if (!user) { openLoginModal(); return; }
+    if (!newReview.comment.trim()) { addToast('اكتب تعليقك أولاً', 'error'); return; }
+    setSubmittingReview(true);
+    try {
+      const profileRes = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+      const { data, error } = await supabase.from('reviews').insert([{
+        product_id: id, user_id: user.id, rating: newReview.rating,
+        comment: newReview.comment, user_name: profileRes.data?.full_name || user.email?.split('@')[0] || 'مستخدم',
+        is_verified_purchase: true
+      }]).select().single();
+      if (error) {
+        if (error.code === '23505') addToast('لقد قمت بتقييم هذا المنتج مسبقاً', 'info');
+        else throw error;
+      } else {
+        setReviews(prev => [data, ...prev]);
+        setUserReview(data);
+        setNewReview({ rating: 5, comment: '' });
+        addToast('تم إضافة تقييمك بنجاح! شكراً لك 🌟', 'success');
+      }
+    } catch (e: any) { addToast('حدث خطأ أثناء إرسال التقييم', 'error'); }
+    finally { setSubmittingReview(false); }
+  };
+
+  const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : '0';
 
   // Save to recently viewed
   useEffect(() => {
@@ -245,29 +289,85 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                  </div>
                </div>
             </div>
+            {/* ─── Urgency Badges ─── */}
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              {product.stock === 'متوفر' && (product.stock_quantity === undefined || product.stock_quantity <= 5) && (
+                <span style={{
+                  background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
+                  padding: '0.4rem 0.8rem', borderRadius: '8px',
+                  fontSize: '0.82rem', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', gap: '0.3rem',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                }}>
+                  🔥 متبقي {product.stock_quantity || 3} فقط!
+                </span>
+              )}
+              {product.rating >= 4 && (
+                <span style={{
+                  background: 'rgba(212, 175, 55, 0.1)', color: '#D4AF37',
+                  padding: '0.4rem 0.8rem', borderRadius: '8px',
+                  fontSize: '0.82rem', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', gap: '0.3rem',
+                  border: '1px solid rgba(212, 175, 55, 0.2)',
+                }}>
+                  ⭐ الأكثر مبيعاً
+                </span>
+              )}
+              {product.shipping === 'مجاني' && (
+                <span style={{
+                  background: 'rgba(16, 185, 129, 0.1)', color: '#10b981',
+                  padding: '0.4rem 0.8rem', borderRadius: '8px',
+                  fontSize: '0.82rem', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', gap: '0.3rem',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                }}>
+                  🚚 شحن مجاني
+                </span>
+              )}
+            </div>
 
             {/* Actions — Desktop */}
-            <div className="product-detail-actions-desktop" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', height: '60px' }}>
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1.5rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>-</button>
-                <div style={{ padding: '0 2rem', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'var(--surface-hover)' }}>{quantity}</div>
-                <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1.5rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>+</button>
+            <div className="product-detail-actions-desktop" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', height: '54px' }}>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1.2rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>-</button>
+                <div style={{ padding: '0 1.5rem', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'var(--surface-hover)' }}>{quantity}</div>
+                <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1.2rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>+</button>
               </div>
 
               <button 
                 onClick={handleAddToCart}
                 disabled={product.stock !== 'متوفر'}
                 style={{
-                  flex: 1, height: '60px', background: product.stock === 'متوفر' ? 'var(--primary)' : 'var(--surface-hover)', 
-                  color: 'var(--text-primary)', border: 'none', borderRadius: '12px', cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed', 
-                  fontWeight: 'bold', fontSize: '1.2rem', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(230, 57, 70, 0.4)',
-                  opacity: product.stock === 'متوفر' ? 1 : 0.5
+                  flex: 1, height: '54px', background: product.stock === 'متوفر' ? 'var(--primary)' : 'var(--surface-hover)', 
+                  color: '#fff', border: 'none', borderRadius: '12px', cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed', 
+                  fontWeight: 900, fontSize: '1rem', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(225, 29, 72, 0.3)',
+                  opacity: product.stock === 'متوفر' ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 }}
-                onMouseOver={e => { if (product.stock === 'متوفر') e.currentTarget.style.transform = 'translateY(-2px)' }} 
-                onMouseOut={e => { if (product.stock === 'متوفر') e.currentTarget.style.transform = 'translateY(0)' }}
               >
-                {product.stock === 'متوفر' ? `أضف للسلة - ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر حالياً'}
+                <ShoppingCart size={18} />
+                {product.stock === 'متوفر' ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر حالياً'}
               </button>
+
+              {/* Buy Now — Direct Checkout */}
+              {product.stock === 'متوفر' && (
+                <button
+                  onClick={() => {
+                    handleAddToCart();
+                    window.location.href = '/checkout';
+                  }}
+                  style={{
+                    height: '54px', padding: '0 2rem',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#fff', border: 'none', borderRadius: '12px',
+                    fontWeight: 900, fontSize: '1rem', cursor: 'pointer',
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)',
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  ⚡ اشتري الآن
+                </button>
+              )}
             </div>
 
             {/* Extended Trust Badges (CRO) */}
@@ -295,65 +395,69 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* Real User Reviews Section (UGC) */}
+        {/* Real User Reviews Section (Dynamic) */}
         <div className="product-detail-reviews" style={{ marginTop: '2rem', paddingTop: '4rem', borderTop: '1px solid var(--border)' }}>
            <div className="product-detail-reviews-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
              <div>
                <h2 className="product-detail-reviews-title" style={{ fontSize: '2.2rem', color: 'var(--text-primary)', margin: '0 0 0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                 تقييمات مجتمع Booga Car <Star size={28} fill="#FFD700" color="#FFD700" />
+                 تقييمات المنتج <Star size={28} fill="#FFD700" color="#FFD700" />
                </h2>
-               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>آراء حقيقية من عشاق السيارات اللي جربوا القطعة دي</p>
+               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>{reviews.length} تقييم من عملاء حقيقيين</p>
              </div>
              <div style={{ fontSize: '1.5rem', color: '#FFD700', fontWeight: 'bold' }}>
-                4.8 / 5.0
+                {avgRating} / 5.0
              </div>
            </div>
+
+           {/* Add Review Form */}
+           {!userReview && (
+             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', marginBottom: '2.5rem' }}>
+               <h3 style={{ margin: '0 0 1.2rem', fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                 <MessageSquare size={22} color="var(--primary)" /> أضف تقييمك
+               </h3>
+               {/* Star selector */}
+               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.2rem' }}>
+                 {[1,2,3,4,5].map(s => (
+                   <Star key={s} size={28} fill={s <= newReview.rating ? '#FFD700' : 'transparent'} color={s <= newReview.rating ? '#FFD700' : 'var(--border)'} style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => setNewReview(p => ({...p, rating: s}))} />
+                 ))}
+                 <span style={{ color: 'var(--text-secondary)', fontWeight: 700, marginRight: '0.5rem', alignSelf: 'center' }}>{newReview.rating}/5</span>
+               </div>
+               <textarea placeholder="شاركنا رأيك في هذا المنتج..." value={newReview.comment} onChange={e => setNewReview(p => ({...p, comment: e.target.value}))} rows={3} style={{ width: '100%', padding: '1rem', borderRadius: '14px', background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem', outline: 'none', resize: 'vertical', marginBottom: '1rem' }} />
+               <button onClick={handleSubmitReview} disabled={submittingReview} style={{ padding: '0.9rem 2rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 6px 20px rgba(244,63,94,0.3)', opacity: submittingReview ? 0.7 : 1 }}>
+                 <Send size={18} /> {submittingReview ? 'جاري الإرسال...' : 'إرسال التقييم'}
+               </button>
+             </div>
+           )}
            
-           <div className="product-detail-reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
-             {/* Review 1 */}
-             <div style={{ background: 'linear-gradient(145deg, var(--surface-hover), transparent)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.03)' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), #d90429)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>أ</div>
-                   <div>
-                     <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>أحمد عبدالله</h4>
-                     <div style={{ color: '#8ac926', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
-                       <span style={{ fontSize: '1rem' }}>✓</span> مشتري مؤكد
+           {/* Reviews List */}
+           <div className="product-detail-reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+             {reviews.length === 0 && (
+               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', fontWeight: 700, background: 'var(--surface)', borderRadius: '20px', border: '1px dashed var(--border)' }}>
+                 <Star size={48} color="var(--border)" style={{ marginBottom: '1rem' }} />
+                 <p style={{ fontSize: '1.2rem', margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>لا توجد تقييمات بعد</p>
+                 <p style={{ margin: 0 }}>كن أول من يقيّم هذا المنتج!</p>
+               </div>
+             )}
+             {reviews.map((r: any) => (
+               <div key={r.id} style={{ background: 'linear-gradient(145deg, var(--surface-hover), transparent)', padding: '2rem', borderRadius: '20px', border: r.user_id === user?.id ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.03)' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                     <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), #d90429)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', fontWeight: 900 }}>{(r.user_name || 'م').charAt(0)}</div>
+                     <div>
+                       <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 800 }}>{r.user_name || 'مستخدم'}</h4>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                         {r.is_verified_purchase && <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>✓ مشتري مؤكد</span>}
+                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{new Date(r.created_at).toLocaleDateString('ar-SA')}</span>
+                       </div>
                      </div>
                    </div>
-                 </div>
-                 <div style={{ display: 'flex', gap: '0.2rem', marginBottom: '0.5rem' }}>
-                   {[1,2,3,4,5].map(s => <Star key={'rev1_'+s} size={16} fill="#FFD700" color="#FFD700" />)}
-                 </div>
-               </div>
-               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', margin: 0 }}>
-                 "القطعة أصلية 100% ومطابقة للوصف اللي بالموقع. ركبتها على سيارتي والفرق واضح جداً في الأداء. شكراً لكم على التغليف الممتاز وسرعة الشحن."
-               </p>
-             </div>
-             
-             {/* Review 2 - With Image */}
-             <div style={{ background: 'linear-gradient(145deg, var(--surface-hover), transparent)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.03)' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #4cc9f0, #0077b6)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>م</div>
-                   <div>
-                     <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>محمد سعيد</h4>
-                     <div style={{ color: '#8ac926', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
-                       <span style={{ fontSize: '1rem' }}>✓</span> مشتري مؤكد
-                     </div>
+                   <div style={{ display: 'flex', gap: '0.15rem' }}>
+                     {[1,2,3,4,5].map(s => <Star key={s} size={14} fill={s <= r.rating ? '#FFD700' : 'transparent'} color={s <= r.rating ? '#FFD700' : 'var(--border)'} />)}
                    </div>
                  </div>
-                 <div style={{ display: 'flex', gap: '0.2rem', marginBottom: '0.5rem' }}>
-                   {[1,2,3,4,5].map(s => <Star key={'rev2_'+s} size={16} fill="#FFD700" color="#FFD700" />)}
-                 </div>
+                 <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1rem', margin: 0, fontWeight: 500 }}>{r.comment}</p>
                </div>
-               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', marginBottom: '1.5rem' }}>
-                 "السعر هنا أرخص من الوكالة بكتير بصراحة. القطعة ركبت بمقاس الوكالة بالضبط وبدون أي تعقيد. بصراحة تجربة ممتازة وخدمة عملاء الواتس اب كانت سريعة جداً. أنصح بالتعامل التام."
-               </p>
-               <div style={{ width: '100%', height: '160px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}>
-                 <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0be2?w=500&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="تصوير العميل للقطعة" />
-               </div>
-             </div>
+             ))}
            </div>
         </div>
 
@@ -361,16 +465,34 @@ export default function ProductDetailsClient({ id }: { id: string }) {
         {related.length > 0 && (
           <div style={{ marginTop: '2rem', paddingTop: '4rem', borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-               <h2 style={{ fontSize: '2rem', color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                 منتجات ذات صلة <RefreshCw size={24} />
+               <h2 style={{ fontSize: 'clamp(1.2rem, 3vw, 2rem)', color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                 🔗 منتجات ذات صلة
                </h2>
-               <a href={`/products?category=${encodeURIComponent(product.category)}`} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold' }}>عرض الكل</a>
+               <a href={`/products?category=${encodeURIComponent(product.category)}`} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>عرض الكل</a>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+            <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                {related.map(p => (
                  <ProductCard key={p.id} {...p} imagePlaceholderColor="var(--border)" />
                ))}
+            </div>
+          </div>
+        )}
+
+        {/* "Customers Also Bought" Section */}
+        {products.length > 4 && product && (
+          <div style={{ marginTop: '2rem', paddingTop: '3rem', borderTop: '1px solid var(--border)' }}>
+            <h2 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.6rem)', color: 'var(--text-primary)', margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              🛒 ناس اشترت ده اشترت كمان...
+            </h2>
+            <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+              {products
+                .filter(p => p.id !== product.id && p.category !== product.category)
+                .sort((a, b) => b.rating - a.rating)
+                .slice(0, 4)
+                .map(p => (
+                  <ProductCard key={p.id} {...p} imagePlaceholderColor="var(--border)" />
+                ))}
             </div>
           </div>
         )}
@@ -382,15 +504,15 @@ export default function ProductDetailsClient({ id }: { id: string }) {
         <div style={{
           display: 'flex', alignItems: 'center', gap: '0.8rem',
           padding: '0.8rem 1rem',
-          background: 'rgba(10,10,15,0.98)',
+          background: 'var(--surface)',
           backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid var(--border)',
         }}>
           {/* Quantity controls */}
-          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', overflow: 'hidden', height: '48px', flexShrink: 0 }}>
-            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>-</button>
-            <div style={{ padding: '0 1rem', fontSize: '1rem', fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{quantity}</div>
-            <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderRight: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>+</button>
+          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden', height: '48px', flexShrink: 0 }}>
+            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1rem', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>-</button>
+            <div style={{ padding: '0 1rem', fontSize: '1rem', fontWeight: 900, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{quantity}</div>
+            <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1rem', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>+</button>
           </div>
           {/* CTA button */}
           <button
@@ -399,8 +521,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             className="btn-tap"
             style={{
               flex: 1, height: '48px',
-              background: product.stock === 'متوفر' ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'rgba(255,255,255,0.1)',
-              color: product.stock === 'متوفر' ? '#fff' : 'rgba(255,255,255,0.3)',
+              background: product.stock === 'متوفر' ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'var(--surface-hover)',
+              color: product.stock === 'متوفر' ? '#fff' : 'var(--text-secondary)',
               border: 'none', borderRadius: '12px',
               fontWeight: 900, fontSize: '1rem',
               cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed',

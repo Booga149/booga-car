@@ -6,19 +6,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function Footer() {
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (!user?.email) { setIsAdmin(false); return; }
-    if (user.email.startsWith('mrmrx2824') || user.email.startsWith('admin')) {
-      setIsAdmin(true);
-      return;
-    }
-    supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => {
-      if (data?.role === 'admin' || data?.role === 'superadmin') setIsAdmin(true);
-    });
-  }, [user]);
+  const { user, role } = useAuth();
+  const isAdmin = role === 'admin';
 
   /* ═══ ADMIN CYBER FOOTER ═══ */
   if (isAdmin) {
@@ -140,103 +129,138 @@ export default function Footer() {
 
   /* ═══ REGULAR FOOTER ═══ */
   return (
-    <footer className="mobile-hide-section" style={{ background: 'var(--background)', borderTop: '1px solid var(--border)', padding: '6rem 2rem 3rem', marginTop: 'auto' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '4rem' }}>
-        {/* Brand & Mission */}
-        <div>
-          <h2 style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '2rem', fontWeight: 950, letterSpacing: '1px' }}>
+    <footer style={{ background: 'var(--background)', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
+      {/* Desktop Footer */}
+      <div className="desktop-only" style={{ display: 'block', padding: '6rem 2rem 3rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '4rem' }}>
+          {/* Brand & Mission */}
+          <div>
+            <h2 style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '2rem', fontWeight: 950, letterSpacing: '1px' }}>
+              CAR <span style={{ color: 'var(--primary)' }}>BOOGA</span>
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', marginBottom: '1.5rem' }}>
+              {siteConfig.description}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <MapPin size={18} color="var(--primary)" /> {siteConfig.contact.address}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Phone size={18} color="var(--primary)" /> {siteConfig.contact.phone}
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick Links */}
+          <div>
+            <h3 style={{ color: 'var(--text-primary)', marginBottom: '2rem', fontSize: '1.3rem', fontWeight: 800 }}>روابط الاستكشاف</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {siteConfig.navigation.quickLinks.map(link => (
+                <a key={link.href} href={link.href} style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: '0.2s', fontWeight: 600 }}>{link.name}</a>
+              ))}
+            </div>
+          </div>
+
+          {/* Policies */}
+          <div>
+            <h3 style={{ color: 'var(--text-primary)', marginBottom: '2rem', fontSize: '1.3rem', fontWeight: 800 }}>السياسات والثقة</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {siteConfig.navigation.policies.map(link => (
+                <a key={link.href} href={link.href} style={{ color: link.highlight ? '#4cc9f0' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: link.highlight ? 800 : 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {link.name} {link.highlight && <ShieldCheck size={18} />}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* App Download & Payment Methods */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            <div>
+              <h3 style={{ color: 'var(--text-primary)', marginBottom: '1.2rem', fontSize: '1.3rem', fontWeight: 900 }}>حمل التطبيق الآن</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '0.8rem' }}>
+                <div style={{ gridRow: 'span 2' }}>
+                  <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
+                </div>
+                <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
+                <a href="#"><img src="https://consumer-img.huawei.com/content/dam/huawei-cbg-site/common/mkt/pdp/phones/p60-pro/images/appgallery-badge.png" alt="AppGallery" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
+              </div>
+            </div>
+            <div>
+              <h3 style={{ color: 'var(--text-primary)', marginBottom: '1.2rem', fontSize: '1.3rem', fontWeight: 900 }}>نقبل طرق الدفع</h3>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                <CreditCard size={24} color="var(--text-secondary)" />
+                <Landmark size={24} color="var(--text-secondary)" />
+                <Smartphone size={24} color="var(--text-secondary)" />
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        {/* KSA Compliance Row */}
+        <div style={{ maxWidth: '1200px', margin: '3rem auto 0', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', opacity: 0.6, fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
+           <div>الرقم الضريبي: 300054321000003</div>
+           <div>سجل تجاري: 1010543210</div>
+           <div>ترخيص وزارة التجارة: معروف #987654</div>
+        </div>
+
+        {/* Copyright */}
+        <div style={{ textAlign: 'center', marginTop: '3rem', paddingTop: '2.5rem', borderTop: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 600, maxWidth: '1200px', margin: '3rem auto 0' }}>
+          © {new Date().getFullYear()} تم التطوير بواسطة فريق {siteConfig.nameArabic}. جميع الحقوق محفوظة للمملكة العربية السعودية.
+        </div>
+      </div>
+
+      {/* ═══ MOBILE FOOTER ═══ */}
+      <div className="mobile-only" style={{ display: 'none', flexDirection: 'column', padding: '2rem 1.2rem 6rem' }}>
+        {/* Brand */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>
             CAR <span style={{ color: 'var(--primary)' }}>BOOGA</span>
           </h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', marginBottom: '1.5rem' }}>
-            {siteConfig.description}
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <MapPin size={18} color="var(--primary)" /> {siteConfig.contact.address}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Phone size={18} color="var(--primary)" /> {siteConfig.contact.phone}
-            </div>
-          </div>
-        </div>
-        
-        {/* Quick Links */}
-        <div>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '2rem', fontSize: '1.3rem', fontWeight: 800 }}>روابط الاستكشاف</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-            {siteConfig.navigation.quickLinks.map(link => (
-              <a 
-                key={link.href} 
-                href={link.href} 
-                style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: '0.2s', fontWeight: 600 }}
-              >
-                {link.name}
-              </a>
-            ))}
-          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>منصة قطع غيار السيارات الأولى في السعودية</p>
         </div>
 
-        {/* Policies */}
-        <div>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '2rem', fontSize: '1.3rem', fontWeight: 800 }}>السياسات والثقة</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-            {siteConfig.navigation.policies.map(link => (
-              <a 
-                key={link.href} 
-                href={link.href} 
-                style={{ 
-                  color: link.highlight ? '#4cc9f0' : 'var(--text-secondary)', 
-                  textDecoration: 'none', 
-                  fontWeight: link.highlight ? 800 : 600,
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem' 
-                }}
-              >
-                {link.name} {link.highlight && <ShieldCheck size={18} />}
-              </a>
-            ))}
+        {/* Quick Links Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1.5rem' }}>
+          {[
+            { name: 'من نحن', href: '/about' },
+            { name: 'تواصل معنا', href: '/contact' },
+            { name: 'تتبع الطلب', href: '/track-order' },
+            { name: 'سعّرلي', href: '/price-request' },
+            { name: 'المفضلة', href: '/wishlist' },
+            { name: 'الأسئلة الشائعة', href: '/faq' },
+            { name: 'سياسة الاسترجاع', href: '/return-policy' },
+            { name: 'الشروط والأحكام', href: '/terms' },
+            { name: 'سياسة الخصوصية', href: '/privacy' },
+            { name: 'انضم كتاجر', href: '/become-dealer' },
+          ].map(link => (
+            <a key={link.href} href={link.href} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0.8rem', background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: '12px', color: 'var(--text-secondary)', fontSize: '0.82rem',
+              fontWeight: 700, textDecoration: 'none', transition: '0.2s'
+            }}>
+              {link.name}
+            </a>
+          ))}
+        </div>
+
+        {/* Payment & Trust */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', alignItems: 'center', padding: '1rem', background: 'var(--surface)', borderRadius: '14px', border: '1px solid var(--border)', marginBottom: '1.2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700 }}>
+            <Lock size={14} color="var(--primary)" /> دفع آمن
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700 }}>
+            <ShieldCheck size={14} color="#10b981" /> ضمان استرجاع
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700 }}>
+            <CreditCard size={14} color="#4cc9f0" /> Visa / Mada
           </div>
         </div>
 
-        {/* App Download & Payment Methods */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          <div>
-            <h3 style={{ color: 'var(--text-primary)', marginBottom: '1.2rem', fontSize: '1.3rem', fontWeight: 900 }}>حمل التطبيق الآن</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '0.8rem' }}>
-              <div style={{ gridRow: 'span 2' }}>
-                <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
-              </div>
-              <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
-              <a href="#"><img src="https://consumer-img.huawei.com/content/dam/huawei-cbg-site/common/mkt/pdp/phones/p60-pro/images/appgallery-badge.png" alt="AppGallery" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} /></a>
-            </div>
-          </div>
-
-          <div>
-            <h3 style={{ color: 'var(--text-primary)', marginBottom: '1.2rem', fontSize: '1.3rem', fontWeight: 900 }}>نقبل طرق الدفع</h3>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
-              <img src="https://tabby.ai/logo.png" alt="Tabby" style={{ height: '22px', width: 'auto' }} />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style={{ height: '28px', width: 'auto' }} />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style={{ height: '18px', width: 'auto' }} />
-              <img src="https://www.mada.com.sa/sites/default/files/mada-logo.png" alt="Mada" style={{ height: '22px', width: 'auto' }} />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" style={{ height: '22px', width: 'auto' }} />
-              <img src="https://mispay.co/logo.png" alt="MisPay" style={{ height: '24px', width: 'auto' }} />
-              <img src="https://tamara.co/logo.png" alt="Tamara" style={{ height: '22px', width: 'auto' }} />
-            </div>
-          </div>
+        {/* Copyright */}
+        <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600 }}>
+          © {new Date().getFullYear()} Booga Car — جميع الحقوق محفوظة
         </div>
-      </div>
-      
-      {/* KSA Compliance Row */}
-      <div style={{ maxWidth: '1200px', margin: '3rem auto 0', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', opacity: 0.6, fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
-         <div>الرقم الضريبي: 300054321000003</div>
-         <div>سجل تجاري: 1010543210</div>
-         <div>ترخيص وزارة التجارة: معروف #987654</div>
-      </div>
-
-      {/* Copyright */}
-      <div style={{ textAlign: 'center', marginTop: '3rem', paddingTop: '2.5rem', borderTop: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 600 }}>
-        © {new Date().getFullYear()} تم التطوير بواسطة فريق {siteConfig.nameArabic}. جميع الحقوق محفوظة للمملكة العربية السعودية.
       </div>
     </footer>
   );

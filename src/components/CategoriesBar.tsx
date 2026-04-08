@@ -1,10 +1,10 @@
 "use client";
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Circle, Lightbulb, Wind, Wrench, Cog, CarFront, CircuitBoard, Fuel,
   Shield, Gauge, Radio, BatteryCharging, Armchair, PaintBucket, Filter, Disc3, LayoutGrid,
-  Monitor, PenTool, Droplets, Flame
+  Monitor, PenTool, Droplets, Flame, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const allCategories = [
@@ -35,6 +35,9 @@ function CategoriesBarInner() {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category') || '';
   const [navHeight, setNavHeight] = useState(73);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     const measure = () => {
@@ -48,6 +51,29 @@ function CategoriesBarInner() {
     return () => ro.disconnect();
   }, []);
 
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 5);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    window.addEventListener('resize', checkScroll);
+    return () => { el.removeEventListener('scroll', checkScroll); window.removeEventListener('resize', checkScroll); };
+  }, [checkScroll]);
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const amount = dir === 'left' ? -300 : 300;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
   const handleCategoryClick = (name: string) => {
     if (name === 'الكل') {
       router.push('/products');
@@ -56,52 +82,82 @@ function CategoriesBarInner() {
     }
   };
 
+  const arrowStyle = (): React.CSSProperties => ({
+    position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+    width: '36px', height: '36px', borderRadius: '50%',
+    background: 'rgba(10,10,14,0.95)', border: '1px solid rgba(245,158,11,0.5)',
+    color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', zIndex: 10, transition: 'all 0.3s ease',
+    opacity: 1,
+    boxShadow: '0 0 12px rgba(245,158,11,0.2), 0 4px 15px rgba(0,0,0,0.4)',
+  });
+
   return (
     <section style={{
-      background: 'rgba(8,8,12,0.95)',
+      background: 'var(--surface)',
       backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(255,255,255,0.04)',
+      borderBottom: '1px solid var(--border)',
       padding: '0',
       position: 'sticky',
       top: `${navHeight}px`,
       zIndex: 90,
-      boxShadow: '0 4px 30px rgba(0,0,0,0.4)'
+      boxShadow: 'var(--card-shadow)',
     }}>
-      <div style={{
-        maxWidth: '1400px', margin: '0 auto',
-        display: 'flex', overflowX: 'auto',
-        gap: '0', scrollbarWidth: 'none',
-      }}>
-        {allCategories.map((cat, i) => {
-          const isActive = (cat.name === 'الكل' && !activeCategory) || activeCategory === cat.name;
-          return (
-            <div
-              key={i}
-              onClick={() => handleCategoryClick(cat.name)}
-              className="cat-item"
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
-                padding: '1.2rem 1.8rem', minWidth: '120px',
-                textDecoration: 'none', 
-                color: isActive ? '#e11d48' : 'rgba(255,255,255,0.4)',
-                fontSize: '0.78rem', fontWeight: 700, textAlign: 'center',
-                borderLeft: '1px solid rgba(255,255,255,0.04)',
-                background: isActive ? 'rgba(225,29,72,0.06)' : 'transparent',
-                borderBottom: isActive ? '2px solid #e11d48' : '2px solid transparent',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-              }}
-            >
-              <span style={{ 
-                color: isActive ? '#e11d48' : 'rgba(255,255,255,0.35)', 
-                transition: 'all 0.3s ease',
-              }} className="cat-icon-container">
-                {cat.icon}
-              </span>
-              {cat.name}
-            </div>
-          );
-        })}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', position: 'relative' }}>
+        {/* Left Arrow */}
+        <div onClick={() => scroll('left')} style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginRight: '4px' }}
+          onMouseOver={e => { e.currentTarget.style.background = '#f59e0b'; e.currentTarget.style.color = '#fff'; }}
+          onMouseOut={e => { e.currentTarget.style.background = 'var(--surface-hover)'; e.currentTarget.style.color = '#f59e0b'; }}>
+          <ChevronLeft size={20} />
+        </div>
+
+        {/* Scrollable categories */}
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+          {canScrollLeft && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40px', background: 'linear-gradient(to right, var(--surface), transparent)', zIndex: 5, pointerEvents: 'none' }} />}
+          {canScrollRight && <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '40px', background: 'linear-gradient(to left, var(--surface), transparent)', zIndex: 5, pointerEvents: 'none' }} />}
+          <div ref={scrollRef} style={{
+            display: 'flex', overflowX: 'auto',
+            gap: '0', scrollbarWidth: 'none',
+          }}>
+          {allCategories.map((cat, i) => {
+            const isActive = (cat.name === 'الكل' && !activeCategory) || activeCategory === cat.name;
+            return (
+              <div
+                key={i}
+                onClick={() => handleCategoryClick(cat.name)}
+                className="cat-item"
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+                  padding: '1.2rem 1.8rem', minWidth: '120px',
+                  textDecoration: 'none', 
+                  color: isActive ? '#e11d48' : 'var(--text-secondary)',
+                  fontSize: '0.78rem', fontWeight: 700, textAlign: 'center',
+                  borderLeft: '1px solid var(--border)',
+                  background: isActive ? 'rgba(225,29,72,0.06)' : 'transparent',
+                  borderBottom: isActive ? '2px solid #e11d48' : '2px solid transparent',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                }}
+              >
+                <span style={{ 
+                  color: isActive ? '#e11d48' : 'var(--text-secondary)', 
+                  transition: 'all 0.3s ease',
+                }} className="cat-icon-container">
+                  {cat.icon}
+                </span>
+                {cat.name}
+              </div>
+            );
+          })}
+          </div>
+        </div>
+
+        {/* Right Arrow */}
+        <div onClick={() => scroll('right')} style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginLeft: '4px' }}
+          onMouseOver={e => { e.currentTarget.style.background = '#f59e0b'; e.currentTarget.style.color = '#fff'; }}
+          onMouseOut={e => { e.currentTarget.style.background = 'var(--surface-hover)'; e.currentTarget.style.color = '#f59e0b'; }}>
+          <ChevronRight size={20} />
+        </div>
       </div>
       <style jsx>{`
         div::-webkit-scrollbar { display: none; }

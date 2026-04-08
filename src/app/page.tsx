@@ -31,22 +31,16 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Admin detection + stats
+  // Admin detection + stats (role-based only)
+  const { role: authRole } = useAuth();
   useEffect(() => {
-    if (!user?.email) { setIsAdmin(false); return; }
-    const isAdm = user.email.startsWith('mrmrx2824') || user.email.startsWith('admin');
-    if (!isAdm) {
-      supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => {
-        if (data?.role === 'admin' || data?.role === 'superadmin') {
-          setIsAdmin(true);
-          loadAdminStats();
-        }
-      });
-    } else {
+    if (authRole === 'admin') {
       setIsAdmin(true);
       loadAdminStats();
+    } else {
+      setIsAdmin(false);
     }
-  }, [user]);
+  }, [authRole]);
 
   async function loadAdminStats() {
     const [u, o, p] = await Promise.all([
@@ -68,7 +62,7 @@ export default function Home() {
       position: 'relative'
     }}>
       {/* Global Precision Grid */}
-      <div style={{
+      <div className="mobile-hide-section" style={{
         position: 'fixed', inset: 0,
         backgroundImage: isAdmin
           ? 'linear-gradient(rgba(76,201,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.03) 1px, transparent 1px)'
@@ -82,7 +76,7 @@ export default function Home() {
 
         {/* ═══ ADMIN COMMAND BAR ═══ */}
         {isAdmin && (
-          <div style={{
+          <div className="mobile-hide-section" style={{
             marginTop: '120px', marginLeft: '2rem', marginRight: '2rem',
             background: 'rgba(5, 5, 12, 0.85)', backdropFilter: 'blur(20px)',
             border: '1px solid rgba(76,201,240,0.2)', borderRadius: '20px',
@@ -135,133 +129,103 @@ export default function Home() {
         {showWelcome && <WelcomeOffer />}
         <Hero />
         
-        {/* ═══ SECTION: Nearby Sellers (الأقرب إليك) — Hidden on mobile ═══ */}
-        <div className="mobile-hide-section">
-          <NearbySellers />
-        </div>
-
-        {/* ═══ SECTION 2: Interactive Engineering Discovery — Hidden on mobile ═══ */}
-        <div className="mobile-hide-section">
-          <EngineeringSystems />
-        </div>
-
-        {/* ═══ MOBILE SIMPLE HEADING (Speero-style) ═══ */}
+        {/* ═══ MOBILE CATEGORIES CHIPS ═══ */}
         <div className="mobile-only" style={{
           display: 'none',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          padding: '0 1.5rem 1rem',
+          padding: '0.8rem 1rem',
+          background: 'var(--surface)',
+          borderBottom: '1px solid var(--border)',
         }}>
-          <h2 style={{ 
-            color: 'white', fontSize: '1.3rem', fontWeight: 900, 
-            margin: '0 0 0.5rem', lineHeight: 1.3
-          }}>
-            اشترِ قطع غيار سيارات أصلية
-          </h2>
-          <p style={{ 
-            color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', 
-            fontWeight: 600, margin: 0, lineHeight: 1.5
-          }}>
-            تصفح تشكيلتنا الواسعة من قطع غيار السيارات الأصلية
-          </p>
-        </div>
-
-        {/* ═══ SECTION 3: Featured Precision Parts ═══ */}
-        <section style={{
-          background: '#050508',
-          padding: 'clamp(3rem, 8vw, 8rem) 0',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          position: 'relative', zIndex: 10
-        }}>
-          <div className="mobile-hide-section" style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-            padding: '0 clamp(1rem, 3vw, 2rem) clamp(2rem, 4vw, 4rem)',
-            maxWidth: '1200px', margin: '0 auto', width: '100%',
-            flexWrap: 'wrap', gap: '1.5rem',
-          }}>
-            <div>
-              <span style={{ color: '#e11d48', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '4px', opacity: 0.8 }}>المطابقة الرائجة</span>
-              <h2 style={{ margin: '1rem 0 0', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 950, color: '#ffffff' }}>
-                القطع الأكثر طلباً <span style={{ color: '#e11d48' }}>عالمياً</span>
-              </h2>
-              {/* Gold underline */}
-              <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', marginTop: '1rem', boxShadow: '0 0 15px rgba(212,175,55,0.3)' }} />
-            </div>
-            <a href="/products" style={{
-              color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '0.9rem',
-              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.8rem',
-              padding: '0.9rem 2rem', background: 'rgba(255,255,255,0.04)', borderRadius: '14px',
-              border: '1px solid rgba(255,255,255,0.08)', transition: 'all 0.3s ease',
-              letterSpacing: '0.3px',
-            }}
-              onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-              onMouseOut={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-            >
-              اكتشف الكتالوج الكامل <ArrowUpRight size={18} />
-            </a>
-          </div>
-
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
-            {/* Recently Viewed (mobile only) */}
-            <RecentlyViewed />
-
-            <div className="product-grid" style={{
-               display: 'grid', 
-               gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', 
-               gap: 'clamp(1rem, 3vw, 3rem)'
-            }}>
-              {products.length === 0 ? (
-                /* Skeleton loading cards */
-                Array.from({ length: 4 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))
-              ) : (
-                products.slice(0, 8).map((prod) => (
-                  <ProductCard
-                    key={prod.id}
-                    {...prod}
-                    imagePlaceholderColor={prod.color || 'var(--border)'}
-                  />
-                ))
-              )}
-            </div>
-
-            {/* Mobile 'Show All' button */}
-            <div className="mobile-only" style={{
-              display: 'none',
-              justifyContent: 'center',
-              padding: '1.5rem 0 0',
-            }}>
+          <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: '0.3rem',
+          }} className="scrollbar-hide">
+            {[
+              { name: 'الكل', emoji: '🔥' },
+              { name: 'فرامل', emoji: '🛞' },
+              { name: 'فلاتر', emoji: '🔧' },
+              { name: 'إضاءة', emoji: '💡' },
+              { name: 'محركات', emoji: '⚙️' },
+              { name: 'كهرباء', emoji: '⚡' },
+              { name: 'زيوت', emoji: '🛢️' },
+              { name: 'بطاريات', emoji: '🔋' },
+            ].map(cat => (
               <a
-                href="/products"
+                key={cat.name}
+                href={cat.name === 'الكل' ? '/products' : `/products?category=${encodeURIComponent(cat.name)}`}
                 className="btn-tap"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  width: '100%',
-                  padding: '0.8rem',
-                  borderRadius: '12px',
-                  background: 'rgba(225,29,72,0.08)',
-                  border: '1px solid rgba(225,29,72,0.2)',
-                  color: '#e11d48',
-                  fontWeight: 800,
-                  fontSize: '0.85rem',
+                  gap: '0.35rem',
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '20px',
+                  background: 'var(--surface-hover)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
                   textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   transition: 'all 0.2s',
                 }}
               >
-                عرض كل المنتجات <ArrowUpRight size={16} />
+                <span>{cat.emoji}</span> {cat.name}
               </a>
-            </div>
+            ))}
           </div>
-        </section>
-        
-        {/* ═══ SECTION 4-5: Hidden on mobile ═══ */}
+        </div>
+
+        {/* ═══ SECTION: Nearby Sellers — Desktop only ═══ */}
         <div className="mobile-hide-section">
-          {/* Support section */}
+          <NearbySellers />
+        </div>
+
+        {/* ═══ SECTION: Engineering Discovery — Desktop only ═══ */}
+        <div className="mobile-hide-section">
+          <EngineeringSystems />
+        </div>
+
+        {/* ═══ BANNER SLIDER ═══ */}
+        <BannerSlider />
+
+        {/* ═══ SECTION: 🔥 Featured Products ═══ */}
+        <ProductSection
+          title="منتجات مميزة"
+          emoji="🔥"
+          products={products.slice(0, 4)}
+          isLoading={products.length === 0}
+        />
+
+        {/* ═══ SECTION: 🆕 New Products ═══ */}
+        <ProductSection
+          title="وصل حديثاً"
+          emoji="🆕"
+          products={products.filter(p => p.condition === 'جديد').slice(0, 4)}
+          isLoading={products.length === 0}
+        />
+
+        {/* ═══ SECTION: ⭐ Best Sellers ═══ */}
+        <ProductSection
+          title="الأكثر مبيعاً"
+          emoji="⭐"
+          products={[...products].sort((a, b) => b.rating - a.rating).slice(0, 4)}
+          isLoading={products.length === 0}
+          showViewAll
+        />
+
+        {/* Recently Viewed */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+          <RecentlyViewed />
+        </div>
+
+        {/* ═══ Desktop-only sections ═══ */}
+        <div className="mobile-hide-section">
           <section style={{
             padding: 'clamp(3rem, 8vw, 8rem) clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto',
             width: '100%', position: 'relative', zIndex: 10
@@ -313,32 +277,6 @@ export default function Home() {
           </section>
 
           <KSATrustBar />
-          <section style={{
-            background: '#000',
-            padding: 'clamp(3rem, 6vw, 6rem) clamp(1rem, 3vw, 2rem)',
-            borderTop: '1px solid rgba(255,255,255,0.05)'
-          }}>
-            <div style={{
-              maxWidth: '1200px', margin: '0 auto',
-              display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '4rem',
-              textAlign: 'center',
-            }}>
-              {[
-                { num: '+124,000', label: 'عملية مطابقة ناجحة' },
-                { num: '0.04s', label: 'سرعة كشف رقم الهيكل' },
-                { num: '100%', label: 'ضمان التوافق الهندسي' },
-                { num: 'World', label: 'تغطية السوق العالمية' },
-              ].map((stat, i) => (
-                <div key={i} style={{ flex: 1, minWidth: '180px' }}>
-                  <div style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, color: 'white', marginBottom: '0.8rem', letterSpacing: '-2px' }}>
-                    {stat.num}
-                  </div>
-                  <div style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
           <WhatsAppHub />
         </div>
       </div>
@@ -349,5 +287,219 @@ export default function Home() {
         }
       `}</style>
     </main>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   BANNER SLIDER COMPONENT
+═══════════════════════════════════════════ */
+function BannerSlider() {
+  const [current, setCurrent] = React.useState(0);
+
+  const banners = [
+    {
+      title: 'خصم 20% على الفرامل',
+      subtitle: 'فرامل أصلية بأعلى جودة',
+      gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%)',
+      accent: '#e11d48',
+    },
+    {
+      title: 'شحن مجاني فوق 200 ر.س',
+      subtitle: 'توصيل سريع لكل المملكة',
+      gradient: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      accent: '#D4AF37',
+    },
+    {
+      title: 'قطع غيار أصلية 100%',
+      subtitle: 'ضمان سنة على جميع المنتجات',
+      gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%)',
+      accent: '#10b981',
+    },
+  ];
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent(prev => (prev + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [banners.length]);
+
+  return (
+    <section style={{
+      padding: '1rem',
+      maxWidth: '1200px',
+      margin: '0 auto',
+      width: '100%',
+    }}>
+      <div style={{
+        position: 'relative',
+        borderRadius: '20px',
+        overflow: 'hidden',
+        height: 'clamp(140px, 30vw, 220px)',
+        background: banners[current].gradient,
+        transition: 'background 0.8s ease',
+        border: '1px solid var(--border)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+      }}>
+        {/* Content */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'center',
+          padding: 'clamp(1.5rem, 4vw, 3rem)',
+          zIndex: 2,
+        }}>
+          <h3 style={{
+            color: '#ffffff',
+            fontSize: 'clamp(1.2rem, 4vw, 2rem)',
+            fontWeight: 900,
+            margin: '0 0 0.5rem',
+            lineHeight: 1.2,
+          }}>
+            {banners[current].title}
+          </h3>
+          <p style={{
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: 'clamp(0.8rem, 2vw, 1rem)',
+            fontWeight: 600,
+            margin: '0 0 1rem',
+          }}>
+            {banners[current].subtitle}
+          </p>
+          <a href="/products" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.6rem 1.2rem',
+            borderRadius: '10px',
+            background: banners[current].accent,
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: '0.85rem',
+            textDecoration: 'none',
+            width: 'fit-content',
+            transition: 'transform 0.2s',
+          }}>
+            تسوق الآن <ArrowUpRight size={16} />
+          </a>
+        </div>
+
+        {/* Decorative circle */}
+        <div style={{
+          position: 'absolute',
+          left: '-20px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 'clamp(120px, 25vw, 200px)',
+          height: 'clamp(120px, 25vw, 200px)',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${banners[current].accent}20, transparent 70%)`,
+          zIndex: 1,
+        }} />
+
+        {/* Dots */}
+        <div style={{
+          position: 'absolute',
+          bottom: '0.8rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: '0.4rem',
+          zIndex: 3,
+        }}>
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              style={{
+                width: current === i ? '20px' : '6px',
+                height: '6px',
+                borderRadius: '10px',
+                background: current === i ? '#fff' : 'rgba(255,255,255,0.4)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                padding: 0,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   PRODUCT SECTION COMPONENT
+═══════════════════════════════════════════ */
+function ProductSection({ title, emoji, products, isLoading, showViewAll }: {
+  title: string;
+  emoji: string;
+  products: any[];
+  isLoading: boolean;
+  showViewAll?: boolean;
+}) {
+  return (
+    <section style={{
+      padding: 'clamp(1.5rem, 4vw, 3rem) 0',
+      position: 'relative',
+      zIndex: 10,
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+        {/* Section Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.2rem',
+        }}>
+          <h2 style={{
+            fontSize: 'clamp(1.1rem, 3vw, 1.6rem)',
+            fontWeight: 900,
+            color: 'var(--text-primary)',
+            margin: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}>
+            <span>{emoji}</span> {title}
+          </h2>
+          {showViewAll && (
+            <a href="/products" style={{
+              color: 'var(--primary)',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}>
+              عرض الكل <ArrowUpRight size={14} />
+            </a>
+          )}
+        </div>
+
+        {/* Product Grid */}
+        <div className="product-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+          gap: 'clamp(1rem, 3vw, 2rem)',
+        }}>
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))
+          ) : (
+            products.map((prod) => (
+              <ProductCard
+                key={prod.id}
+                {...prod}
+                imagePlaceholderColor={prod.color || 'var(--border)'}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

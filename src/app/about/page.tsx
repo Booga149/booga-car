@@ -111,15 +111,15 @@ export default function AboutPage() {
         maxWidth: '1000px', margin: '0 auto 6rem', padding: '0 2rem'
       }}>
         <div style={{
-          background: 'linear-gradient(135deg, #111 0%, #000 100%)',
+          background: 'var(--surface)',
           borderRadius: '40px', padding: '4rem', textAlign: 'center',
-          border: '1px solid rgba(255,255,255,0.05)',
-          boxShadow: '0 30px 60px rgba(0,0,0,0.3)'
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--card-shadow)'
         }}>
-          <h2 style={{ color: 'white', fontSize: '2.5rem', fontWeight: 950, marginBottom: '1rem' }}>
+          <h2 style={{ color: 'var(--text-primary)', fontSize: '2.5rem', fontWeight: 950, marginBottom: '1rem' }}>
             جاهز تبدأ؟
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.2rem', marginBottom: '2.5rem', lineHeight: 1.8 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '2.5rem', lineHeight: 1.8 }}>
             ابحث عن قطعتك الآن أو انضم كتاجر معتمد وابدأ البيع عبر أكبر منصة في المملكة.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>

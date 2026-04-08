@@ -1,0 +1,10 @@
+[33ma846319[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: mobile UX overhaul - product detail, sticky CTA, navbar, hydration fix
+[33mff9b7b8[m Luxury dark theme redesign: Products page, Filters, CategoriesBar, SortDropdown, ProductGrid
+[33m1518dd5[m feat: switch to light theme + restrict god-mode to admin pages only
+[33m88f852f[m fix: add missing
+[33ma8718f5[m fix
+[33mbb29f23[m Fix crashes
+[33ma4b64f2[m Fix hydration error
+[33m0bd3f7e[m Make admin stats clickable
+[33me85e04c[m God Mode comprehensive upgrade - admin experience across all pages
+[33meada847[m fix: move signup toggle link to phone auth section

@@ -22,6 +22,8 @@ export const siteConfig = {
   navigation: {
     quickLinks: [
       { name: 'تصفح محرك القطع', href: '/products' },
+      { name: 'سعّرلي (طلب تسعير)', href: '/price-request' },
+      { name: 'تتبع طلبك', href: '/track-order' },
       { name: 'من نحن', href: '/about' },
       { name: 'بوجا للأعمال (للتجار)', href: '/become-dealer' },
       { name: 'الأسئلة الشائعة', href: '/faq' },

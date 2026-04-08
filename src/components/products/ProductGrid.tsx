@@ -17,9 +17,9 @@ export default function ProductGrid({ products, isLoading, visibleCount, onLoadM
       <div className="product-grid">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} style={{ 
-            height: '420px', background: 'rgba(255,255,255,0.03)', 
+            height: '420px', background: 'var(--surface-hover)', 
             borderRadius: '20px', animation: 'shimmer 1.5s infinite ease-in-out', 
-            border: '1px solid rgba(255,255,255,0.04)' 
+            border: '1px solid var(--border)' 
           }} />
         ))}
         <style>{`
@@ -37,14 +37,14 @@ export default function ProductGrid({ products, isLoading, visibleCount, onLoadM
     return (
       <div style={{ 
         textAlign: 'center', padding: '6rem 2rem', 
-        background: 'rgba(12,12,16,0.9)', borderRadius: '20px', 
-        border: '1px dashed rgba(255,255,255,0.08)' 
+        background: 'var(--surface)', borderRadius: '20px', 
+        border: '1px dashed var(--border)' 
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <Search size={64} opacity={0.2} color="rgba(255,255,255,0.3)" />
+          <Search size={64} opacity={0.2} color="var(--text-secondary)" />
         </div>
-        <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#ffffff' }}>لا يوجد منتجات مطابقة</h3>
-        <p style={{ color: 'rgba(255,255,255,0.4)' }}>حاول تغيير خيارات البحث أو الفلتر للعثور على ما تبحث عنه.</p>
+        <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>لا يوجد منتجات مطابقة</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>حاول تغيير خيارات البحث أو الفلتر للعثور على ما تبحث عنه.</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ export default function ProductGrid({ products, isLoading, visibleCount, onLoadM
               animation: `fadeInUp 0.5s ease ${i * 0.05}s both`,
             }}
           >
-            <ProductCard {...prod} imagePlaceholderColor={prod.color || 'rgba(255,255,255,0.05)'} />
+            <ProductCard {...prod} imagePlaceholderColor={prod.color || 'var(--border)'} />
           </div>
         ))}
       </div>
@@ -72,13 +72,13 @@ export default function ProductGrid({ products, isLoading, visibleCount, onLoadM
           <button 
             onClick={onLoadMore} 
             style={{
-              padding: '1rem 3rem', background: 'rgba(255,255,255,0.04)', 
-              color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)',
+              padding: '1rem 3rem', background: 'var(--surface)', 
+              color: 'var(--text-secondary)', border: '1px solid var(--border)',
               borderRadius: '14px', cursor: 'pointer', fontWeight: 800, fontSize: '0.95rem', 
               transition: 'all 0.3s ease', letterSpacing: '0.3px',
             }} 
             onMouseOver={e => { e.currentTarget.style.background = 'rgba(225,29,72,0.1)'; e.currentTarget.style.borderColor = 'rgba(225,29,72,0.3)'; e.currentTarget.style.color = '#e11d48'; }} 
-            onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+            onMouseOut={e => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >
             عرض المزيد
           </button>

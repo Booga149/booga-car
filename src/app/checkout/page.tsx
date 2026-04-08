@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import { useCart } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
 import { PartyPopper, CreditCard, Truck, Smartphone } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { roundPrice, formatPrice, calculateCartTotal, calculateCommission, createPriceAuditEntry } from '@/lib/pricing';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -18,24 +18,53 @@ export default function CheckoutPage() {
   const [discountStatus, setDiscountStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [discountMsg, setDiscountMsg] = useState('');
 
-  const applyDiscount = () => {
-    if (discountCode.trim().toUpperCase() === 'SAUDI15') {
-       setAppliedDiscount(0.15);
-       setDiscountStatus('success');
-       setDiscountMsg('🎉 مبروك! تم تطبيق خصم 15% بنجاح');
-    } else {
-       setAppliedDiscount(0);
-       setDiscountStatus('error');
-       setDiscountMsg('كود الخصم غير صحيح أو منتهي الصلاحية');
+  const applyDiscount = async () => {
+    const code = discountCode.trim().toUpperCase();
+    if (!code) return;
+    try {
+      const { data, error } = await supabase.from('coupons').select('*').eq('code', code).eq('is_active', true).single();
+      if (error || !data) {
+        setAppliedDiscount(0);
+        setDiscountStatus('error');
+        setDiscountMsg('كود الخصم غير صحيح أو منتهي الصلاحية');
+      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setAppliedDiscount(0);
+        setDiscountStatus('error');
+        setDiscountMsg('كود الخصم منتهي الصلاحية');
+      } else if (data.max_uses && data.current_uses >= data.max_uses) {
+        setAppliedDiscount(0);
+        setDiscountStatus('error');
+        setDiscountMsg('تم استنفاد عدد استخدامات هذا الكود');
+      } else if (data.min_order_amount && cartTotal < data.min_order_amount) {
+        setAppliedDiscount(0);
+        setDiscountStatus('error');
+        setDiscountMsg(`الحد الأدنى للطلب ${data.min_order_amount} ر.س لاستخدام هذا الكود`);
+      } else {
+        setAppliedDiscount(data.discount_percent);
+        setDiscountStatus('success');
+        setDiscountMsg(`🎉 مبروك! تم تطبيق خصم ${data.discount_percent}% بنجاح`);
+        // Increment usage
+        await supabase.from('coupons').update({ current_uses: (data.current_uses || 0) + 1 }).eq('id', data.id);
+      }
+    } catch {
+      setAppliedDiscount(0);
+      setDiscountStatus('error');
+      setDiscountMsg('حدث خطأ أثناء التحقق من الكود');
     }
-    setTimeout(() => { setDiscountStatus('idle'); setDiscountMsg(''); }, 4000);
+    setTimeout(() => { setDiscountStatus('idle'); setDiscountMsg(''); }, 5000);
   };
 
-  // Shipping cost logic
-  const shippingCost = cartTotal > 500 ? 0 : 35; // Free shipping over 500 SAR
-  const totalBeforeDiscount = cartTotal + shippingCost;
-  const discountAmount = Math.round(totalBeforeDiscount * appliedDiscount * 100) / 100;
-  const finalTotal = Math.round((totalBeforeDiscount - discountAmount) * 100) / 100;
+  // ─── CENTRALIZED PRICING (Single Source of Truth) ───
+  const cartPricing = calculateCartTotal(
+    cartItems.map(item => ({ price: item.price, quantity: item.quantity })),
+    appliedDiscount
+  );
+
+  // Use centralized values
+  const shippingCost = cartPricing.shippingCost;
+  const totalBeforeDiscount = cartPricing.totalBeforeDiscount;
+  const discountAmount = cartPricing.couponDiscount;
+  const finalTotal = cartPricing.finalTotal;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +73,34 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id || null; // Will act as guest if not logged in
+      const userId = session?.user?.id || null;
 
-      // 1. Insert Order (Fallback to Client-side temporarily till DB admin creates RPC)
+      // ─── STEP 0: Server-side price validation ───
+      try {
+        const validationRes = await fetch('/api/validate-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
+            coupon_code: appliedDiscount > 0 ? discountCode : null,
+          }),
+        });
+        const validation = await validationRes.json();
+        if (!validationRes.ok || !validation.valid) {
+          throw new Error(validation.error || 'فشل التحقق من الأسعار');
+        }
+        // Use server-validated total (ignore frontend calculation)
+        const serverTotal = roundPrice(validation.order.final_total);
+        if (Math.abs(serverTotal - finalTotal) > 1) {
+          // Price mismatch > 1 SAR — possible tampering
+          console.warn('Price mismatch detected:', { frontend: finalTotal, server: serverTotal });
+        }
+      } catch (valErr: any) {
+        // If validation API is unavailable, continue with frontend prices (graceful degradation)
+        console.warn('Server validation unavailable, using frontend prices:', valErr.message);
+      }
+
+      // ─── STEP 1: Insert Order ───
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -63,34 +117,60 @@ export default function CheckoutPage() {
         throw new Error(orderError.message || "Failed to create order");
       }
 
-      // 2. Insert Order Items safely
+      // ─── STEP 2: Insert Order Items (centralized commission) ───
       if (orderData) {
         const orderItemsData = cartItems.map(item => {
-          const rate = 0.10; // 10% commission
-          const gross = item.price;
-          const fee = gross * rate;
-          const net = gross - fee;
-
+          const commission = calculateCommission(item.price);
           return {
             order_id: orderData.id,
             product_id: item.id,
             product_name: item.name,
             product_image: item.image,
             quantity: item.quantity,
-            price: item.price
+            price: roundPrice(item.price),
           };
         });
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
         if (itemsError) throw itemsError;
+
+        // ─── STEP 2b: Price Audit Log (non-blocking) ───
+        try {
+          const auditEntry = createPriceAuditEntry(
+            orderData.id,
+            cartPricing.items,
+            cartPricing,
+            appliedDiscount > 0 ? discountCode : undefined
+          );
+          await supabase.from('admin_notifications').insert({
+            type: 'PRICE_AUDIT',
+            title: `سجل أسعار طلب #${orderData.id.slice(0, 8)}`,
+            message: JSON.stringify(auditEntry),
+          });
+        } catch {}
       }
       
-      // Notify Admin Board safely
-      await supabase.from('admin_notifications').insert({
-        type: 'NEW_ORDER',
-        title: 'طلب جديد',
-        message: `طلب مبدئي بقيمة ${finalTotal} ر.س تم استلامه من ${formData.name}.`
-      });
+      // Notify Admin Board (non-blocking)
+      try {
+        await supabase.from('admin_notifications').insert({
+          type: 'NEW_ORDER',
+          title: 'طلب جديد',
+          message: `طلب مبدئي بقيمة ${finalTotal} ر.س تم استلامه من ${formData.name}.`
+        });
+      } catch {}
+
+      // Notify User (non-blocking)
+      if (userId) {
+        try {
+          await supabase.from('user_notifications').insert({
+            user_id: userId,
+            type: 'order_update',
+            title: 'تم استلام طلبك بنجاح! 🎉',
+            message: `طلبك بقيمة ${finalTotal} ر.س قيد المراجعة. سنقوم بإعلامك عند تحديث حالة الشحن.`,
+            link: `/track-order?id=${orderData.id}`
+          });
+        } catch {}
+      }
 
       setSuccessOrderId(orderData.id);
       clearCart();
@@ -135,6 +215,14 @@ export default function CheckoutPage() {
                 display: 'flex', alignItems: 'center', gap: '0.5rem'
               }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
                 <Truck size={20} /> تتبع طلبي الآن
+              </a>
+              <a href={`/invoice?id=${successOrderId}`} style={{ 
+                padding: '1.2rem 2.5rem', background: 'var(--surface)', color: 'var(--text-primary)', 
+                borderRadius: '14px', textDecoration: 'none', fontWeight: 800, fontSize: '1.1rem',
+                border: '1px solid var(--border)', transition: '0.3s',
+                display: 'flex', alignItems: 'center', gap: '0.5rem'
+              }} onMouseOver={e => e.currentTarget.style.background = 'var(--background)'} onMouseOut={e => e.currentTarget.style.background = 'var(--surface)'}>
+                📄 عرض الفاتورة
               </a>
               <a href="/" style={{ 
                 padding: '1.2rem 2.5rem', background: 'var(--surface)', color: 'var(--text-primary)', 
@@ -444,9 +532,7 @@ export default function CheckoutPage() {
                       display: 'flex', alignItems: 'center', gap: '0.4rem',
                       background: 'rgba(244,63,94,0.03)',
                     }}>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.5)', fontWeight: 700 }}>💡 جرب الكود:</span>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.7)', fontWeight: 900, letterSpacing: '2px', fontFamily: 'monospace' }}>SAUDI15</span>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.4)', fontWeight: 600, marginRight: 'auto' }}>خصم 15%</span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.5)', fontWeight: 700 }}>💡 هل لديك كود خصم؟ أدخله أعلاه واحصل على خصمك الفوري!</span>
                     </div>
                   </div>
                 </div>
@@ -464,7 +550,7 @@ export default function CheckoutPage() {
                     padding: '1rem', borderRadius: '12px',
                     background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
                   }}>
-                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق (15%)</span>
+                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق ({Math.round(appliedDiscount * 100)}%)</span>
                     <span style={{ color: '#10b981' }}>- {discountAmount?.toLocaleString()} ر.س</span>
                   </div>
                 )}

@@ -57,7 +57,7 @@ export default function EngineeringSystems() {
   return (
     <section style={{ 
       padding: '8rem 2rem', 
-      background: '#050508',
+      background: 'var(--surface-hover)',
       position: 'relative',
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
@@ -73,12 +73,12 @@ export default function EngineeringSystems() {
           </div>
           <h2 style={{ 
             fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 950, 
-            color: '#ffffff', lineHeight: 1.1, marginBottom: '1.5rem' 
+            color: 'var(--text-primary)', lineHeight: 1.1, marginBottom: '1.5rem' 
           }}>
              حدد <span style={{ color: '#e11d48' }}>النظام</span> الذي ترغب في ترقيته
           </h2>
           <p style={{ 
-            color: 'rgba(255,255,255,0.35)', fontSize: '1rem', lineHeight: 1.7, fontWeight: 500 
+            color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.7, fontWeight: 500 
           }}>
              استكشف عالم الأجزاء المعقدة المصممة خصيصاً لتفوق سيارتك.
           </p>
@@ -98,18 +98,18 @@ export default function EngineeringSystems() {
                 onMouseEnter={() => setHoveredId(system.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{
-                  background: isHovered ? 'rgba(20,20,25,0.95)' : 'rgba(12,12,16,0.9)',
+                  background: 'var(--surface)',
                   borderRadius: '24px',
                   padding: '2.5rem',
-                  border: `1px solid ${isHovered ? `${system.color}40` : 'rgba(255,255,255,0.04)'}`,
+                  border: `1px solid ${isHovered ? `${system.color}40` : 'var(--border)'}`,
                   transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
                   position: 'relative',
                   overflow: 'hidden',
                   cursor: 'default',
                   transform: isHovered ? 'translateY(-12px)' : 'translateY(0)',
                   boxShadow: isHovered 
-                    ? `0 30px 80px rgba(0,0,0,0.6), 0 0 40px ${system.glow}` 
-                    : '0 4px 20px rgba(0,0,0,0.3)',
+                    ? `0 30px 80px rgba(0,0,0,0.06), 0 0 40px ${system.glow}` 
+                    : 'var(--card-shadow)',
                 }}
               >
                 {/* Muted Glow Background */}
@@ -124,7 +124,7 @@ export default function EngineeringSystems() {
                 {/* Technical Label */}
                 <div style={{ 
                   position: 'absolute', top: '1.5rem', right: '1.5rem', 
-                  fontSize: '0.6rem', fontWeight: 800, color: 'rgba(255,255,255,0.15)',
+                  fontSize: '0.6rem', fontWeight: 800, color: 'rgba(0,0,0,0.15)',
                   letterSpacing: '2px', textTransform: 'uppercase'
                 }}>
                   [ {system.eng} ]
@@ -146,14 +146,14 @@ export default function EngineeringSystems() {
                 {/* Title */}
                 <h3 style={{ 
                   fontSize: '1.6rem', fontWeight: 950, marginBottom: '1rem', 
-                  color: '#fff', letterSpacing: '-0.3px' 
+                  color: 'var(--text-primary)', letterSpacing: '-0.3px' 
                 }}>
                   {system.name}
                 </h3>
 
                 {/* Description - smaller, more transparent */}
                 <p style={{ 
-                  color: 'rgba(255,255,255,0.3)', lineHeight: 1.7, 
+                  color: 'var(--text-secondary)', lineHeight: 1.7, 
                   marginBottom: '2rem', fontSize: '0.92rem', fontWeight: 500 
                 }}>
                   {system.desc}
@@ -166,25 +166,25 @@ export default function EngineeringSystems() {
                       key={cat}
                       onClick={() => handleCategoryClick(cat)}
                       style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.06)',
+                        background: 'rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border)',
                         padding: '0.5rem 1.2rem',
                         borderRadius: '12px',
                         fontSize: '0.85rem',
                         fontWeight: 600,
-                        color: 'rgba(255,255,255,0.45)',
+                        color: 'var(--text-secondary)',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease'
                       }}
                       onMouseOver={e => {
                         e.currentTarget.style.borderColor = `${system.color}60`;
-                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.color = system.color;
                         e.currentTarget.style.background = `${system.color}10`;
                       }}
                       onMouseOut={e => {
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                        e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                        e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
                       }}
                     >
                       {cat}
@@ -194,7 +194,7 @@ export default function EngineeringSystems() {
 
                 {/* Explore Button - appears on hover */}
                 <button 
-                  onClick={() => router.push(`/products?categories=${encodeURIComponent(system.categories.join(','))}`)}
+                  onClick={() => router.push(`/products?multi_search=${encodeURIComponent(system.categories.join(','))}`)}
                   style={{ 
                     background: 'none', border: 'none', color: system.color, 
                     fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', 

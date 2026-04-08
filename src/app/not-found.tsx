@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <main style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#0a0a0a', padding: '2rem', textAlign: 'center'
+      background: 'var(--background)', padding: '2rem', textAlign: 'center'
     }}>
       <div style={{ maxWidth: '600px' }}>
         <div style={{
@@ -15,10 +15,10 @@ export default function NotFound() {
           404
         </div>
 
-        <h1 style={{ fontSize: '2rem', fontWeight: 950, color: '#fff', marginBottom: '1rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 950, color: 'var(--text-primary)', marginBottom: '1rem' }}>
           الصفحة غير موجودة
         </h1>
-        <p style={{ color: '#888', fontSize: '1.15rem', fontWeight: 500, lineHeight: 1.8, marginBottom: '3rem' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.15rem', fontWeight: 500, lineHeight: 1.8, marginBottom: '3rem' }}>
           يبدو أن الصفحة التي تبحث عنها قد تم نقلها أو حذفها أو أن الرابط غير صحيح.
         </p>
 
@@ -33,9 +33,9 @@ export default function NotFound() {
           </Link>
           <Link href="/products" style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
-            background: '#1a1a1a', color: '#fff', padding: '1rem 2rem',
+            background: 'var(--surface)', color: 'var(--text-primary)', padding: '1rem 2rem',
             borderRadius: '16px', fontWeight: 900, textDecoration: 'none',
-            border: '1px solid #333', fontSize: '1rem'
+            border: '1px solid var(--border)', fontSize: '1rem'
           }}>
             🔍 تصفح المنتجات
           </Link>

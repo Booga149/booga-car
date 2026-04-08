@@ -262,12 +262,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200000,
-      background: 'rgba(0, 0, 0, 0.92)', backdropFilter: 'blur(30px)',
+      background: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(30px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1.5rem'
     }} onClick={onClose}>
       
-      <div style={{
-        background: '#050508', borderRadius: '32px', width: '100%', maxWidth: '1100px',
+      <div className="auth-modal-container" style={{
+        background: 'var(--surface)', borderRadius: '32px', width: '100%', maxWidth: '1100px',
         border: '1px solid rgba(255,215,0,0.12)', 
         boxShadow: '0 25px 80px rgba(0,0,0,0.6), 0 0 100px rgba(255,215,0,0.03), 0 0 0 1px rgba(255,255,255,0.03) inset', 
         overflow: 'hidden',
@@ -278,9 +278,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         {/* Close Button */}
         <button onClick={onClose} style={{ 
           position: 'absolute', top: '1.2rem', left: '1.2rem', 
-          background: 'rgba(255,255,255,0.06)', 
-          border: '1px solid rgba(255,255,255,0.08)', 
-          color: 'rgba(255,255,255,0.6)', width: '40px', height: '40px', 
+          background: 'rgba(0,0,0,0.06)', 
+          border: '1px solid rgba(0,0,0,0.08)', 
+          color: 'var(--text-secondary)', width: '40px', height: '40px', 
           borderRadius: '50%', cursor: 'pointer', zIndex: 50, 
           display: 'flex', alignItems: 'center', justifyContent: 'center', 
           transition: 'all 0.2s', backdropFilter: 'blur(10px)',
@@ -292,7 +292,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         {showSplash && (
           <div style={{
             position: 'absolute', inset: 0, zIndex: 100,
-            background: '#000', 
+            background: 'var(--surface)', 
             display: 'flex', flexDirection: 'column',
             justifyContent: 'center', alignItems: 'center', gap: '1.5rem',
             animation: 'splashFadeOut 0.8s ease 2.8s forwards'
@@ -308,7 +308,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             
             <div style={{ position: 'relative' }}>
               <div style={{ 
-                fontSize: '4.5rem', fontWeight: 950, letterSpacing: '-3px',
+                fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', fontWeight: 950, letterSpacing: '-3px',
                 background: 'linear-gradient(135deg, #FFD700, #FFA500, #FFD700)',
                 backgroundSize: '200% 200%',
                 WebkitBackgroundClip: 'text',
@@ -355,7 +355,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
           {/* Layer 1: Deep space base */}
           <div style={{ 
             position: 'absolute', inset: 0, 
-            background: 'radial-gradient(ellipse at 60% 20%, #0d0720 0%, #060310 40%, #000005 100%)',
+            background: 'radial-gradient(ellipse at 60% 20%, #ffffff 0%, #f1f3f7 40%, var(--background) 100%)',
           }} />
 
           {/* Layer 2: Car track / road texture */}
@@ -621,7 +621,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         </div>
 
         {/* === RIGHT SIDE: Form === */}
-        <div style={{ 
+        <div className="auth-form-side" style={{ 
           flex: '1', padding: '2.5rem 2.8rem', display: 'flex', flexDirection: 'column', 
           justifyContent: 'center', 
           background: 'linear-gradient(180deg, #0a0a0f 0%, #060609 100%)',
@@ -752,7 +752,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 />
                 <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
                   padding: '1.1rem', background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: '#000', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
                   cursor: 'pointer', fontSize: '1rem',
                   boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
                   transition: 'all 0.3s',
@@ -789,7 +789,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
                   padding: '1.1rem', 
                   background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: '#000', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
                   cursor: 'pointer', fontSize: '1rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
                   boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
@@ -865,7 +865,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
                   padding: '1.1rem', 
                   background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: '#000', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
                   fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', 
                   transition: 'all 0.3s',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',

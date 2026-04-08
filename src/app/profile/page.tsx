@@ -61,8 +61,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [myProducts, setMyProducts] = useState<any[]>([]);
   const router = useRouter();
-  const isMerchant = !!profile?.cr_number;
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'superadmin' || user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin');
+  const isMerchant = !!profile?.cr_number || profile?.role === 'seller';
+  const isAdmin = profile?.role === 'admin';
 
   useEffect(() => {
     async function getData() {
@@ -73,8 +73,8 @@ export default function ProfilePage() {
         const { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (prof) {
           setProfile(prof);
-          const isAdm = prof?.role === 'admin' || prof?.role === 'superadmin' || session.user.email?.startsWith('mrmrx2824') || session.user.email?.startsWith('admin');
-          if (prof?.cr_number && !isAdm) {
+          const isAdm = prof?.role === 'admin';
+          if (prof?.role === 'seller' && !isAdm) {
             setActiveTab('store');
           } else if (isAdm) {
             setActiveTab('orders');
@@ -483,9 +483,13 @@ export default function ProfilePage() {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} color="var(--primary)" /> {order.shipping_address || '—'}</span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}><Package size={16} color="var(--primary)" /> {order.order_items?.length || 0} قطع</span>
                   </div>
-                  {order.status === 'قيد المراجعة' && (
-                    <button onClick={() => cancelOrder(order.id)} style={{ color: 'var(--error)', background: 'transparent', border: '1px solid var(--error)', padding: '0.7rem 1.4rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: '0.2s' }}>إلغاء الطلب</button>
-                  )}
+                  <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                    <Link href={`/invoice?id=${order.id}`} style={{ color: 'var(--primary)', background: 'rgba(225,29,72,0.06)', border: '1px solid rgba(225,29,72,0.15)', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: 800, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📄 الفاتورة</Link>
+                    <Link href={`/track-order?id=${order.id}`} style={{ color: 'var(--text-secondary)', background: 'var(--surface-hover)', border: '1px solid var(--border)', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: 800, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📦 تتبع</Link>
+                    {order.status === 'قيد المراجعة' && (
+                      <button onClick={() => cancelOrder(order.id)} style={{ color: 'var(--error)', background: 'transparent', border: '1px solid var(--error)', padding: '0.6rem 1.2rem', borderRadius: '10px', cursor: 'pointer', fontWeight: 800, fontSize: '0.82rem', transition: '0.2s' }}>إلغاء</button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

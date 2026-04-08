@@ -22,7 +22,7 @@
 body {
   background-color: var(--background);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Cairo', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -86,13 +86,38 @@ a {
     display: none !important;
   }
 
+  /* ─── Hero BOOGA CAR Logo visible on mobile ─── */
+  .hero-logo-section h1 {
+    font-size: clamp(2.8rem, 13vw, 4rem) !important;
+    letter-spacing: 0.02em !important;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  }
+  .hero-logo-section {
+    margin-bottom: 1rem !important;
+  }
+
   .mobile-hide-section {
     display: none !important;
   }
 
+  /* ─── SmartSearch: Mobile Simplification ─── */
+  .search-tabs {
+    display: none !important;
+  }
+
+  .search-quick-actions {
+    display: none !important;
+  }
+
+  .search-submit-btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 14px !important;
+  }
+
   /* Bottom nav clearance */
   body {
-    padding-bottom: 130px;
+    padding-bottom: 80px;
   }
 
   /* Hide the floating WhatsApp bubble on mobile (replaced by CTA bar) */
@@ -105,10 +130,15 @@ a {
     display: none !important;
   }
 
-  /* Compact product grid on mobile */
+  /* Hide admin/merchant top bar on mobile */
+  .desktop-top-bar {
+    display: none !important;
+  }
+
+  /* Compact product grid on mobile — single column for full readability */
   .product-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 0.6rem !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
 
   /* ─── Mobile ProductCard simplification ─── */
@@ -117,56 +147,62 @@ a {
   }
 
   .card-image-wrap {
-    height: 140px !important;
+    height: 200px !important;
   }
 
   .gm-product-card {
-    border-radius: 14px !important;
+    border-radius: 16px !important;
   }
 
   .gm-product-card > div:last-child {
-    padding: 0.7rem !important;
-    gap: 0.4rem !important;
+    padding: 1rem !important;
+    gap: 0.6rem !important;
   }
 
   .gm-product-card h3 {
-    font-size: 0.82rem !important;
+    font-size: 1rem !important;
     min-height: unset !important;
-    -webkit-line-clamp: 2 !important;
-    line-clamp: 2 !important;
+    -webkit-line-clamp: 3 !important;
+    line-clamp: 3 !important;
   }
 
   /* Compact price on mobile */
   .gm-product-card span[style*="1.7rem"] {
-    font-size: 1.1rem !important;
+    font-size: 1.3rem !important;
   }
 
   /* Compact add to cart button */
   .gm-product-card .btn-tap {
-    padding: 0.6rem !important;
-    font-size: 0.8rem !important;
-    border-radius: 10px !important;
+    padding: 0.8rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 12px !important;
     margin-top: 0.3rem !important;
   }
 
   /* Wishlist button always visible on mobile */
   .card-wishlist-btn {
     opacity: 1 !important;
-    width: 34px !important;
-    height: 34px !important;
+    width: 38px !important;
+    height: 38px !important;
   }
 
-  /* ─── Skeleton Loading ─── */
+  /* Products page container tighter padding */
+  .products-page-container {
+    padding: 1.5rem 0.8rem 5rem !important;
+  }
+
+  /* ─── Skeleton Loading (Light Theme) ─── */
   .skeleton-card {
-    background: rgba(18,18,24,0.95);
+    background: #ffffff;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
   }
 
   .skeleton-image {
     height: 140px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.03) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
@@ -174,7 +210,7 @@ a {
   .skeleton-line {
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.03) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
@@ -192,6 +228,63 @@ a {
     background: linear-gradient(90deg, rgba(225,29,72,0.05) 25%, rgba(225,29,72,0.1) 50%, rgba(225,29,72,0.05) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* ─── Product Detail Page: Single Column on Mobile ─── */
+  .product-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .product-detail-container {
+    padding: 5rem 1rem 2rem !important;
+  }
+
+  .product-detail-image {
+    min-height: 250px !important;
+    padding: 1rem !important;
+  }
+
+  /* ─── Auth Modal: Mobile Full-Screen ─── */
+  .auth-modal-container {
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    flex-direction: column !important;
+  }
+
+  .auth-hero {
+    display: none !important;
+  }
+
+  .auth-form-side {
+    min-width: 100% !important;
+    width: 100% !important;
+    padding: 1.5rem !important;
+  }
+
+  /* ─── Footer compact on mobile ─── */
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  /* ─── Mobile Sticky CTA on Product Detail ─── */
+  .mobile-sticky-cta {
+    display: block !important;
+    position: fixed;
+    bottom: 70px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--surface);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  }
+
+  /* ─── General: prevent horizontal overflow ─── */
+  body, main {
+    overflow-x: hidden;
   }
 }
 

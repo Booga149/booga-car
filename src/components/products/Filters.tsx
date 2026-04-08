@@ -27,9 +27,9 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
     borderRadius: '12px',
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
-    border: active ? '1px solid rgba(225,29,72,0.5)' : '1px solid rgba(255,255,255,0.12)',
-    background: active ? 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(225,29,72,0.1))' : 'rgba(255,255,255,0.05)',
-    color: active ? '#f43f5e' : 'rgba(255,255,255,0.6)',
+    border: active ? '1px solid rgba(225,29,72,0.5)' : '1px solid var(--border)',
+    background: active ? 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(225,29,72,0.1))' : 'var(--surface-hover)',
+    color: active ? '#f43f5e' : 'var(--text-secondary)',
     fontWeight: active ? 800 : 600,
     fontSize: '0.82rem',
     display: 'flex',
@@ -44,18 +44,18 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
       flexShrink: 0,
       padding: '1.8rem',
       borderRadius: '20px',
-      border: '1px solid rgba(255,255,255,0.1)',
-      background: 'linear-gradient(180deg, rgba(16,16,22,0.98), rgba(10,10,14,0.95))',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
       position: 'sticky',
       top: '100px',
       height: 'fit-content',
       maxHeight: 'calc(100vh - 120px)',
       overflowY: 'auto',
-      boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+      boxShadow: 'var(--card-shadow)',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(225,29,72,0.15)' }}>
-        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 950, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 950, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <SlidersHorizontal size={18} color="#e11d48" /> تصفية النتائج
         </h3>
         <button 
@@ -81,9 +81,9 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
           onChange={e => setFilters({...filters, category: e.target.value})} 
           style={{ 
             width: '100%', padding: '0.8rem 1rem', 
-            background: 'rgba(255,255,255,0.06)', 
-            border: '1px solid rgba(255,255,255,0.12)', 
-            borderRadius: '12px', color: '#ffffff', 
+            background: 'var(--background)', 
+            border: '1px solid var(--border)', 
+            borderRadius: '12px', color: 'var(--text-primary)', 
             outline: 'none', fontSize: '0.88rem', fontWeight: 700,
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -109,40 +109,39 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
             style={{
               width: '100%', height: '4px',
               appearance: 'none', WebkitAppearance: 'none',
-              background: `linear-gradient(to left, rgba(225,29,72,0.5) ${((Number(filters.maxPrice) || 2000) / 2000) * 100}%, rgba(255,255,255,0.08) 0%)`,
+              background: `linear-gradient(to left, rgba(225,29,72,0.5) ${((Number(filters.maxPrice) || 2000) / 2000) * 100}%, var(--border) 0%)`,
               borderRadius: '4px', outline: 'none', cursor: 'pointer',
             }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.6rem' }}>
-            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>0</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 700 }}>0</span>
             <span style={{ fontSize: '0.85rem', color: '#e11d48', fontWeight: 900 }}>
               {filters.maxPrice ? `حتى ${filters.maxPrice} ر.س` : 'الكل'}
             </span>
-            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>2000+</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 700 }}>2000+</span>
           </div>
         </div>
       </div>
 
-      {/* Brand Chips */}
+      {/* Brand Select */}
       <div style={{ marginBottom: '2rem' }}>
         <h4 style={sectionTitle}><span style={{ width: '3px', height: '14px', background: '#e11d48', borderRadius: '2px', display: 'inline-block' }} />الماركة</h4>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto', paddingRight: '0.3rem' }}>
-          <button 
-            onClick={() => setFilters({...filters, brand: ''})}
-            style={chipStyle(filters.brand === '')}
-          >
-            {filters.brand === '' && '✔'} الكل
-          </button>
-          {brands.map(brand => (
-            <button 
-              key={brand}
-              onClick={() => setFilters({...filters, brand})}
-              style={chipStyle(filters.brand === brand)}
-            >
-              {filters.brand === brand && '✔'} {brand}
-            </button>
-          ))}
-        </div>
+        <select 
+          value={filters.brand} 
+          onChange={e => setFilters({...filters, brand: e.target.value})} 
+          style={{ 
+            width: '100%', padding: '0.8rem 1rem', 
+            background: 'var(--background)', 
+            border: '1px solid var(--border)', 
+            borderRadius: '12px', color: 'var(--text-primary)', 
+            outline: 'none', fontSize: '0.88rem', fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <option value="">الكل</option>
+          {brands.map(brand => <option key={brand} value={brand}>{brand}</option>)}
+        </select>
       </div>
 
       {/* Condition Chips */}
@@ -158,9 +157,9 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
                 style={{
                   flex: 1, padding: '0.6rem', borderRadius: '12px', cursor: 'pointer', 
                   transition: 'all 0.3s ease', 
-                  border: active ? '1px solid rgba(225,29,72,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                  background: active ? 'linear-gradient(135deg, #be123c, #e11d48)' : 'rgba(255,255,255,0.03)',
-                  color: active ? '#fff' : 'rgba(255,255,255,0.5)', 
+                  border: active ? '1px solid rgba(225,29,72,0.3)' : '1px solid var(--border)',
+                  background: active ? 'linear-gradient(135deg, #be123c, #e11d48)' : 'var(--background)',
+                  color: active ? '#fff' : 'var(--text-secondary)', 
                   fontWeight: 800, fontSize: '0.82rem',
                   boxShadow: active ? '0 4px 15px rgba(225,29,72,0.25)' : 'none',
                 }}
@@ -186,16 +185,16 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
                   display: 'flex', alignItems: 'center', gap: '0.6rem',
                   padding: '0.6rem 0.8rem', borderRadius: '12px', cursor: 'pointer',
                   transition: 'all 0.3s ease',
-                  border: active ? '1px solid rgba(201,161,74,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                  border: active ? '1px solid rgba(201,161,74,0.3)' : '1px solid var(--border)',
                   background: active ? 'rgba(201,161,74,0.1)' : 'transparent',
-                  color: active ? '#C9A14A' : 'rgba(255,255,255,0.5)',
+                  color: active ? '#C9A14A' : 'var(--text-secondary)',
                   fontWeight: 700, fontSize: '0.82rem',
                   width: '100%', textAlign: 'right',
                 }}
               >
                 <span style={{ display: 'flex', gap: '2px' }}>
                   {[...Array(stars)].map((_,i) => <Star key={i} size={14} fill="#C9A14A" color="#C9A14A" />)}
-                  {[...Array(5-stars)].map((_,i) => <Star key={i} size={14} fill="transparent" color="rgba(255,255,255,0.15)" />)}
+                  {[...Array(5-stars)].map((_,i) => <Star key={i} size={14} fill="transparent" color="var(--border)" />)}
                 </span>
                 <span>وأكثر</span>
                 {active && <span style={{ marginRight: 'auto', fontSize: '0.7rem' }}>✔</span>}
@@ -209,28 +208,27 @@ export default function Filters({ filters, setFilters, clearFilters, brands, cat
       <style jsx>{`
         aside::-webkit-scrollbar { width: 4px; }
         aside::-webkit-scrollbar-track { background: transparent; }
-        aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        aside::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        aside::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
         input[type=range]::-webkit-slider-thumb {
           appearance: none; -webkit-appearance: none;
           width: 20px; height: 20px; border-radius: 50%;
           background: linear-gradient(135deg, #e11d48, #f43f5e); cursor: pointer;
           box-shadow: 0 0 12px rgba(225,29,72,0.5);
-          border: 2px solid rgba(255,255,255,0.3);
+          border: 2px solid var(--surface);
           transition: all 0.2s ease;
         }
         input[type=range]::-webkit-slider-thumb:hover {
           transform: scale(1.2);
           box-shadow: 0 0 20px rgba(225,29,72,0.6);
         }
-        select option { background: #0c0c10; color: #fff; }
+        select option { background: var(--surface); color: var(--text-primary); }
         aside button:hover {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
         }
         aside select:hover {
           border-color: rgba(225,29,72,0.3) !important;
-          background: rgba(255,255,255,0.08) !important;
+          background: var(--surface-hover) !important;
         }
       `}</style>
     </aside>

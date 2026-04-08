@@ -45,7 +45,7 @@ export default function RecentlyViewed() {
     }}>
       <div style={{ 
         display: 'flex', alignItems: 'center', gap: '0.4rem',
-        color: 'rgba(255,255,255,0.6)', fontSize: '0.78rem', fontWeight: 800,
+        color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 800,
       }}>
         <Clock size={14} />
         شاهدته مؤخراً
@@ -75,8 +75,8 @@ export default function RecentlyViewed() {
               height: '80px',
               borderRadius: '10px',
               overflow: 'hidden',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.03)',
+              border: '1px solid var(--border)',
               marginBottom: '0.3rem',
             }}>
               <img
@@ -93,7 +93,7 @@ export default function RecentlyViewed() {
             <div style={{
               fontSize: '0.65rem',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.6)',
+              color: 'var(--text-secondary)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',

@@ -8,9 +8,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { Heart, ShoppingCart, User, Settings, LogOut, Tag, Trophy, Zap, Hand, Rocket, Lock, Eye, EyeOff, X as XIcon, Car, Wallet, Landmark, ShieldCheck, BarChart3, PackagePlus, Store, Crown, TrendingUp, Package } from 'lucide-react';
 import AuthModal from './AuthModal';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
-  const { user, isAuthModalOpen, authMode, closeAuthModal, openLoginModal, openSignUpModal, signOut } = useAuth();
+  const { user, role, profile: authProfile, isAuthModalOpen, authMode, closeAuthModal, openLoginModal, openSignUpModal, signOut } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const pathname = usePathname();
   
@@ -18,14 +19,16 @@ export default function Navbar() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    if (user?.id) {
+    if (authProfile) {
+      setProfile(authProfile);
+    } else if (user?.id) {
        supabase.from('profiles').select('*').eq('id', user.id).single().then(({data}) => {
          if (data) setProfile(data);
        });
     } else {
        setProfile(null);
     }
-  }, [user]);
+  }, [user, authProfile]);
 
   const handleLogout = async () => {
     try {
@@ -36,8 +39,8 @@ export default function Navbar() {
     }
   };
 
-  const isAdmin = user?.email?.startsWith('mrmrx2824') || user?.email?.startsWith('admin') || profile?.role === 'admin' || profile?.role === 'superadmin';
-  const isMerchant = !!profile?.cr_number;
+  const isAdmin = role === 'admin';
+  const isMerchant = role === 'seller' || !!profile?.cr_number;
   const merchantName = profile?.business_name || profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0];
   const merchantInitial = (profile?.business_name?.charAt(0) || profile?.full_name?.charAt(0) || user?.email?.charAt(0) || '?').toUpperCase();
 
@@ -72,18 +75,18 @@ export default function Navbar() {
           ? 'rgba(5, 5, 12, 0.85)'
           : isMerchant
             ? '#080702'
-            : 'rgba(8, 8, 16, 0.75)',
+            : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(20px)',
         borderBottom: isAdmin
           ? '1px solid rgba(76,201,240,0.2)'
           : isMerchant
             ? '1px solid rgba(212,175,55,0.18)'
-            : '1px solid rgba(255,255,255,0.06)',
+            : '1px solid rgba(0,0,0,0.08)',
         boxShadow: isAdmin
           ? '0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(76,201,240,0.05) inset'
           : isMerchant
             ? '0 4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.06) inset'
-            : '0 4px 30px rgba(0,0,0,0.3)',
+            : '0 4px 30px rgba(0,0,0,0.05)',
         transition: 'all 0.5s ease',
       }}>
 
@@ -176,9 +179,9 @@ export default function Navbar() {
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ position: 'relative' }}>
                 <h1 className="mobile-logo-size" style={{ 
-                  color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : '#ffffff', 
+                  color: isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : 'var(--text-primary)', 
                   margin: 0, fontSize: '1.9rem', fontWeight: 950, letterSpacing: '-1px',
-                  textShadow: isAdmin ? '0 0 20px rgba(76,201,240,0.5)' : isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : '0 0 30px rgba(255,255,255,0.15)',
+                  textShadow: isAdmin ? '0 0 20px rgba(76,201,240,0.5)' : isMerchant ? '0 0 30px rgba(212,175,55,0.3)' : 'none',
                   display: 'flex', alignItems: 'center', gap: '0.4rem'
                 }}>
                   BOOGA <span style={{ color: isAdmin ? '#f43f5e' : isMerchant ? '#FFD700' : '#D4AF37' }}>CAR</span>
@@ -232,6 +235,7 @@ export default function Navbar() {
                 { href: '/', label: 'الرئيسية' },
                 { href: '/products', label: 'قطع الغيار' },
                 { href: '/accessories', label: 'أكسسوارات', isNew: true },
+                { href: '/price-request', label: 'سعّرلي', isNew: true },
                 { href: '/track-order', label: 'تتبع الطلبات' },
                 { href: '/garage', label: 'كراجي' },
                 { href: '/sell', label: 'اعرض قطعة' },
@@ -244,8 +248,8 @@ export default function Navbar() {
                     color: isCTA
                       ? (isAdmin ? '#4cc9f0' : isMerchant ? '#D4AF37' : '#e11d48')
                       : isActive 
-                        ? (isRegular ? '#ffffff' : 'var(--text-primary)') 
-                        : (isRegular ? 'rgba(255,255,255,0.55)' : 'var(--text-secondary)'),
+                        ? 'var(--text-primary)' 
+                        : 'var(--text-secondary)',
                     fontWeight: isActive || isCTA ? 800 : 600,
                     fontSize: '0.88rem',
                     padding: '1rem 0.3rem',
@@ -255,8 +259,8 @@ export default function Navbar() {
                     letterSpacing: '0.3px',
                     textShadow: isCTA && isAdmin ? '0 0 15px rgba(76,201,240,0.4)' : isCTA && isMerchant ? '0 0 15px rgba(212,175,55,0.4)' : 'none',
                   }}
-                    onMouseOver={e => { if (isRegular) { e.currentTarget.style.color = '#ffffff'; } }}
-                    onMouseOut={e => { if (isRegular && !isActive && !isCTA) { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}
+                    onMouseOver={e => { if (isRegular) { e.currentTarget.style.color = 'var(--primary)'; } }}
+                    onMouseOut={e => { if (isRegular && !isActive && !isCTA) { e.currentTarget.style.color = 'var(--text-secondary)'; } }}
                   >
                     {link.label}
                     {link.href === '/sell' && !isMerchant && !isAdmin && <Tag size={16} />}
@@ -282,18 +286,19 @@ export default function Navbar() {
 
           {/* Right Side Actions */}
           <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+            {user && <NotificationBell />}
             {!isMerchant && (
               <Link href="/wishlist" style={{ 
                 textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', 
                 width: '46px', height: '46px', borderRadius: '14px', 
-                background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(255,255,255,0.06)',
+                background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(0,0,0,0.02)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
-                border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(255,255,255,0.1)', 
+                border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(0,0,0,0.05)', 
                 cursor: 'pointer',
-                color: isAdmin || isMerchant ? 'var(--text-primary)' : 'rgba(255,255,255,0.7)'
+                color: isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'
               }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = isAdmin || isMerchant ? 'var(--border)' : 'rgba(255,255,255,0.1)'; }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'; e.currentTarget.style.borderColor = isAdmin || isMerchant ? 'var(--border)' : 'rgba(0,0,0,0.05)'; }}
               >
                 <Heart size={24} />
               </Link>
@@ -305,13 +310,13 @@ export default function Navbar() {
                 style={{ 
                   position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', 
                   width: '46px', height: '46px', borderRadius: '14px', 
-                  background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(255,255,255,0.06)',
+                  background: isAdmin || isMerchant ? 'var(--surface-hover)' : 'rgba(0,0,0,0.02)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
-                  border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(255,255,255,0.1)',
-                  color: isAdmin || isMerchant ? 'var(--text-primary)' : 'rgba(255,255,255,0.7)'
+                  border: isAdmin || isMerchant ? '1px solid var(--border)' : '1px solid rgba(0,0,0,0.05)',
+                  color: isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'
                 }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = '#ffffff'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'rgba(255,255,255,0.7)'; }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isAdmin || isMerchant ? 'var(--text-primary)' : 'var(--text-secondary)'; }}
               >
                 <ShoppingCart size={24} />
                 {cartCount > 0 && (
@@ -616,13 +621,13 @@ export default function Navbar() {
                 <button 
                   onClick={openLoginModal} 
                   style={{
-                    background: 'transparent', color: 'rgba(255,255,255,0.7)', 
-                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'transparent', color: 'var(--text-primary)', 
+                    border: '1px solid rgba(0,0,0,0.1)',
                     padding: '0.7rem 1.6rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, 
                     transition: 'all 0.3s ease', fontSize: '0.88rem'
                   }}
-                  onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; }}
-                  onMouseOut={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+                  onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'; }}
+                  onMouseOut={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'; }}
                 >
                   دخول
                 </button>

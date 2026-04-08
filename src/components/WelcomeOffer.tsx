@@ -65,7 +65,7 @@ export default function WelcomeOffer() {
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
       zIndex: 2000000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
       padding: '1.5rem', 
-      background: 'rgba(0, 0, 0, 0.92)',
+      background: 'rgba(255, 255, 255, 0.92)',
       backdropFilter: 'blur(20px)',
       animation: 'offerOverlayIn 0.4s ease',
       overflowY: 'auto',
@@ -77,7 +77,7 @@ export default function WelcomeOffer() {
         border: '1px solid rgba(255,215,0,0.15)',
         boxShadow: '0 50px 100px rgba(0,0,0,0.7), 0 0 80px rgba(255,215,0,0.05)',
         position: 'relative', overflow: 'hidden',
-        background: '#050508',
+        background: 'var(--surface)',
         animation: 'offerCardIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         transform: isRevealed ? 'scale(1)' : 'scale(0.95)',
         opacity: isRevealed ? 1 : 0,
@@ -92,7 +92,7 @@ export default function WelcomeOffer() {
           {/* Base gradient */}
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(160deg, #1a1000 0%, #0d0800 30%, #151005 60%, #000 100%)',
+            background: 'linear-gradient(160deg, #fffcf0 0%, #fff6e0 30%, #fff9ec 60%, var(--surface) 100%)',
           }} />
           
           {/* Golden light beam */}
@@ -184,7 +184,7 @@ export default function WelcomeOffer() {
             display: 'flex', alignItems: 'center', gap: '0.5rem',
             zIndex: 10,
           }}>
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 700 }}>ينتهي خلال</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 700 }}>ينتهي خلال</span>
             <div style={{ display: 'flex', gap: '0.3rem' }}>
               {[padNum(countdown.h), padNum(countdown.m), padNum(countdown.s)].map((val, i) => (
                 <React.Fragment key={i}>
@@ -206,7 +206,7 @@ export default function WelcomeOffer() {
         <div style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)', textAlign: 'center' }}>
           <h2 style={{ 
             fontSize: 'clamp(1.3rem, 4vw, 2rem)', fontWeight: 950, marginBottom: '0.8rem', 
-            color: 'white', lineHeight: 1.2 
+            color: 'var(--text-primary)', lineHeight: 1.2 
           }}>
             مرحباً بك في{' '}
             <span style={{ 
@@ -217,7 +217,7 @@ export default function WelcomeOffer() {
           </h2>
            
           <p style={{ 
-            color: 'rgba(255,255,255,0.45)', fontSize: '1rem', fontWeight: 600, 
+            color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 600, 
             lineHeight: 1.6, marginBottom: '2rem' 
           }}>
             يسعدنا اختيارك لنا. احصل على خصم{' '}
@@ -245,7 +245,7 @@ export default function WelcomeOffer() {
             
             <div style={{ textAlign: 'right', position: 'relative', zIndex: 1 }}>
               <div style={{ 
-                fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, 
+                fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 800, 
                 textTransform: 'uppercase', marginBottom: '0.3rem', letterSpacing: '1px',
               }}>كود الخصم الحصري</div>
               <div style={{ 
@@ -304,7 +304,7 @@ export default function WelcomeOffer() {
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: '0.4rem',
-                color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem', fontWeight: 700,
+                color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700,
               }}>
                 <span style={{ color: 'rgba(255,215,0,0.5)' }}>{item.icon}</span>
                 {item.text}
@@ -316,12 +316,12 @@ export default function WelcomeOffer() {
             onClick={handleClose}
             style={{ 
               background: 'transparent', border: 'none', 
-              color: 'rgba(255,255,255,0.3)', 
+              color: 'var(--text-secondary)', 
               fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
               transition: 'color 0.2s',
             }}
-            onMouseOver={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-            onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+            onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
           >
             سأكتشف الموقع أولاً
           </button>
@@ -332,20 +332,20 @@ export default function WelcomeOffer() {
           onClick={handleClose}
           style={{ 
             position: 'absolute', top: '1.2rem', left: '1.2rem', 
-            background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', 
-            border: '1px solid rgba(255,255,255,0.08)', 
+            background: 'rgba(0,0,0,0.06)', color: 'var(--text-secondary)', 
+            border: '1px solid rgba(0,0,0,0.08)', 
             width: '38px', height: '38px', borderRadius: '50%', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s', backdropFilter: 'blur(10px)',
             zIndex: 20,
           }}
           onMouseOver={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-            e.currentTarget.style.color = 'white';
+            e.currentTarget.style.background = 'rgba(0,0,0,0.12)';
+            e.currentTarget.style.color = 'var(--text-primary)';
           }}
           onMouseOut={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+            e.currentTarget.style.background = 'rgba(0,0,0,0.06)';
+            e.currentTarget.style.color = 'var(--text-secondary)';
           }}
         >
           <X size={18} />

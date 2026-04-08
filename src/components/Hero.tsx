@@ -17,7 +17,7 @@ export default function Hero() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#000',
+      background: 'var(--background)',
     }}>
 
       {/* ─── Car Background Image ─── */}
@@ -51,46 +51,26 @@ export default function Hero() {
 
         {/* ──── LUXURY LOGO ──── */}
         <div className="hero-logo-section" style={{ marginBottom: 'clamp(1.5rem, 4vw, 3rem)' }}>
-          {/* Gear Icon */}
-          <div style={{ 
-            fontSize: '2.5rem', marginBottom: '1.5rem', 
-            filter: 'drop-shadow(0 0 20px rgba(225,29,72,0.4))',
-          }}>
-            ⚙️
-          </div>
           
-          {/* BOOGA - Massive Bold */}
+          {/* BOOGA CAR - Big, Bold, Clear */}
           <h1 style={{
-            fontSize: 'clamp(4rem, 12vw, 9rem)',
+            fontSize: 'clamp(3rem, 11vw, 7rem)',
             fontWeight: 950,
             color: '#ffffff',
-            lineHeight: 0.85,
-            letterSpacing: '0.15em',
+            lineHeight: 1,
+            letterSpacing: '0.05em',
             margin: 0,
-            textShadow: '0 0 80px rgba(225,29,72,0.3)',
+            textShadow: '0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.9)',
           }}>
-            BOOGA
+            BOOGA <span style={{ color: '#D4AF37' }}>CAR</span>
           </h1>
-          
-          {/* CAR - Gold Bold underneath */}
-          <div style={{
-            fontSize: 'clamp(1.2rem, 3vw, 2rem)',
-            fontWeight: 700,
-            color: '#D4AF37',
-            letterSpacing: '1.2em',
-            marginTop: '0.5rem',
-            textTransform: 'uppercase',
-            textShadow: '0 0 20px rgba(212,175,55,0.4)',
-          }}>
-            CAR
-          </div>
           
           {/* Gold Line */}
           <div style={{
             width: '80px',
-            height: '1.5px',
+            height: '2px',
             background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)',
-            margin: '1.2rem auto 0',
+            margin: '1rem auto 0',
             boxShadow: '0 0 15px rgba(212,175,55,0.4)',
           }} />
         </div>
@@ -98,24 +78,24 @@ export default function Hero() {
         {/* ──── Tagline ──── */}
         <p style={{
           fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-          color: 'rgba(255,255,255,0.6)',
+          color: 'rgba(255,255,255,0.8)',
           maxWidth: '600px',
           margin: '0 auto clamp(2rem, 5vw, 4rem)',
           lineHeight: 1.8,
           fontWeight: 500,
           letterSpacing: '0.5px',
         }}>
-          أداء أقوى يبدأ بقطع <span style={{ color: '#fff', fontWeight: 800 }}>أصلية موثوقة</span>
+          أداء أقوى يبدأ بقطع <span style={{ color: '#ffffff', fontWeight: 800 }}>أصلية موثوقة</span>
         </p>
 
         {/* ──── Search Bar ──── */}
         <div style={{ 
           position: 'relative', maxWidth: '800px', margin: '0 auto',
-          background: 'rgba(255,255,255,0.1)',
+          background: 'var(--surface)',
           padding: '0.4rem',
           borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.18)',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--card-shadow)',
           backdropFilter: 'blur(10px)',
         }}>
            <SmartSearch />
@@ -146,7 +126,7 @@ export default function Hero() {
                 borderRadius: '16px',
                 overflow: 'hidden',
                 cursor: 'pointer',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid var(--border)',
                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
@@ -195,7 +175,7 @@ export default function Hero() {
               }}>
                 {stat.icon} {stat.label}
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff' }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff' }}>
                 {stat.val}
               </div>
             </div>
@@ -207,7 +187,7 @@ export default function Hero() {
       <div className="hero-scroll-indicator" style={{ 
         position: 'absolute', bottom: '2.5rem', zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center', 
-        gap: '0.6rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: 600,
+        gap: '0.6rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600,
         letterSpacing: '2px',
       }}>
         اكتشف المزيد
@@ -235,12 +215,24 @@ export default function Hero() {
         @media (max-width: 768px) {
           .hero-section {
             min-height: auto !important;
-            padding: 5rem 0 1.5rem !important;
+            padding: 5rem 0 2rem !important;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
           }
           .hero-bg-image {
             display: none !important;
           }
           .hero-logo-section {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem !important;
+          }
+          .hero-logo-section h1 {
+            font-size: clamp(2.8rem, 13vw, 4rem) !important;
+            letter-spacing: 0.02em !important;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+          }
+          .cat-card {
             display: none !important;
           }
           .hero-stats-section {

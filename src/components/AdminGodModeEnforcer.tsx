@@ -6,40 +6,14 @@ import { Crosshair } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminGodModeEnforcer() {
-  const { user, loading } = useAuth();
+  const { user, role, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
-
-    if (!user?.email) {
-      setIsAdmin(false);
-      return;
-    }
-
-    // Fastest check: by email prefix
-    const adminByEmail =
-      user.email.startsWith('mrmrx2824') ||
-      user.email.startsWith('admin');
-
-    if (adminByEmail) {
-      setIsAdmin(true);
-      return;
-    }
-
-    // Fallback: check role column in profiles table
-    supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.role === 'admin' || data?.role === 'superadmin') {
-          setIsAdmin(true);
-        }
-      });
-  }, [user, loading]);
+    setIsAdmin(role === 'admin');
+  }, [role, loading]);
 
   // Toggle the 'god-mode' class on <body> ONLY on /admin pages
   const isOnAdminPage = pathname?.startsWith('/admin');
@@ -61,6 +35,7 @@ export default function AdminGodModeEnforcer() {
   return (
     <div
       id="admin-hud-badge"
+      className="desktop-only"
       style={{
         position: 'fixed',
         bottom: '2rem',

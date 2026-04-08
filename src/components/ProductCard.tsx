@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin, Phone, MessageCircle, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { calculateProductPrice, roundPrice } from '@/lib/pricing';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 type ProductProps = Product & {
@@ -46,7 +47,8 @@ export default function ProductCard({
   const [justAdded, setJustAdded] = useState(false);
   const [phoneRevealed, setPhoneRevealed] = useState(false);
 
-  const discount = oldPrice ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
+  const priceCalc = calculateProductPrice({ originalPrice: price, oldPrice });
+  const discount = priceCalc.discountPercent;
   const wishlisted = isInWishlist(id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -94,17 +96,17 @@ export default function ProductCard({
       <div
         className="gm-product-card"
         style={{
-          background: isHovered ? 'rgba(22,22,30,0.98)' : 'rgba(18,18,24,0.95)',
+          background: isHovered ? '#ffffff' : '#ffffff',
           borderRadius: '20px',
           overflow: 'hidden',
           transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          border: isHovered ? '1px solid rgba(225,29,72,0.35)' : '1px solid rgba(255,255,255,0.08)',
+          border: isHovered ? '1px solid rgba(225,29,72,0.3)' : '1px solid rgba(0,0,0,0.08)',
           boxShadow: isHovered
-            ? '0 25px 60px -15px rgba(0,0,0,0.6), 0 0 30px rgba(225,29,72,0.12)'
-            : '0 4px 24px rgba(0,0,0,0.35)',
+            ? '0 15px 40px rgba(0,0,0,0.08), 0 0 20px rgba(225,29,72,0.05)'
+            : '0 4px 15px rgba(0,0,0,0.04)',
           transform: isHovered ? 'translateY(-8px) scale(1.01)' : 'translateY(0) scale(1)',
         }}
         onMouseEnter={() => setIsHovered(true)}
@@ -145,12 +147,12 @@ export default function ProductCard({
         <div className="card-image-wrap" style={{
           position: 'relative',
           height: '240px',
-          background: 'rgba(10,10,14,0.9)',
+          background: '#f8f9fb',
           overflow: 'hidden',
         }}>
           <img
             src={image}
-            alt={name}
+            alt=""
             loading="lazy"
             style={{
               width: '100%',
@@ -188,58 +190,7 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Top-Left Badges */}
-          <div style={{
-            position: 'absolute', top: '12px', left: '12px',
-            display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 5,
-          }}>
-            {discount > 0 && (
-              <span style={{
-                background: 'linear-gradient(135deg, #e11d48, #be123c)',
-                color: '#fff',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                padding: '4px 12px',
-                borderRadius: '20px',
-                boxShadow: '0 4px 12px rgba(225,29,72,0.3)'
-              }}>
-                -{discount}%
-              </span>
-            )}
-            {shipping === 'مجاني' && (
-              <span style={{
-                background: '#059669',
-                color: '#fff',
-                fontSize: '0.75rem',
-                fontWeight: 800,
-                padding: '4px 12px',
-                borderRadius: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
-              }}>
-                <Truck size={14} /> مجاني
-              </span>
-            )}
-            {is_verified_seller && (
-              <span style={{
-                background: 'linear-gradient(45deg, #FFD700, #DAA520)',
-                color: '#000',
-                fontSize: '0.75rem',
-                fontWeight: 900,
-                padding: '4px 12px',
-                borderRadius: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 4px 15px rgba(218, 165, 32, 0.4)',
-                border: '1px solid rgba(0,0,0,0.1)'
-              }}>
-                <ShieldCheck size={14} /> تاجر موثوق
-              </span>
-            )}
-          </div>
+
 
           {/* Condition Badge Top-Right */}
           <span style={{
@@ -326,7 +277,7 @@ export default function ProductCard({
             <span style={{
               fontSize: '0.75rem',
               fontWeight: 600,
-              color: 'rgba(255,255,255,0.45)',
+              color: 'var(--text-secondary)',
             }}>
               {seller_name ? `بواسطة: ${seller_name}` : category}
             </span>
@@ -339,7 +290,7 @@ export default function ProductCard({
               fontSize: '1.05rem',
               fontWeight: 800,
               lineHeight: 1.4,
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -351,14 +302,14 @@ export default function ProductCard({
             {part_number && (
               <div className="card-desktop-only" style={{ 
                 fontSize: '0.7rem', 
-                color: 'rgba(255,255,255,0.5)', 
+                 color: 'var(--text-secondary)', 
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.3rem',
                 opacity: 0.8
               }}>
-                رقم القطعة: <span style={{ color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{part_number}</span>
+                رقم القطعة: <span style={{ color: 'var(--text-primary)', background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{part_number}</span>
               </div>
             )}
           </div>
@@ -380,7 +331,7 @@ export default function ProductCard({
                 />
               ))}
             </div>
-            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
               ({reviews})
             </span>
           </div>
@@ -389,11 +340,11 @@ export default function ProductCard({
           <div style={{
             marginTop: 'auto',
             paddingTop: '1rem',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'rgba(225,29,72,0.03)',
+            background: 'var(--surface-hover)',
             margin: '0 -1.2rem',
             padding: '1rem 1.2rem 0',
           }}>
@@ -401,7 +352,7 @@ export default function ProductCard({
               {oldPrice && (
                 <span style={{
                   fontSize: '0.85rem',
-                  color: 'rgba(255,255,255,0.35)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'line-through',
                   fontWeight: 500,
                 }}>
@@ -513,9 +464,9 @@ export default function ProductCard({
                   ? 'linear-gradient(135deg, #059669, #10b981)'
                   : stock === 'متوفر'
                     ? 'linear-gradient(135deg, #e11d48, #f43f5e, #e11d48)'
-                    : 'rgba(255,255,255,0.05)',
+                    : 'rgba(0,0,0,0.05)',
                 backgroundSize: stock === 'متوفر' ? '200% 100%' : 'auto',
-                color: stock === 'متوفر' ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                color: stock === 'متوفر' ? '#ffffff' : 'var(--text-secondary)',
                 boxShadow: justAdded
                   ? '0 8px 25px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'
                   : stock === 'متوفر'
@@ -556,7 +507,6 @@ export default function ProductCard({
           {/* ─── SECONDARY: Seller Contact Section (desktop only) ─── */}
           {seller_phone && seller_phone.trim() !== '' && (
             <div
-              className="card-desktop-only"
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
               style={{
                 display: 'flex',
@@ -564,9 +514,9 @@ export default function ProductCard({
                 gap: '0.5rem',
                 marginTop: '0.3rem',
                 padding: '0.7rem 0.8rem',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
+                background: 'rgba(0,0,0,0.02)',
                 borderRadius: '12px',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid rgba(0,0,0,0.05)',
                 transition: 'all 0.3s ease',
               }}
             >
@@ -585,13 +535,13 @@ export default function ProductCard({
                     <Phone size={13} color="#10b981" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
-                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.3px' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.3px' }}>
                       تواصل مع التاجر
                     </span>
                     <span style={{
                       fontSize: '0.8rem',
                       fontWeight: 800,
-                      color: phoneRevealed ? '#10b981' : 'rgba(255,255,255,0.55)',
+                      color: phoneRevealed ? '#10b981' : 'var(--text-secondary)',
                       letterSpacing: '1px',
                       direction: 'ltr',
                       fontFamily: 'monospace',

@@ -7,7 +7,7 @@ import ProductGrid from '@/components/products/ProductGrid';
 import { useProducts } from '@/context/ProductsContext';
 import {
   CheckCircle2, X, Circle, Lightbulb, Wind, Wrench, Cog, CarFront,
-  PaintBucket, Filter, Disc3, Shield, Globe, MapPin, Locate
+  PaintBucket, Filter, Disc3, Shield, Globe, MapPin, Locate, SlidersHorizontal
 } from 'lucide-react';
 import CategoriesBar from '@/components/CategoriesBar';
 import { useGeolocation, calculateDistance } from '@/hooks/useGeolocation';
@@ -27,6 +27,7 @@ export default function ProductsPage() {
   });
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [multiSearch, setMultiSearch] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('popular');
   const [visibleCount, setVisibleCount] = useState(20);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +48,7 @@ export default function ProductsPage() {
       const cats = params.get('categories');
       const brand = params.get('brand');
       const s = params.get('search');
+      const ms = params.get('multi_search');
       const g = params.get('global');
       const vinV = params.get('vin_verified');
       
@@ -56,6 +58,7 @@ export default function ProductsPage() {
       }
       
       if (s) setFilters(prev => ({ ...prev, search: s }));
+      if (ms) setMultiSearch(ms.split(',').map(w => w.trim()).filter(w => w.length > 0));
       if (g === 'true') setIsGlobal(true);
 
       if (m && !s) {
@@ -85,6 +88,7 @@ export default function ProductsPage() {
   const clearFilters = () => {
     setFilters({ search: '', category: '', brand: '', condition: '', minPrice: '', maxPrice: '', minRating: 0 });
     setSelectedCategories([]);
+    setMultiSearch([]);
     setIsGlobal(false);
     setIsLoading(true);
   };
@@ -115,6 +119,14 @@ export default function ProductsPage() {
       result = result.filter(p => {
         const target = (p.name + ' ' + p.brand + ' ' + p.category + ' ' + (p.description || '')).toLowerCase();
         return searchWords.every(word => target.includes(word));
+      });
+    }
+
+    // Multi-keyword OR Search (from EngineeringSystems)
+    if (multiSearch.length > 0) {
+      result = result.filter(p => {
+        const target = (p.name + ' ' + p.brand + ' ' + p.category + ' ' + (p.description || '')).toLowerCase();
+        return multiSearch.some(word => target.includes(word.toLowerCase()));
       });
     }
 
@@ -157,10 +169,10 @@ export default function ProductsPage() {
     }
 
     return result;
-  }, [products, filters, sortBy, fitment, selectedCategories, position, distanceRange]);
+  }, [products, filters, sortBy, fitment, selectedCategories, multiSearch, position, distanceRange]);
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#050508' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
       <Navbar />
       <CategoriesBar />
       
@@ -187,7 +199,7 @@ export default function ProductsPage() {
                 <h3 style={{ margin: '0 0 0.2rem', color: isVinVerified ? '#2563eb' : '#10b981', fontSize: '1.2rem', fontWeight: 900 }}>
                   {isVinVerified ? 'تأكيد VIN نشط' : 'تطابق سيارة الكراج'}
                 </h3>
-                <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', fontWeight: 600 }}>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 600 }}>
                   النتائج مخصصة لسيارتك: <span style={{ color: '#e11d48', fontWeight: 800 }}>{fitment.make} {fitment.model} {fitment.year}</span>
                 </p>
               </div>
@@ -246,9 +258,9 @@ export default function ProductsPage() {
                   style={{
                     padding: '0.4rem 0.9rem',
                     borderRadius: '8px',
-                    border: distanceRange === d ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                    background: distanceRange === d ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)',
-                    color: distanceRange === d ? '#10b981' : 'rgba(255,255,255,0.5)',
+                    border: distanceRange === d ? '1px solid #10b981' : '1px solid var(--border)',
+                    background: distanceRange === d ? 'rgba(16,185,129,0.15)' : 'var(--surface)',
+                    color: distanceRange === d ? '#10b981' : 'var(--text-secondary)',
                     fontWeight: 800,
                     fontSize: '0.8rem',
                     cursor: 'pointer',
@@ -303,13 +315,13 @@ export default function ProductsPage() {
 
         {/* Breadcrumb & Header */}
         <div style={{ marginBottom: '3rem' }}>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '1rem', fontWeight: 600 }}>
-             الرئيسية <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>/</span> <span style={{ color: '#ffffff' }}>كل القطع ({filteredSortedProducts.length})</span>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', fontWeight: 600 }}>
+             الرئيسية <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>/</span> <span style={{ color: 'var(--text-primary)' }}>كل القطع ({filteredSortedProducts.length})</span>
           </div>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
             <div>
-              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 950, margin: 0, color: '#ffffff' }}>تسوق قطع الغيار</h1>
+              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 950, margin: 0, color: 'var(--text-primary)' }}>تسوق قطع الغيار</h1>
               <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', marginTop: '0.8rem', boxShadow: '0 0 15px rgba(212,175,55,0.3)' }} />
             </div>
             
@@ -320,9 +332,9 @@ export default function ProductsPage() {
                 value={filters.search}
                 onChange={e => setFilters({...filters, search: e.target.value})}
                 style={{ 
-                  width: '100%', padding: '1.2rem 1.5rem', background: 'rgba(255,255,255,0.04)', 
-                  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', color: '#ffffff', fontSize: '1.1rem',
-                  outline: 'none', transition: 'all 0.3s ease', boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                  width: '100%', padding: '1.2rem 1.5rem', background: 'var(--surface)', 
+                  border: '1px solid var(--border)', borderRadius: '16px', color: 'var(--text-primary)', fontSize: '1.1rem',
+                  outline: 'none', transition: 'all 0.3s ease', boxShadow: 'var(--card-shadow)',
                   fontWeight: 600
                 }} 
                 onFocus={e => {
@@ -330,8 +342,8 @@ export default function ProductsPage() {
                   e.currentTarget.style.boxShadow = '0 10px 25px rgba(225,29,72,0.15)';
                 }}
                 onBlur={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.boxShadow = 'var(--card-shadow)';
                 }}
               />
             </div>
@@ -340,7 +352,7 @@ export default function ProductsPage() {
 
         {/* Main Content Layout */}
         <div className="products-page-layout" style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start' }}>
-          {/* Sidebar */}
+          {/* Sidebar — Desktop Only */}
           <div className="sidebar-container desktop-only" style={{ width: '300px', flexShrink: 0 }}>
              <Filters filters={filters} setFilters={setFilters} clearFilters={clearFilters} brands={brands} categories={categories} />
           </div>
@@ -356,7 +368,248 @@ export default function ProductsPage() {
             />
           </div>
         </div>
+
+        {/* ═══ MOBILE FILTER SHEET ═══ */}
+        <MobileFilterSheet
+          filters={filters}
+          setFilters={setFilters}
+          clearFilters={clearFilters}
+          brands={brands}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          totalResults={filteredSortedProducts.length}
+        />
       </div>
     </main>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE FILTER SHEET COMPONENT
+═══════════════════════════════════════════ */
+function MobileFilterSheet({ filters, setFilters, clearFilters, brands, sortBy, setSortBy, totalResults }: {
+  filters: any;
+  setFilters: (f: any) => void;
+  clearFilters: () => void;
+  brands: string[];
+  sortBy: string;
+  setSortBy: (s: string) => void;
+  totalResults: number;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState(500);
+
+  const activeFiltersCount = [
+    filters.brand,
+    filters.condition,
+    filters.category,
+    filters.minRating > 0,
+    filters.minPrice || filters.maxPrice,
+  ].filter(Boolean).length;
+
+  return (
+    <>
+      {/* Floating Filter Button — Mobile Only */}
+      <button
+        className="mobile-only"
+        onClick={() => setIsOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: '80px',
+          left: '1rem',
+          zIndex: 99990,
+          display: 'none',
+          alignItems: 'center',
+          gap: '0.4rem',
+          padding: '0.7rem 1.2rem',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, #e11d48, #be123c)',
+          color: '#fff',
+          border: 'none',
+          fontWeight: 800,
+          fontSize: '0.85rem',
+          cursor: 'pointer',
+          boxShadow: '0 6px 20px rgba(225,29,72,0.4)',
+        }}
+      >
+        <SlidersHorizontal size={16} /> فلترة
+        {activeFiltersCount > 0 && (
+          <span style={{
+            background: '#fff', color: '#e11d48',
+            borderRadius: '50%', width: '18px', height: '18px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.65rem', fontWeight: 900,
+          }}>
+            {activeFiltersCount}
+          </span>
+        )}
+      </button>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 999998,
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(4px)',
+          }}
+        />
+      )}
+
+      {/* Bottom Sheet */}
+      <div style={{
+        position: 'fixed',
+        bottom: isOpen ? 0 : '-100%',
+        left: 0, right: 0,
+        zIndex: 999999,
+        background: 'var(--surface)',
+        borderRadius: '20px 20px 0 0',
+        maxHeight: '85vh',
+        overflowY: 'auto',
+        transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 -10px 40px rgba(0,0,0,0.2)',
+      }}>
+        {/* Handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '0.8rem 0 0' }}>
+          <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'var(--border)' }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1.2rem', borderBottom: '1px solid var(--border)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+            فلترة وترتيب
+          </h3>
+          <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#e11d48', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}>
+            مسح الكل
+          </button>
+        </div>
+
+        <div style={{ padding: '1rem 1.2rem 2rem' }}>
+          {/* Sort */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.85rem', fontWeight: 800, color: '#e11d48' }}>الترتيب</h4>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {[
+                { value: 'popular', label: 'الأكثر شعبية' },
+                { value: 'price_low', label: 'الأرخص' },
+                { value: 'price_high', label: 'الأغلى' },
+                { value: 'rating', label: 'الأعلى تقييم' },
+                { value: 'newest', label: 'الأحدث' },
+              ].map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => setSortBy(s.value)}
+                  style={{
+                    padding: '0.5rem 0.9rem', borderRadius: '10px',
+                    border: sortBy === s.value ? '1px solid #e11d48' : '1px solid var(--border)',
+                    background: sortBy === s.value ? 'rgba(225,29,72,0.1)' : 'var(--surface-hover)',
+                    color: sortBy === s.value ? '#e11d48' : 'var(--text-secondary)',
+                    fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Condition */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.85rem', fontWeight: 800, color: '#e11d48' }}>الحالة</h4>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              {['', 'جديد', 'مستعمل'].map(c => (
+                <button
+                  key={c}
+                  onClick={() => setFilters({ ...filters, condition: c })}
+                  style={{
+                    padding: '0.5rem 1rem', borderRadius: '10px',
+                    border: filters.condition === c ? '1px solid #e11d48' : '1px solid var(--border)',
+                    background: filters.condition === c ? 'rgba(225,29,72,0.1)' : 'var(--surface-hover)',
+                    color: filters.condition === c ? '#e11d48' : 'var(--text-secondary)',
+                    fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                  }}
+                >
+                  {c || 'الكل'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Price Range */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.85rem', fontWeight: 800, color: '#e11d48' }}>
+              السعر: حتى {priceRange} ر.س
+            </h4>
+            <input
+              type="range"
+              min="10"
+              max="5000"
+              step="10"
+              value={priceRange}
+              onChange={e => {
+                const v = Number(e.target.value);
+                setPriceRange(v);
+                setFilters({ ...filters, maxPrice: v.toString() });
+              }}
+              style={{ width: '100%', accentColor: '#e11d48' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <span>10 ر.س</span>
+              <span>5,000 ر.س</span>
+            </div>
+          </div>
+
+          {/* Brand */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.85rem', fontWeight: 800, color: '#e11d48' }}>الماركة</h4>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', maxHeight: '120px', overflowY: 'auto' }}>
+              <button
+                onClick={() => setFilters({ ...filters, brand: '' })}
+                style={{
+                  padding: '0.45rem 0.8rem', borderRadius: '8px',
+                  border: !filters.brand ? '1px solid #e11d48' : '1px solid var(--border)',
+                  background: !filters.brand ? 'rgba(225,29,72,0.1)' : 'var(--surface-hover)',
+                  color: !filters.brand ? '#e11d48' : 'var(--text-secondary)',
+                  fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                }}
+              >
+                الكل
+              </button>
+              {brands.slice(0, 15).map(b => (
+                <button
+                  key={b}
+                  onClick={() => setFilters({ ...filters, brand: b })}
+                  style={{
+                    padding: '0.45rem 0.8rem', borderRadius: '8px',
+                    border: filters.brand === b ? '1px solid #e11d48' : '1px solid var(--border)',
+                    background: filters.brand === b ? 'rgba(225,29,72,0.1)' : 'var(--surface-hover)',
+                    color: filters.brand === b ? '#e11d48' : 'var(--text-secondary)',
+                    fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                  }}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Apply Button */}
+          <button
+            onClick={() => setIsOpen(false)}
+            style={{
+              width: '100%', padding: '0.9rem',
+              borderRadius: '14px', border: 'none',
+              background: 'linear-gradient(135deg, #e11d48, #be123c)',
+              color: '#fff', fontWeight: 900, fontSize: '1rem',
+              cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(225,29,72,0.3)',
+            }}
+          >
+            عرض {totalResults} نتيجة
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

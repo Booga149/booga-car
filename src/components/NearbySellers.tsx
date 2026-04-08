@@ -98,7 +98,7 @@ export default function NearbySellers() {
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'linear-gradient(180deg, rgba(5,5,5,0.95) 0%, rgba(15,15,25,0.98) 50%, rgba(5,5,5,0.95) 100%)',
+        background: 'var(--background)',
         zIndex: 0,
       }} />
 
@@ -164,7 +164,7 @@ export default function NearbySellers() {
               margin: 0,
               fontSize: '2.5rem',
               fontWeight: 950,
-              color: 'white',
+              color: 'var(--text-primary)',
               lineHeight: 1.2,
             }}>
               محلات قطع الغيار{' '}
@@ -206,8 +206,8 @@ export default function NearbySellers() {
         {/* حالة: لم يتم تحديد الموقع بعد */}
         {!position && !geoLoading && !error && (
           <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(0,0,0,0.03)',
+            border: '1px solid var(--border)',
             borderRadius: '24px',
             padding: '4rem 3rem',
             textAlign: 'center',
@@ -225,10 +225,10 @@ export default function NearbySellers() {
             }}>
               <Navigation size={32} color="#e11d48" />
             </div>
-            <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.8rem' }}>
+            <h3 style={{ color: 'var(--text-primary)', fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.8rem' }}>
               اكتشف أقرب المحلات إليك
             </h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem', lineHeight: 1.7 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem', lineHeight: 1.7 }}>
               فعّل خدمة الموقع لعرض محلات قطع الغيار والبائعين الأقرب لك مع المسافة المقدرة
             </p>
             <button
@@ -277,7 +277,7 @@ export default function NearbySellers() {
               animation: 'spin 1s linear infinite',
               margin: '0 auto 1.5rem',
             }} />
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem', fontWeight: 700 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 700 }}>
               {geoLoading ? 'جاري تحديد موقعك...' : 'جاري البحث عن محلات قريبة...'}
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function NearbySellers() {
               <h4 style={{ color: '#ef4444', margin: '0 0 0.3rem', fontWeight: 900, fontSize: '1rem' }}>
                 تعذر تحديد موقعك
               </h4>
-              <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '0.9rem' }}>
+              <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
                 {error} — يمكنك المحاولة مرة أخرى أو تفعيل خدمة الموقع من إعدادات المتصفح
               </p>
             </div>
@@ -344,11 +344,11 @@ export default function NearbySellers() {
                   key={seller.id}
                   style={{
                     background: hovered === seller.id
-                      ? 'rgba(255,255,255,0.06)'
-                      : 'rgba(255,255,255,0.03)',
+                      ? 'var(--surface-hover)'
+                      : 'var(--surface)',
                     border: hovered === seller.id
                       ? '1px solid rgba(225,29,72,0.3)'
-                      : '1px solid rgba(255,255,255,0.08)',
+                      : '1px solid var(--border)',
                     borderRadius: '20px',
                     padding: '1.8rem',
                     cursor: 'pointer',
@@ -378,7 +378,7 @@ export default function NearbySellers() {
                       ? 'linear-gradient(90deg, #10b981, #059669)'
                       : index === 1
                         ? 'linear-gradient(90deg, #e11d48, #f43f5e)'
-                        : 'linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
+                        : 'linear-gradient(90deg, rgba(0,0,0,0.1), rgba(0,0,0,0.05))',
                     opacity: hovered === seller.id ? 1 : 0.6,
                     transition: 'opacity 0.3s',
                   }} />
@@ -394,12 +394,12 @@ export default function NearbySellers() {
                       ? 'rgba(16,185,129,0.12)'
                       : seller.distance_km <= 15
                         ? 'rgba(245,158,11,0.12)'
-                        : 'rgba(255,255,255,0.06)',
+                        : 'rgba(0,0,0,0.06)',
                     border: `1px solid ${seller.distance_km <= 5
                       ? 'rgba(16,185,129,0.25)'
                       : seller.distance_km <= 15
                         ? 'rgba(245,158,11,0.25)'
-                        : 'rgba(255,255,255,0.1)'}`,
+                        : 'rgba(0,0,0,0.1)'}`,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.3rem',
@@ -432,7 +432,7 @@ export default function NearbySellers() {
 
                     {/* اسم المتجر */}
                     <h3 style={{
-                      color: 'white',
+                      color: 'var(--text-primary)',
                       fontSize: '1.1rem',
                       fontWeight: 900,
                       margin: '0 0 0.4rem',
@@ -443,7 +443,7 @@ export default function NearbySellers() {
 
                     {/* المدينة */}
                     <div style={{
-                      color: 'rgba(255,255,255,0.4)',
+                      color: 'var(--text-secondary)',
                       fontSize: '0.85rem',
                       fontWeight: 600,
                       margin: '0 0 1.2rem',
@@ -462,16 +462,16 @@ export default function NearbySellers() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       paddingTop: '1rem',
-                      borderTop: '1px solid rgba(255,255,255,0.06)',
+                      borderTop: '1px solid var(--border)',
                     }}>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
                       }}>
-                        <Package size={14} color="rgba(255,255,255,0.4)" />
+                        <Package size={14} color="var(--text-secondary)" />
                         <span style={{
-                          color: 'rgba(255,255,255,0.5)',
+                          color: 'var(--text-secondary)',
                           fontSize: '0.8rem',
                           fontWeight: 700,
                         }}>

@@ -147,7 +147,7 @@ export default function ContactPage() {
           {/* Map / Business Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #111 0%, #000 100%)',
+              background: 'var(--surface)',
               borderRadius: '32px', padding: '3rem',
               border: '1px solid rgba(255,255,255,0.05)', color: 'white'
             }}>

@@ -4,9 +4,11 @@ import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { logSecurityEvent } from '@/lib/utils';
 import { useAdminNotifications } from '@/hooks/useAdminNotifications';
-import { Ban, BarChart2, Package, ShoppingCart, Users, Activity, Globe, Bell, Flower2, User, Upload, Fingerprint, Search, Menu, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { Ban, BarChart2, Package, ShoppingCart, Users, Activity, Globe, Bell, Flower2, User, Upload, Fingerprint, Search, Menu, ShieldAlert, Ticket, DollarSign } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { user, role, loading: authLoading, profile } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -15,30 +17,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { notifications, markAsRead } = useAdminNotifications();
 
   useEffect(() => {
-    // Add custom body styling overriding globals temporarily for admin pages
+    // Add custom body styling for admin pages
     document.body.style.background = '#020205';
     document.body.style.color = '#ffffff';
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const email = session?.user?.email;
-      if (email && (email.startsWith('mrmrx2824') || email.startsWith('admin'))) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-        logSecurityEvent(supabase, {
-          type: 'SECURITY_ALERT',
-          title: 'محاولة دخول غير مصرحة!',
-          account: email ? `مستخدم (${email})` : 'زائر مجهول'
-        }).catch(() => {});
-      }
-      setLoading(false);
-    });
+    if (authLoading) return;
+
+    if (role === 'admin') {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+      // Log unauthorized access attempt
+      logSecurityEvent(supabase, {
+        type: 'SECURITY_ALERT',
+        title: 'محاولة دخول غير مصرحة!',
+        account: user?.email ? `مستخدم (${user.email})` : 'زائر مجهول'
+      }).catch(() => {});
+    }
+    setLoading(false);
 
     return () => {
       document.body.style.background = '';
       document.body.style.color = '';
     };
-  }, []);
+  }, [authLoading, role, user]);
 
   if (loading) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#020205' }}>
@@ -87,6 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             { href: '/admin', id: 'orders', icon: <ShoppingCart size={20} />, label: 'رادار المبيعات' },
             { href: '/admin/users', icon: <Users size={20} />, label: 'سجلات المستهدفين' },
             { href: '/admin/import', icon: <Upload size={20} />, label: 'تغذية المنتجات' },
+            { href: '/admin/coupons', icon: <Ticket size={20} />, label: 'إدارة الكوبونات' },
             { href: '/admin/logs', icon: <Activity size={20} />, label: 'مراقبة الشبكة' },
           ].map((item) => {
             const active = pathname === item.href && (!item.id || pathname.includes(item.id));

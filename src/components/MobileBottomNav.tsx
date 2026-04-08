@@ -2,11 +2,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, PlusCircle, User, ShoppingCart } from 'lucide-react';
+import { Home, ShoppingBag, PlusCircle, User, ShoppingCart, MessageCircle, LayoutDashboard, Package, Users, BarChart3 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
-const NAV_ITEMS = [
+// Role-specific navigation items
+const USER_NAV = [
   { href: '/', label: 'الرئيسية', icon: Home },
   { href: '/products', label: 'المنتجات', icon: ShoppingBag },
   { href: '/sell', label: 'بيع', icon: PlusCircle, isCenter: true },
@@ -14,20 +15,38 @@ const NAV_ITEMS = [
   { href: '#cart', label: 'السلة', icon: ShoppingCart, isCart: true },
 ];
 
+const SELLER_NAV = [
+  { href: '/seller/dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
+  { href: '/seller/products', label: 'منتجاتي', icon: Package },
+  { href: '/sell', label: 'إضافة', icon: PlusCircle, isCenter: true },
+  { href: '#cart', label: 'السلة', icon: ShoppingCart, isCart: true },
+  { href: '/profile', label: 'حسابي', icon: User },
+];
+
+const ADMIN_NAV = [
+  { href: '/admin', label: 'لوحة التحكم', icon: LayoutDashboard },
+  { href: '/admin/users', label: 'المستخدمين', icon: Users },
+  { href: '/admin/products', label: 'المنتجات', icon: Package },
+  { href: '/admin/finances', label: 'المالية', icon: BarChart3 },
+  { href: '/profile', label: 'حسابي', icon: User },
+];
+
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { cartCount, setIsCartOpen } = useCart();
-  const { user, openLoginModal } = useAuth();
+  const { user, role, openLoginModal } = useAuth();
+
+  // Pick navigation based on role
+  const NAV_ITEMS = role === 'admin' ? ADMIN_NAV : role === 'seller' ? SELLER_NAV : USER_NAV;
 
   return (
     <>
-      {/* WhatsApp CTA Bar */}
+      {/* WhatsApp CTA Button */}
       <div className="mobile-only" style={{
         position: 'fixed',
-        bottom: '64px',
-        left: 0, right: 0,
+        bottom: '80px',
+        right: '1rem',
         zIndex: 99990,
-        padding: '0 0.5rem',
       }}>
         <a
           href="https://wa.me/966500000000?text=مرحباً، أحتاج مساعدة في قطع الغيار"
@@ -37,18 +56,16 @@ export default function MobileBottomNav() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.5rem',
+            width: '54px',
+            height: '54px',
             background: 'linear-gradient(135deg, #25D366, #128C7E)',
             color: 'white',
-            padding: '0.65rem 1rem',
-            borderRadius: '12px',
-            fontWeight: 800,
-            fontSize: '0.82rem',
+            borderRadius: '16px',
             textDecoration: 'none',
-            boxShadow: '0 4px 15px rgba(37,211,102,0.3)',
+            boxShadow: '0 6px 20px rgba(37,211,102,0.4)',
           }}
         >
-          اضغط هنا للتواصل معنا عبر الواتساب 💬
+          <MessageCircle size={28} />
         </a>
       </div>
 
@@ -58,9 +75,9 @@ export default function MobileBottomNav() {
         bottom: 0,
         left: 0, right: 0,
         zIndex: 99999,
-        background: 'rgba(10, 10, 15, 0.95)',
+        background: 'rgba(255, 255, 255, 0.98)',
         backdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
+        borderTop: '1px solid rgba(0,0,0,0.08)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
@@ -89,7 +106,7 @@ export default function MobileBottomNav() {
                 }}
               >
                 <div style={{ position: 'relative' }}>
-                  <Icon size={22} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+                  <Icon size={22} color="var(--text-secondary)" strokeWidth={1.8} />
                   {cartCount > 0 && (
                     <span style={{
                       position: 'absolute', top: -6, right: -8,
@@ -105,7 +122,7 @@ export default function MobileBottomNav() {
                 <span style={{
                   fontSize: '0.62rem',
                   fontWeight: 700,
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'var(--text-secondary)',
                 }}>
                   {item.label}
                 </span>
@@ -125,18 +142,18 @@ export default function MobileBottomNav() {
                   gap: '0.1rem',
                   textDecoration: 'none',
                   padding: '0.2rem 0.6rem',
-                  marginTop: '-1.2rem',
+                  marginTop: '-0.6rem',
                 }}
               >
                 <div style={{
                   background: 'linear-gradient(135deg, #e11d48, #be123c)',
                   borderRadius: '50%',
-                  width: '44px', height: '44px',
+                  width: '38px', height: '38px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 6px 20px rgba(225,29,72,0.4)',
-                  border: '3px solid rgba(10,10,15,0.95)',
+                  boxShadow: '0 4px 12px rgba(225,29,72,0.3)',
+                  border: '2px solid rgba(255, 255, 255, 0.98)',
                 }}>
-                  <Icon size={22} color="white" strokeWidth={2.2} />
+                  <Icon size={18} color="white" strokeWidth={2.2} />
                 </div>
                 <span style={{
                   fontSize: '0.6rem',
@@ -169,13 +186,13 @@ export default function MobileBottomNav() {
               >
                 <Icon
                   size={22}
-                  color="rgba(255,255,255,0.5)"
+                  color="var(--text-secondary)"
                   strokeWidth={1.8}
                 />
                 <span style={{
                   fontSize: '0.62rem',
                   fontWeight: 700,
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'var(--text-secondary)',
                 }}>
                   {item.label}
                 </span>
@@ -198,13 +215,13 @@ export default function MobileBottomNav() {
             >
               <Icon
                 size={22}
-                color={isActive ? '#e11d48' : 'rgba(255,255,255,0.5)'}
+                color={isActive ? '#e11d48' : 'var(--text-secondary)'}
                 strokeWidth={isActive ? 2.2 : 1.8}
               />
               <span style={{
                 fontSize: '0.62rem',
                 fontWeight: isActive ? 900 : 700,
-                color: isActive ? '#e11d48' : 'rgba(255,255,255,0.4)',
+                color: isActive ? '#e11d48' : 'var(--text-secondary)',
               }}>
                 {item.label}
               </span>

@@ -30,8 +30,8 @@ export default function AccessoriesPage() {
         justifyContent: 'center',
         textAlign: 'center',
         overflow: 'hidden',
-        color: 'white',
-        background: '#000'
+        color: 'var(--text-primary)',
+        background: 'var(--surface-hover)'
       }}>
         {/* Visual Layer */}
         <div style={{
@@ -46,15 +46,14 @@ export default function AccessoriesPage() {
         {/* Dynamic Gradient Overlay */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'linear-gradient(to top, var(--background) 0%, transparent 60%, rgba(0,0,0,0.4) 100%)',
+          background: 'linear-gradient(to top, var(--background) 0%, transparent 60%, rgba(0,0,0,0.05) 100%)',
           zIndex: 1
         }} />
 
         {/* Hero Content */}
         <div style={{ position: 'relative', zIndex: 10, maxWidth: '900px', padding: '0 2rem' }}>
            <div style={{ 
-              display: 'inline-flex', alignItems: 'center', gap: '0.8rem', 
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              display: 'inline-flex', alignItems: 'center', gap: '0.8rem',               background: 'rgba(225,29,72,0.08)', border: '1px solid rgba(225,29,72,0.2)',
               padding: '0.6rem 1.4rem', borderRadius: '40px', marginBottom: '2.5rem',
               backdropFilter: 'blur(12px)', fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase',
               letterSpacing: '2px'
@@ -66,7 +65,7 @@ export default function AccessoriesPage() {
              حوّل مقصورتك إلى <br/> <span style={{ color: 'var(--primary)', textShadow: '0 0 30px rgba(244, 63, 94, 0.4)' }}>تحفة فنية</span>
            </h1>
            
-           <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: '3.5rem', maxWidth: '700px', margin: '0 auto 3.5rem', fontWeight: 500 }}>
+           <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '3.5rem', maxWidth: '700px', margin: '0 auto 3.5rem', fontWeight: 500 }}>
              نقدم لك أفخم الإكسسوارات العالمية المختارة بعناية لتناسب أرقى السيارات في المملكة. دقة في التفاصيل وفخامة في الملمس.
            </p>
 
@@ -76,7 +75,7 @@ export default function AccessoriesPage() {
                 { label: 'شحن مبرد فاخر', icon: <Zap size={18} /> },
                 { label: 'مستورد حصري', icon: <Globe size={18} /> },
               ].map((badge, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', fontWeight: 800 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 800 }}>
                    <span style={{ color: 'var(--primary)' }}>{badge.icon}</span> {badge.label}
                 </div>
               ))}
@@ -141,18 +140,18 @@ export default function AccessoriesPage() {
       {/* ─── CUSTOM DECOR BANNER ─── */}
       <section style={{ padding: '5rem 2rem', maxWidth: '1200px', margin: '2rem auto 8rem', width: '100%' }}>
          <div style={{
-           background: 'linear-gradient(135deg, #111 0%, #000 100%)',
+           background: 'var(--surface)',
            borderRadius: '40px', padding: '4rem',
            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '3rem',
-           border: '1px solid rgba(255,255,255,0.05)',
-           boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow)',
            position: 'relative', overflow: 'hidden'
          }}>
             <div style={{ flex: 1, minWidth: '350px', position: 'relative', zIndex: 10 }}>
-               <h2 style={{ color: 'white', fontSize: '2.8rem', fontWeight: 950, marginBottom: '1.5rem', lineHeight: 1.2 }}>
+               <h2 style={{ color: 'var(--text-primary)', fontSize: '2.8rem', fontWeight: 950, marginBottom: '1.5rem', lineHeight: 1.2 }}>
                  تصميم داخلي <span style={{ color: 'var(--primary)' }}>حسب الطلب</span>
                </h2>
-               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.2rem', lineHeight: 1.8, marginBottom: '3rem', maxWidth: '700px' }}>
+               <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', lineHeight: 1.8, marginBottom: '3rem', maxWidth: '700px' }}>
                 هل تبحث عن شكل محدد لمقصورة سيارتك؟ خبراؤنا المهندسون يساعدونك في اختيار طقم الإضاءة والتنجيد المناسب لنوع سيارتك بدقة متناهية.
              </p>
                <a href={ACCESSORY_DATA[0].description} style={{
@@ -169,10 +168,9 @@ export default function AccessoriesPage() {
                  { title: 'تركيب احترافي', icon: <Zap size={20} /> },
                  { title: 'ضمان سنتين', icon: <ShieldCheck size={20} /> },
                ].map((item, i) => (
-                 <div key={i} style={{ 
-                   background: 'rgba(255,255,255,0.04)', padding: '1.5rem 2rem', 
-                   borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)',
-                   textAlign: 'center', color: 'white'
+                 <div key={i} style={{                    background: 'var(--background)', padding: '1.5rem 2rem', 
+                    borderRadius: '20px', border: '1px solid var(--border)',
+                    textAlign: 'center', color: 'var(--text-primary)'
                  }}>
                     <div style={{ color: 'var(--primary)', marginBottom: '0.8rem', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
                     <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{item.title}</div>
