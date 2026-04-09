@@ -16,6 +16,7 @@ import WelcomeOffer from '@/components/WelcomeOffer';
 import NearbySellers from '@/components/NearbySellers';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import SkeletonCard from '@/components/SkeletonCard';
+import VehicleSearch from '@/components/VehicleSearch';
 
 export default function Home() {
   const { products } = useProducts();
@@ -128,6 +129,11 @@ export default function Home() {
 
         {showWelcome && <WelcomeOffer />}
         <Hero />
+
+        {/* ═══ VEHICLE SEARCH ═══ */}
+        <div style={{ padding: '0 1rem', marginTop: '-4rem', marginBottom: '2rem', position: 'relative', zIndex: 20 }}>
+          <VehicleSearch />
+        </div>
         
         {/* ═══ MOBILE CATEGORIES CHIPS ═══ */}
         <div className="mobile-only" style={{

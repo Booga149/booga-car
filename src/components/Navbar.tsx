@@ -57,8 +57,8 @@ export default function Navbar() {
   ] : [
     { href: '/', label: 'الرئيسية' },
     { href: '/products', label: 'قطع الغيار' },
-    { href: '/accessories', label: 'أكسسوارات', isNew: true },
-    { href: '/price-request', label: 'سعّرلي', isNew: true },
+    { href: '/request-part', label: 'اطلب قطعتك', isNew: true },
+    { href: '/accessories', label: 'أكسسوارات' },
     { href: '/track-order', label: 'تتبع الطلبات' },
     { href: '/garage', label: 'كراجي' },
     { href: '/sell', label: 'اعرض قطعة' },
