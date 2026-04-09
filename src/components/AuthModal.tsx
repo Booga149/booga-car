@@ -248,15 +248,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const inputStyle = (field: string) => ({
     width: '100%',
     padding: '1.1rem 1.4rem',
-    background: focusedField === field ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.04)',
-    border: focusedField === field ? '2px solid var(--primary)' : '2px solid rgba(255,255,255,0.08)',
+    background: focusedField === field ? 'rgba(255,215,0,0.04)' : 'rgba(0,0,0,0.03)',
+    border: focusedField === field ? '2px solid #D4AF37' : '2px solid rgba(0,0,0,0.1)',
     borderRadius: '16px',
-    color: 'var(--text-primary)',
+    color: '#111',
     outline: 'none',
     fontSize: '1rem',
     fontWeight: 600,
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: focusedField === field ? '0 0 0 4px rgba(255, 215, 0, 0.1), 0 0 30px rgba(255, 215, 0, 0.05)' : 'none',
+    boxShadow: focusedField === field ? '0 0 0 4px rgba(212, 175, 55, 0.1), 0 0 30px rgba(212, 175, 55, 0.05)' : 'none',
   });
 
   return (
@@ -624,19 +624,28 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         <div className="auth-form-side" style={{ 
           flex: '1', padding: '2.5rem 2.8rem', display: 'flex', flexDirection: 'column', 
           justifyContent: 'center', 
-          background: 'linear-gradient(180deg, #0a0a0f 0%, #060609 100%)',
+          background: '#ffffff',
           overflowY: 'auto',
-          borderRight: '1px solid rgba(255,255,255,0.04)',
+          borderRight: '1px solid rgba(0,0,0,0.06)',
+          position: 'relative',
         }}>
+          {/* Saudi Flag */}
+          <div style={{
+            position: 'absolute', top: '1.2rem', right: '1.2rem',
+            fontSize: '2rem', lineHeight: 1,
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+          }}>
+            🇸🇦
+          </div>
           {/* Header */}
           <div style={{ marginBottom: '1.8rem' }}>
             <h2 style={{ 
               fontSize: '1.8rem', marginBottom: '0.5rem', fontWeight: 950, 
-              color: 'white', letterSpacing: '-0.5px'
+              color: '#111', letterSpacing: '-0.5px'
             }}>
               {isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+            <p style={{ color: 'rgba(0,0,0,0.45)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
               {isLoginMode ? 'أدخل بياناتك للوصول إلى حسابك' : 'انضم لأكبر مجتمع سيارات في المملكة'}
             </p>
           </div>
@@ -646,22 +655,22 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             onClick={handleGoogleSignIn}
             style={{
               width: '100%', padding: '0.95rem', borderRadius: '14px',
-              background: 'rgba(255,255,255,0.04)', 
-              border: '2px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.03)', 
+              border: '2px solid rgba(0,0,0,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem',
               cursor: 'pointer', transition: 'all 0.3s', fontWeight: 700,
-              fontSize: '0.95rem', color: 'white',
+              fontSize: '0.95rem', color: '#333',
               marginBottom: '1.3rem',
             }}
             onMouseOver={e => {
               e.currentTarget.style.borderColor = 'rgba(66,133,244,0.5)';
-              e.currentTarget.style.background = 'rgba(66,133,244,0.08)';
+              e.currentTarget.style.background = 'rgba(66,133,244,0.06)';
               e.currentTarget.style.transform = 'translateY(-1px)';
               e.currentTarget.style.boxShadow = '0 4px 20px rgba(66,133,244,0.15)';
             }}
             onMouseOut={e => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+              e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)';
+              e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }}
@@ -675,32 +684,32 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             display: 'flex', alignItems: 'center', gap: '1rem', 
             margin: '0.3rem 0 1.3rem',
           }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.08)' }} />
+            <span style={{ color: 'rgba(0,0,0,0.35)', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
               أو استخدم
             </span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.08)' }} />
           </div>
 
           {/* Method Toggle */}
           <div style={{ 
             display: 'flex', 
-            background: 'rgba(255,255,255,0.03)', 
+            background: 'rgba(0,0,0,0.03)', 
             borderRadius: '12px', 
             padding: '0.3rem', 
             marginBottom: '1.3rem',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: '1px solid rgba(0,0,0,0.06)',
           }}>
             <button 
               onClick={() => { setAuthMethod('phone'); setIsOtpSent(false); setAuthError(''); }} 
               style={{ 
                 flex: 1, padding: '0.7rem', borderRadius: '10px', border: 'none', 
-                background: authMethod === 'phone' ? 'rgba(255,215,0,0.1)' : 'transparent', 
-                color: authMethod === 'phone' ? '#FFD700' : 'rgba(255,255,255,0.4)', 
+                background: authMethod === 'phone' ? 'rgba(212,175,55,0.12)' : 'transparent', 
+                color: authMethod === 'phone' ? '#B8860B' : 'rgba(0,0,0,0.4)', 
                 fontWeight: 800, cursor: 'pointer', transition: 'all 0.25s',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 fontSize: '0.85rem',
-                boxShadow: authMethod === 'phone' ? '0 2px 12px rgba(255,215,0,0.08)' : 'none',
+                boxShadow: authMethod === 'phone' ? '0 2px 12px rgba(212,175,55,0.12)' : 'none',
               }}
             >
               <Phone size={16} /> الجوال
@@ -709,12 +718,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               onClick={() => { setAuthMethod('email'); setIsOtpSent(false); setAuthError(''); }} 
               style={{ 
                 flex: 1, padding: '0.7rem', borderRadius: '10px', border: 'none', 
-                background: authMethod === 'email' ? 'rgba(255,215,0,0.1)' : 'transparent', 
-                color: authMethod === 'email' ? '#FFD700' : 'rgba(255,255,255,0.4)', 
+                background: authMethod === 'email' ? 'rgba(212,175,55,0.12)' : 'transparent', 
+                color: authMethod === 'email' ? '#B8860B' : 'rgba(0,0,0,0.4)', 
                 fontWeight: 800, cursor: 'pointer', transition: 'all 0.25s',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 fontSize: '0.85rem',
-                boxShadow: authMethod === 'email' ? '0 2px 12px rgba(255,215,0,0.08)' : 'none',
+                boxShadow: authMethod === 'email' ? '0 2px 12px rgba(212,175,55,0.12)' : 'none',
               }}
             >
               <Mail size={16} /> البريد
@@ -760,18 +769,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   {loading ? 'جاري التحقق...' : 'تأكيد الرمز'}
                 </button>
                 {authError && <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>{authError}</div>}
-                <button type="button" onClick={() => setIsOtpSent(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+                <button type="button" onClick={() => setIsOtpSent(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(0,0,0,0.4)', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
                   ← تغيير الرقم
                 </button>
               </form>
             ) : (
               <form onSubmit={handlePhoneAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>رقم الجوال</label>
+                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>رقم الجوال</label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ 
                       position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', 
-                      fontWeight: 800, color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem',
+                      fontWeight: 800, color: 'rgba(0,0,0,0.4)', fontSize: '0.95rem',
                       display: 'flex', alignItems: 'center', gap: '0.4rem',
                     }}>
                       🇸🇦 +966
@@ -789,7 +798,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
                   padding: '1.1rem', 
                   background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                  color: '#111', border: 'none', borderRadius: '14px', fontWeight: 900, 
                   cursor: 'pointer', fontSize: '1rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
                   boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
@@ -799,10 +808,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 </button>
                 {/* Toggle login/signup */}
                 <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+                  <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
                     {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
                     <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
-                      background: 'transparent', border: 'none', color: '#FFD700', 
+                      background: 'transparent', border: 'none', color: '#B8860B', 
                       cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
                       textDecoration: 'underline', textUnderlineOffset: '3px',
                     }}>
@@ -816,9 +825,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             <>
               <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>البريد الإلكتروني</label>
+                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>البريد الإلكتروني</label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+                    <Mail size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
                     <input 
                       type="email" required value={email} 
                       onChange={e => setEmail(e.target.value)} 
@@ -830,9 +839,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>كلمة المرور</label>
+                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>كلمة المرور</label>
                   <div style={{ position: 'relative' }}>
-                    <Lock size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+                    <Lock size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
                     <input 
                       type={showPassword ? "text" : "password"} required 
                       value={password} onChange={e => setPassword(e.target.value)} 
@@ -843,7 +852,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ 
                       position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', 
-                      background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', 
+                      background: 'transparent', border: 'none', color: 'rgba(0,0,0,0.3)', 
                       cursor: 'pointer', display: 'flex', padding: '0.2rem',
                     }}>
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -875,10 +884,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 </button>
                 {/* Toggle login/signup for email */}
                 <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+                  <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
                     {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
                     <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
-                      background: 'transparent', border: 'none', color: '#FFD700', 
+                      background: 'transparent', border: 'none', color: '#B8860B', 
                       cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
                       textDecoration: 'underline', textUnderlineOffset: '3px',
                     }}>
@@ -901,7 +910,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             ].map((badge, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: '0.4rem',
-                color: 'rgba(255,255,255,0.25)', fontSize: '0.72rem', fontWeight: 600,
+                color: 'rgba(0,0,0,0.3)', fontSize: '0.72rem', fontWeight: 600,
               }}>
                 {badge.icon} {badge.text}
               </div>
