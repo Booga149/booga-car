@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const productIds = items.map((i: any) => i.product_id);
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, price, old_price, stock, seller_id')
+      .select('id, name, price, old_price, stock, stock_quantity, seller_id')
       .in('id', productIds);
 
     if (productsError || !products) {
@@ -59,7 +59,23 @@ export async function POST(req: NextRequest) {
 
       if (product.stock === 'غير متوفر') {
         return NextResponse.json({ 
-          error: `المنتج "${product.name}" غير متوفر حالياً` 
+          error: `المنتج "${product.name}" غير متوفر حالياً`,
+          out_of_stock: true,
+          product_id: product.id
+        }, { status: 400 });
+      }
+
+      // Check actual stock quantity
+      const availableQty = product.stock_quantity ?? 0;
+      const requestedQty = Math.max(1, Math.round(item.quantity));
+      if (availableQty < requestedQty) {
+        return NextResponse.json({ 
+          error: availableQty === 0 
+            ? `المنتج "${product.name}" نفد من المخزون` 
+            : `المنتج "${product.name}" متبقي منه ${availableQty} قطع فقط، وأنت طلبت ${requestedQty}`,
+          out_of_stock: availableQty === 0,
+          available_quantity: availableQty,
+          product_id: product.id
         }, { status: 400 });
       }
 

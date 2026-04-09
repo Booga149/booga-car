@@ -50,6 +50,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             reviews: data.reviews_count || 0,
             image: data.image_url || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80',
             color: 'var(--border)',
+            stock_quantity: data.stock_quantity ?? 0,
           });
 
           // Fetch Related Products (Same category, exclude current)
@@ -169,10 +170,22 @@ export default function ProductDetailsClient({ id }: { id: string }) {
     );
   }
 
+  const maxQty = product.stock_quantity ?? 999;
+  const isOutOfStock = product.stock !== 'متوفر' || maxQty <= 0;
+
   const handleAddToCart = () => {
+    if (isOutOfStock) {
+      addToast('هذا المنتج غير متوفر حالياً', 'error');
+      return;
+    }
     if (!user) {
       addToast('يرجى تسجيل الدخول أولاً لإضافة منتجات إلى السلة', 'info');
       openLoginModal();
+      return;
+    }
+    if (quantity > maxQty) {
+      addToast(`متبقي ${maxQty} قطع فقط من هذا المنتج`, 'error');
+      setQuantity(maxQty);
       return;
     }
 
@@ -256,8 +269,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
               </div>
               <span style={{ color: 'var(--text-secondary)' }}>(تستند إلى {product.reviews} تقييم)</span>
               <span style={{ color: 'var(--border)' }}>|</span>
-              <span style={{ color: product.stock === 'متوفر' ? '#8ac926' : '#e63946', fontWeight: 'bold' }}>
-                {product.stock === 'متوفر' ? '✓ متوفر بالمخزن' : '× نفذت الكمية'}
+              <span style={{ color: isOutOfStock ? '#e63946' : '#8ac926', fontWeight: 'bold' }}>
+                {isOutOfStock ? '× نفذت الكمية' : maxQty <= 5 ? `✓ متبقي ${maxQty} فقط!` : '✓ متوفر بالمخزن'}
               </span>
             </div>
 
@@ -291,7 +304,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             </div>
             {/* ─── Urgency Badges ─── */}
             <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              {product.stock === 'متوفر' && (product.stock_quantity === undefined || product.stock_quantity <= 5) && (
+              {!isOutOfStock && maxQty <= 5 && maxQty > 0 && (
                 <span style={{
                   background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
                   padding: '0.4rem 0.8rem', borderRadius: '8px',
@@ -299,7 +312,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                   display: 'flex', alignItems: 'center', gap: '0.3rem',
                   border: '1px solid rgba(239, 68, 68, 0.2)',
                 }}>
-                  🔥 متبقي {product.stock_quantity || 3} فقط!
+                  🔥 متبقي {maxQty} فقط!
                 </span>
               )}
               {product.rating >= 4 && (
@@ -331,25 +344,25 @@ export default function ProductDetailsClient({ id }: { id: string }) {
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', height: '54px' }}>
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1.2rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>-</button>
                 <div style={{ padding: '0 1.5rem', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'var(--surface-hover)' }}>{quantity}</div>
-                <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1.2rem', background: 'rgba(0,0,0,0.03)', color: 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.2rem', height: '100%' }}>+</button>
+                <button onClick={() => setQuantity(Math.min(maxQty, quantity + 1))} disabled={quantity >= maxQty} style={{ padding: '0 1.2rem', background: 'rgba(0,0,0,0.03)', color: quantity >= maxQty ? 'var(--text-secondary)' : 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: quantity >= maxQty ? 'not-allowed' : 'pointer', fontSize: '1.2rem', height: '100%', opacity: quantity >= maxQty ? 0.4 : 1 }}>+</button>
               </div>
 
               <button 
                 onClick={handleAddToCart}
-                disabled={product.stock !== 'متوفر'}
+                disabled={isOutOfStock}
                 style={{
-                  flex: 1, height: '54px', background: product.stock === 'متوفر' ? 'var(--primary)' : 'var(--surface-hover)', 
-                  color: '#fff', border: 'none', borderRadius: '12px', cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed', 
+                  flex: 1, height: '54px', background: !isOutOfStock ? 'var(--primary)' : 'var(--surface-hover)', 
+                  color: '#fff', border: 'none', borderRadius: '12px', cursor: !isOutOfStock ? 'pointer' : 'not-allowed', 
                   fontWeight: 900, fontSize: '1rem', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(225, 29, 72, 0.3)',
-                  opacity: product.stock === 'متوفر' ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                  opacity: !isOutOfStock ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 }}
               >
                 <ShoppingCart size={18} />
-                {product.stock === 'متوفر' ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر حالياً'}
+                {!isOutOfStock ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر حالياً'}
               </button>
 
               {/* Buy Now — Direct Checkout */}
-              {product.stock === 'متوفر' && (
+              {!isOutOfStock && (
                 <button
                   onClick={() => {
                     handleAddToCart();
@@ -512,26 +525,26 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden', height: '48px', flexShrink: 0 }}>
             <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ padding: '0 1rem', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: 'none', borderLeft: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>-</button>
             <div style={{ padding: '0 1rem', fontSize: '1rem', fontWeight: 900, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{quantity}</div>
-            <button onClick={() => setQuantity(quantity + 1)} style={{ padding: '0 1rem', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900 }}>+</button>
+            <button onClick={() => setQuantity(Math.min(maxQty, quantity + 1))} disabled={quantity >= maxQty} style={{ padding: '0 1rem', background: 'var(--surface-hover)', color: quantity >= maxQty ? 'var(--text-secondary)' : 'var(--text-primary)', border: 'none', borderRight: '1px solid var(--border)', cursor: quantity >= maxQty ? 'not-allowed' : 'pointer', fontSize: '1.1rem', height: '100%', fontWeight: 900, opacity: quantity >= maxQty ? 0.4 : 1 }}>+</button>
           </div>
           {/* CTA button */}
-          <button
+            <button
             onClick={handleAddToCart}
-            disabled={product.stock !== 'متوفر'}
+            disabled={isOutOfStock}
             className="btn-tap"
             style={{
               flex: 1, height: '48px',
-              background: product.stock === 'متوفر' ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'var(--surface-hover)',
-              color: product.stock === 'متوفر' ? '#fff' : 'var(--text-secondary)',
+              background: !isOutOfStock ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'var(--surface-hover)',
+              color: !isOutOfStock ? '#fff' : 'var(--text-secondary)',
               border: 'none', borderRadius: '12px',
               fontWeight: 900, fontSize: '1rem',
-              cursor: product.stock === 'متوفر' ? 'pointer' : 'not-allowed',
+              cursor: !isOutOfStock ? 'pointer' : 'not-allowed',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-              boxShadow: product.stock === 'متوفر' ? '0 6px 20px rgba(225,29,72,0.4)' : 'none',
+              boxShadow: !isOutOfStock ? '0 6px 20px rgba(225,29,72,0.4)' : 'none',
             }}
           >
             <ShoppingCart size={20} />
-            {product.stock === 'متوفر' ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر'}
+            {!isOutOfStock ? `أضف للسلة · ${(product.price * quantity).toLocaleString()} ر.س` : 'غير متوفر'}
           </button>
         </div>
       </div>

@@ -134,7 +134,23 @@ export default function CheckoutPage() {
         const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
         if (itemsError) throw itemsError;
 
-        // ─── STEP 2b: Price Audit Log (non-blocking) ───
+        // ─── STEP 2b: Decrement Stock (atomic) ───
+        for (const item of cartItems) {
+          try {
+            const { data: decrementOk, error: decErr } = await supabase.rpc('decrement_stock', {
+              p_product_id: item.id,
+              p_quantity: item.quantity,
+            });
+            if (decErr) console.warn('Stock decrement warning:', decErr.message);
+            
+            // Check low stock & send notifications
+            await supabase.rpc('check_low_stock', { p_product_id: item.id }).catch(() => {});
+          } catch (stockErr) {
+            console.warn('Stock decrement failed for', item.id, stockErr);
+          }
+        }
+
+        // ─── STEP 2c: Price Audit Log (non-blocking) ───
         try {
           const auditEntry = createPriceAuditEntry(
             orderData.id,

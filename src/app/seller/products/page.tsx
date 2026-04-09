@@ -62,6 +62,20 @@ export default function SellerProductsPage() {
     setDeleting(null);
   }
 
+  async function updateStockQuantity(id: string, newQty: number) {
+    const qty = Math.max(0, newQty);
+    const { error } = await supabase
+      .from('products')
+      .update({ stock_quantity: qty, stock: qty > 0 ? 'متوفر' : 'غير متوفر' })
+      .eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, stock_quantity: qty, stock: qty > 0 ? 'متوفر' : 'غير متوفر' } : p));
+      if (qty === 0) addToast('⚠️ تم تصفير المخزون - المنتج أصبح غير متوفر', 'error');
+    } else {
+      addToast('فشل تحديث المخزون', 'error');
+    }
+  }
+
   const filtered = products.filter(p =>
     p.name?.toLowerCase().includes(search.toLowerCase()) ||
     p.brand?.toLowerCase().includes(search.toLowerCase()) ||
@@ -186,8 +200,40 @@ export default function SellerProductsPage() {
                       {Number(product.price).toLocaleString()} <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>ر.س</span>
                     </td>
 
-                    <td style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
-                      {product.stock_quantity ?? '—'}
+                    <td style={{ padding: '1.2rem 1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <button
+                          onClick={() => updateStockQuantity(product.id, (product.stock_quantity || 0) - 1)}
+                          style={{
+                            width: '28px', height: '28px', borderRadius: '8px', border: '1px solid rgba(244,63,94,0.15)',
+                            background: 'rgba(244,63,94,0.08)', color: '#f43f5e', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1rem'
+                          }}>−</button>
+                        <span style={{
+                          minWidth: '36px', textAlign: 'center', fontWeight: 900, fontSize: '0.95rem',
+                          color: (product.stock_quantity || 0) === 0 ? '#f43f5e' : (product.stock_quantity || 0) <= 5 ? '#f59e0b' : '#10b981',
+                          padding: '0.3rem 0.6rem', borderRadius: '8px',
+                          background: (product.stock_quantity || 0) === 0 ? 'rgba(244,63,94,0.1)' : (product.stock_quantity || 0) <= 5 ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)',
+                        }}>{product.stock_quantity ?? 0}</span>
+                        <button
+                          onClick={() => updateStockQuantity(product.id, (product.stock_quantity || 0) + 1)}
+                          style={{
+                            width: '28px', height: '28px', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.15)',
+                            background: 'rgba(16,185,129,0.08)', color: '#10b981', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1rem'
+                          }}>+</button>
+                        <button
+                          onClick={() => {
+                            const val = prompt('أدخل الكمية الجديدة:', String(product.stock_quantity || 0));
+                            if (val !== null && !isNaN(Number(val))) updateStockQuantity(product.id, Number(val));
+                          }}
+                          style={{
+                            padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(212,175,55,0.12)',
+                            background: 'rgba(212,175,55,0.05)', color: 'rgba(212,175,55,0.5)', cursor: 'pointer',
+                            fontSize: '0.65rem', fontWeight: 800, marginRight: '0.2rem'
+                          }}
+                          title="تعديل يدوي">✏️</button>
+                      </div>
                     </td>
 
                     {/* Active toggle */}
