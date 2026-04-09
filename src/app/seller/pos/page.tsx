@@ -68,7 +68,7 @@ export default function SellerPOSPage() {
       const total = selectedProduct.price * quantity;
 
       // 1. Record the sale
-      const { error: saleErr } = await supabase.from('store_sales').insert({
+      const { data: saleData, error: saleErr } = await supabase.from('store_sales').insert({
         seller_id: user!.id,
         product_id: selectedProduct.id,
         product_name: selectedProduct.name,
@@ -78,7 +78,7 @@ export default function SellerPOSPage() {
         customer_name: customerName || null,
         customer_phone: customerPhone || null,
         notes: notes || null,
-      });
+      }).select('id').single();
       if (saleErr) throw saleErr;
 
       // 2. Decrement stock
@@ -91,7 +91,41 @@ export default function SellerPOSPage() {
       // 3. Check low stock
       await supabase.rpc('check_low_stock', { p_product_id: selectedProduct.id }).catch(() => {});
 
-      // 4. Update local state
+      // 4. Create Invoice (POS-XXXXXX)
+      let invoiceNumber = '';
+      try {
+        const { data: invNum } = await supabase.rpc('create_invoice', {
+          p_seller_id: user!.id,
+          p_source: 'store',
+          p_store_sale_id: saleData?.id || null,
+          p_subtotal: total,
+          p_discount: 0,
+          p_total: total,
+          p_customer_name: customerName || null,
+          p_customer_phone: customerPhone || null,
+        });
+        invoiceNumber = invNum || '';
+
+        // Insert invoice items
+        if (invNum) {
+          const { data: inv } = await supabase
+            .from('invoices').select('id').eq('invoice_number', invNum).single();
+          if (inv) {
+            await supabase.from('invoice_items').insert({
+              invoice_id: inv.id,
+              product_id: selectedProduct.id,
+              product_name: selectedProduct.name,
+              quantity,
+              unit_price: selectedProduct.price,
+              total,
+            });
+          }
+        }
+      } catch (invErr) {
+        console.warn('Invoice creation:', invErr);
+      }
+
+      // 5. Update local state
       setProducts(prev => prev.map(p =>
         p.id === selectedProduct.id
           ? { ...p, stock_quantity: Math.max(0, (p.stock_quantity || 0) - quantity) }
@@ -104,6 +138,7 @@ export default function SellerPOSPage() {
         unitPrice: selectedProduct.price,
         total,
         customerName,
+        invoiceNumber,
         date: new Date().toLocaleString('ar-SA'),
       });
 
@@ -145,8 +180,15 @@ export default function SellerPOSPage() {
             background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '20px',
             padding: '1.8rem', marginTop: '1.5rem', textAlign: 'right',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.2rem', color: 'rgba(212,175,55,0.6)', fontSize: '0.8rem', fontWeight: 800 }}>
-              <Receipt size={16} /> إيصال البيع
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(212,175,55,0.6)', fontSize: '0.8rem', fontWeight: 800 }}>
+                <Receipt size={16} /> إيصال البيع
+              </div>
+              {successSale.invoiceNumber && (
+                <span style={{ color: '#D4AF37', fontWeight: 900, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '1px' }}>
+                  {successSale.invoiceNumber}
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.95rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'rgba(255,255,255,0.6)' }}>

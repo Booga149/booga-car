@@ -312,9 +312,19 @@ export default function SellerDashboard() {
               onMouseOut={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
               📊 تقرير البيعات
             </Link>
-            <Link href="/seller/import" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+            <Link href="/seller/invoices" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
               onMouseOver={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.15)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
               onMouseOut={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              🧾 الفواتير
+            </Link>
+            <Link href="/seller/returns" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(244,63,94,0.08)', color: '#f43f5e', border: '1px solid rgba(244,63,94,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(244,63,94,0.15)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(244,63,94,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              ↩️ المرتجعات
+            </Link>
+            <Link href="/seller/import" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
               <Zap size={18} /> رفع ملف Excel/CSV
             </Link>
           </div>

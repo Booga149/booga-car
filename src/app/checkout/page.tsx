@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { useCart } from '@/context/CartContext';
+import { useToast } from '@/context/ToastContext';
 import { supabase } from '@/lib/supabase';
 import { PartyPopper, CreditCard, Truck, Smartphone } from 'lucide-react';
 import { roundPrice, formatPrice, calculateCartTotal, calculateCommission, createPriceAuditEntry } from '@/lib/pricing';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { addToast } = useToast();
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', city: 'الرياض', paymentMethod: 'الدفع عند الاستلام' });
@@ -102,6 +104,33 @@ export default function CheckoutPage() {
         console.warn('Server validation unavailable, using frontend prices:', valErr.message);
       }
 
+      // ─── STEP 0.5: Reserve Stock (15 min hold) ───
+      const reservationIds: string[] = [];
+      try {
+        // Release expired reservations first
+        await supabase.rpc('release_expired_reservations').catch(() => {});
+        
+        for (const item of cartItems) {
+          const { data: resId, error: resErr } = await supabase.rpc('reserve_stock', {
+            p_product_id: item.id,
+            p_quantity: item.quantity,
+            p_user_id: userId,
+          });
+          if (resErr) {
+            // Release all previous reservations on failure
+            for (const rid of reservationIds) {
+              await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid).catch(() => {});
+            }
+            addToast(resErr.message || 'الكمية المطلوبة غير متاحة حالياً', 'error');
+            setLoading(false);
+            return;
+          }
+          if (resId) reservationIds.push(resId);
+        }
+      } catch (resErr: any) {
+        console.warn('Reservation system unavailable:', resErr.message);
+      }
+
       // ─── STEP 1: Insert Order ───
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -116,6 +145,10 @@ export default function CheckoutPage() {
         .single();
 
       if (orderError) {
+        // Release reservations on order failure
+        for (const rid of reservationIds) {
+          await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid).catch(() => {});
+        }
         throw new Error(orderError.message || "Failed to create order");
       }
 
@@ -136,20 +169,63 @@ export default function CheckoutPage() {
         const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
         if (itemsError) throw itemsError;
 
-        // ─── STEP 2b: Decrement Stock (atomic) ───
+        // ─── STEP 2b: Decrement Stock + Complete Reservations ───
         for (const item of cartItems) {
           try {
-            const { data: decrementOk, error: decErr } = await supabase.rpc('decrement_stock', {
+            const { error: decErr } = await supabase.rpc('decrement_stock', {
               p_product_id: item.id,
               p_quantity: item.quantity,
             });
             if (decErr) console.warn('Stock decrement warning:', decErr.message);
             
-            // Check low stock & send notifications
             await supabase.rpc('check_low_stock', { p_product_id: item.id }).catch(() => {});
           } catch (stockErr) {
             console.warn('Stock decrement failed for', item.id, stockErr);
           }
+        }
+
+        // Complete all reservations
+        for (const rid of reservationIds) {
+          await supabase.rpc('complete_reservation', { p_reservation_id: rid }).catch(() => {});
+        }
+
+        // ─── STEP 2c: Create Invoice (non-blocking) ───
+        try {
+          // Get seller_id from first product
+          const { data: firstProduct } = await supabase
+            .from('products').select('seller_id').eq('id', cartItems[0].id).single();
+
+          if (firstProduct?.seller_id) {
+            const { data: invNumber } = await supabase.rpc('create_invoice', {
+              p_seller_id: firstProduct.seller_id,
+              p_source: 'online',
+              p_order_id: orderData.id,
+              p_subtotal: totalBeforeDiscount,
+              p_discount: discountAmount,
+              p_total: finalTotal,
+              p_customer_name: formData.name,
+              p_customer_phone: formData.phone,
+            });
+
+            // Insert invoice items
+            if (invNumber) {
+              const { data: inv } = await supabase
+                .from('invoices').select('id').eq('invoice_number', invNumber).single();
+              if (inv) {
+                const invoiceItems = cartItems.map(item => ({
+                  invoice_id: inv.id,
+                  product_id: item.id,
+                  product_name: item.name,
+                  quantity: item.quantity,
+                  unit_price: roundPrice(item.price),
+                  total: roundPrice(item.price * item.quantity),
+                }));
+                await supabase.from('invoice_items').insert(invoiceItems);
+              }
+            }
+          }
+        } catch (invErr) {
+          console.warn('Invoice creation (non-blocking):', invErr);
         }
 
         // ─── STEP 2c: Price Audit Log (non-blocking) ───
