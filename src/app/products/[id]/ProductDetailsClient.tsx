@@ -8,7 +8,7 @@ import { Product } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import ProductCard from '@/components/ProductCard';
-import { Frown, Flame, ShoppingCart, Star, Package, Truck, Lock, CreditCard, Landmark, Smartphone, Globe, ShieldCheck, RefreshCw, Send, MessageSquare } from 'lucide-react';
+import { Frown, Flame, ShoppingCart, Star, Package, Truck, Lock, CreditCard, Landmark, Smartphone, Globe, ShieldCheck, RefreshCw, Send, MessageSquare, Bell } from 'lucide-react';
 import { saveRecentlyViewed } from '@/components/RecentlyViewed';
 
 export default function ProductDetailsClient({ id }: { id: string }) {
@@ -26,6 +26,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [userReview, setUserReview] = useState<any>(null);
+  const [notifyMeStatus, setNotifyMeStatus] = useState<'idle' | 'loading' | 'done' | 'already'>('idle');
 
   useEffect(() => {
     async function fetchProductDetails() {
@@ -382,6 +383,46 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                 </button>
               )}
             </div>
+
+            {/* Notify Me — for out of stock */}
+            {isOutOfStock && (
+              <div style={{ marginTop: '1rem' }}>
+                <button
+                  onClick={async () => {
+                    if (!user) { openLoginModal(); return; }
+                    setNotifyMeStatus('loading');
+                    const { error } = await supabase.from('stock_waitlist').insert({
+                      product_id: product.id,
+                      user_id: user.id,
+                      email: user.email,
+                    });
+                    if (error?.code === '23505') {
+                      setNotifyMeStatus('already');
+                      addToast('أنت مسجل بالفعل — سنبلغك لما يتوفر ✓', 'success');
+                    } else if (!error) {
+                      setNotifyMeStatus('done');
+                      addToast('تم! سنبلغك لما يتوفر المنتج 🔔', 'success');
+                    } else {
+                      setNotifyMeStatus('idle');
+                      addToast('حدث خطأ، حاول مرة أخرى', 'error');
+                    }
+                  }}
+                  disabled={notifyMeStatus === 'loading' || notifyMeStatus === 'done' || notifyMeStatus === 'already'}
+                  style={{
+                    width: '100%', padding: '1rem', borderRadius: '12px',
+                    background: notifyMeStatus === 'done' || notifyMeStatus === 'already' ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.08)',
+                    border: `1px solid ${notifyMeStatus === 'done' || notifyMeStatus === 'already' ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)'}`,
+                    color: notifyMeStatus === 'done' || notifyMeStatus === 'already' ? '#10b981' : '#3b82f6',
+                    fontWeight: 900, fontSize: '1rem', cursor: notifyMeStatus !== 'idle' ? 'default' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <Bell size={18} />
+                  {notifyMeStatus === 'done' || notifyMeStatus === 'already' ? 'سنبلغك لما يتوفر ✓' : notifyMeStatus === 'loading' ? 'جاري التسجيل...' : '🔔 أبلغني لما يتوفر'}
+                </button>
+              </div>
+            )}
 
             {/* Extended Trust Badges (CRO) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '3rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>

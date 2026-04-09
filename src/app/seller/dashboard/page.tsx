@@ -19,6 +19,7 @@ export default function SellerDashboard() {
   const [wallet, setWallet] = useState({ totalSales: 0, totalCommission: 0, availableBalance: 0, pendingPayouts: 0 });
   const [stats, setStats] = useState({ totalViews: 0, totalLikes: 0, activeProducts: 0 });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [stockAlerts, setStockAlerts] = useState({ outOfStock: 0, lowStock: 0 });
   const [time, setTime] = useState(new Date());
 
   // Live clock
@@ -41,14 +42,18 @@ export default function SellerDashboard() {
         const { data: prof } = await supabase.from('profiles').select('*').eq('id', user!.id).single();
         if (prof) setProfile(prof);
 
-        // Fetch Product Stats
+        // Fetch Product Stats (including stock)
         const { data: productsData } = await supabase
-          .from('products').select('views_count, likes_count, is_active').eq('seller_id', user!.id);
+          .from('products').select('views_count, likes_count, is_active, stock_quantity').eq('seller_id', user!.id);
         if (productsData) {
           const totalViews = productsData.reduce((sum, p) => sum + (p.views_count || 0), 0);
           const totalLikes = productsData.reduce((sum, p) => sum + (p.likes_count || 0), 0);
           const activeCount = productsData.filter(p => p.is_active !== false).length;
           setStats({ totalViews, totalLikes, activeProducts: activeCount });
+          // Stock alerts
+          const outOfStock = productsData.filter(p => (p.stock_quantity ?? 0) === 0).length;
+          const lowStock = productsData.filter(p => (p.stock_quantity ?? 0) > 0 && (p.stock_quantity ?? 0) <= 5).length;
+          setStockAlerts({ outOfStock, lowStock });
         }
 
         // Fetch Sales — first get seller's product IDs, then order_items
@@ -168,6 +173,32 @@ export default function SellerDashboard() {
           </div>
         </div>
 
+        {/* ═══ STOCK ALERTS BANNER ═══ */}
+        {(stockAlerts.outOfStock > 0 || stockAlerts.lowStock > 0) && (
+          <Link href="/seller/stock" style={{ textDecoration: 'none', display: 'block', marginBottom: '1.5rem' }}>
+            <div style={{
+              padding: '1.2rem 1.8rem', borderRadius: '18px',
+              background: stockAlerts.outOfStock > 0 ? 'linear-gradient(135deg, rgba(244,63,94,0.08), rgba(244,63,94,0.03))' : 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.03))',
+              border: `1px solid ${stockAlerts.outOfStock > 0 ? 'rgba(244,63,94,0.2)' : 'rgba(245,158,11,0.2)'}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap',
+              transition: 'all 0.25s', cursor: 'pointer',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span style={{ fontSize: '1.5rem' }}>{stockAlerts.outOfStock > 0 ? '🚫' : '⚠️'}</span>
+                <div>
+                  <div style={{ color: stockAlerts.outOfStock > 0 ? '#f43f5e' : '#f59e0b', fontWeight: 900, fontSize: '0.95rem' }}>
+                    {stockAlerts.outOfStock > 0 && `${stockAlerts.outOfStock} منتج نفد`}
+                    {stockAlerts.outOfStock > 0 && stockAlerts.lowStock > 0 && ' • '}
+                    {stockAlerts.lowStock > 0 && `${stockAlerts.lowStock} منتج مخزونه منخفض`}
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', fontWeight: 600 }}>اضغط للانتقال لإدارة المخزون</div>
+                </div>
+              </div>
+              <ArrowRight size={20} color={stockAlerts.outOfStock > 0 ? '#f43f5e' : '#f59e0b'} />
+            </div>
+          </Link>
+        )}
+
         {/* ═══ LARGE KPI CARDS — Top Row ═══ */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
           
@@ -275,6 +306,11 @@ export default function SellerDashboard() {
               onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(212,175,55,0.4)'; }}
               onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(212,175,55,0.25)'; }}>
               <PackagePlus size={18} /> إضافة منتج يدوي
+            </Link>
+            <Link href="/seller/sales" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(59,130,246,0.08)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.15)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              📊 تقرير البيعات
             </Link>
             <Link href="/seller/import" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
               onMouseOver={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.15)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}

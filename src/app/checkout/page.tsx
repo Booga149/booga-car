@@ -75,7 +75,7 @@ export default function CheckoutPage() {
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id || null;
 
-      // ─── STEP 0: Server-side price validation ───
+      // ─── STEP 0: Server-side price & stock validation ───
       try {
         const validationRes = await fetch('/api/validate-order', {
           method: 'POST',
@@ -87,16 +87,18 @@ export default function CheckoutPage() {
         });
         const validation = await validationRes.json();
         if (!validationRes.ok || !validation.valid) {
-          throw new Error(validation.error || 'فشل التحقق من الأسعار');
+          // Stock or price error — BLOCK the order
+          addToast(validation.error || 'فشل التحقق من الطلب', 'error');
+          setLoading(false);
+          return;
         }
         // Use server-validated total (ignore frontend calculation)
         const serverTotal = roundPrice(validation.order.final_total);
         if (Math.abs(serverTotal - finalTotal) > 1) {
-          // Price mismatch > 1 SAR — possible tampering
           console.warn('Price mismatch detected:', { frontend: finalTotal, server: serverTotal });
         }
       } catch (valErr: any) {
-        // If validation API is unavailable, continue with frontend prices (graceful degradation)
+        // If validation API is completely unavailable, continue with frontend prices
         console.warn('Server validation unavailable, using frontend prices:', valErr.message);
       }
 
