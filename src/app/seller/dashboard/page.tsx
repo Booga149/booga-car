@@ -261,6 +261,16 @@ export default function SellerDashboard() {
 
           {/* Quick Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', minWidth: '200px' }}>
+            <Link href="/seller/pos" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', borderRadius: '18px', textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem', boxShadow: '0 8px 25px rgba(16,185,129,0.25)', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(16,185,129,0.4)'; }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(16,185,129,0.25)'; }}>
+              🛒 نقطة البيع (POS)
+            </Link>
+            <Link href="/seller/stock" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '18px', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.15)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              📦 إدارة المخزون
+            </Link>
             <Link href="/sell" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '1rem 1.4rem', background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#111', borderRadius: '18px', textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem', boxShadow: '0 8px 25px rgba(212,175,55,0.25)', transition: 'all 0.3s', whiteSpace: 'nowrap' }}
               onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(212,175,55,0.4)'; }}
               onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(212,175,55,0.25)'; }}>
