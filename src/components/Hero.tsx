@@ -17,6 +17,7 @@ export default function Hero() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
+      paddingTop: '80px',
       background: 'var(--background)',
     }}>
 
@@ -49,10 +50,8 @@ export default function Hero() {
         maxWidth: '1100px', width: '100%', padding: '0 clamp(1rem, 3vw, 2rem)',
       }}>
 
-        {/* ──── LUXURY LOGO ──── */}
+        {/* ──── LOGO ──── */}
         <div className="hero-logo-section" style={{ marginBottom: 'clamp(1.5rem, 4vw, 3rem)' }}>
-          
-          {/* BOOGA CAR - Big, Bold, Clear */}
           <h1 style={{
             fontSize: 'clamp(3rem, 11vw, 7rem)',
             fontWeight: 950,
