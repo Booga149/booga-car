@@ -45,14 +45,39 @@ export default function DropshipSettings() {
   async function saveConfig() {
     setSaving(true);
     try {
-      const res = await fetch('/api/dropship/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'aliexpress', ...config }),
-      });
-      if (!res.ok) throw new Error('Failed to save');
+      const updates: any = {
+        provider: 'aliexpress',
+        app_key: config.app_key,
+        app_secret: config.app_secret,
+        default_markup_percent: config.default_markup_percent,
+        auto_fulfill: config.auto_fulfill,
+        auto_sync_prices: config.auto_sync_prices,
+        auto_sync_stock: config.auto_sync_stock,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Try update first
+      const { data: existing } = await supabase
+        .from('dropship_config')
+        .select('id')
+        .eq('provider', 'aliexpress')
+        .single();
+
+      let error;
+      if (existing) {
+        ({ error } = await supabase
+          .from('dropship_config')
+          .update(updates)
+          .eq('id', existing.id));
+      } else {
+        ({ error } = await supabase
+          .from('dropship_config')
+          .insert(updates));
+      }
+
+      if (error) throw error;
       alert('✅ تم حفظ الإعدادات');
-    } catch { alert('❌ فشل الحفظ'); }
+    } catch (e: any) { alert('❌ فشل الحفظ: ' + (e?.message || '')); }
     setSaving(false);
   }
 
