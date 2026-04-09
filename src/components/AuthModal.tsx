@@ -497,20 +497,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             {/* Title */}
             <h2 style={{ 
               fontSize: '2.8rem', margin: '0 0 1rem', fontWeight: 950, lineHeight: 1.08,
-              color: 'white', letterSpacing: '-1px',
+              color: '#1a1a1a', letterSpacing: '-1px',
               animation: 'fadeInUp 0.6s ease 0.3s both'
             }}>
               ادخل عالم
               <br />
               <span style={{ 
-                background: 'linear-gradient(135deg, #FFD700, #FFA500, #FF8C00)',
+                background: 'linear-gradient(135deg, #B8860B, #D4AF37, #B8860B)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>القيادة الفاخرة</span>
             </h2>
             
             <p style={{ 
-              color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.7, 
+              color: 'rgba(0,0,0,0.5)', fontSize: '1rem', lineHeight: 1.7, 
               marginBottom: '2.5rem', fontWeight: 500, maxWidth: '380px',
               animation: 'fadeInUp 0.6s ease 0.4s both'
             }}>
@@ -550,7 +550,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </svg>
               <div style={{
                 position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)',
-                color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 700,
+                color: 'rgba(0,0,0,0.4)', fontSize: '0.7rem', fontWeight: 700,
                 letterSpacing: '2px', textTransform: 'uppercase',
               }}>
                 PERFORMANCE
@@ -569,13 +569,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               ].map((feat, i) => (
                 <div key={i} style={{ 
                   display: 'flex', alignItems: 'center', gap: '0.8rem',
-                  color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontWeight: 600,
+                  color: 'rgba(0,0,0,0.5)', fontSize: '0.85rem', fontWeight: 600,
                 }}>
                   <div style={{ 
-                    color: '#FFD700', 
-                    background: 'rgba(255,215,0,0.08)', 
+                    color: '#B8860B', 
+                    background: 'rgba(212,175,55,0.1)', 
                     padding: '0.35rem', borderRadius: '8px', display: 'flex',
-                    border: '1px solid rgba(255,215,0,0.1)',
+                    border: '1px solid rgba(212,175,55,0.15)',
                   }}>
                     {feat.icon}
                   </div>
@@ -591,9 +591,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             }}>
               <div style={{ 
                 display: 'flex', alignItems: 'center', gap: '1rem', 
-                background: 'rgba(255,255,255,0.02)', 
+                background: 'rgba(0,0,0,0.03)', 
                 padding: '1rem 1.3rem', borderRadius: '16px', 
-                border: '1px solid rgba(255,255,255,0.04)',
+                border: '1px solid rgba(0,0,0,0.06)',
                 backdropFilter: 'blur(10px)',
               }}>
                 <div style={{ position: 'relative' }}>
@@ -608,10 +608,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   }} />
                 </div>
                 <div>
-                  <div style={{ color: 'white', fontWeight: 900, fontSize: '1.3rem', lineHeight: 1 }}>
+                  <div style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.3rem', lineHeight: 1 }}>
                     {liveUsers.toLocaleString()}
                   </div>
-                  <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.15rem' }}>
+                  <div style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.15rem' }}>
                     يتسوقون الآن
                   </div>
                 </div>
