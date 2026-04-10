@@ -70,28 +70,24 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   // --- Google Auth ---
   const handleGoogleSignIn = async () => {
-    console.log('🔵 Google Sign-In clicked!');
     setLoading(true);
     setAuthError('');
     try {
-      console.log('🔵 Calling supabase.auth.signInWithOAuth...');
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: typeof window !== 'undefined' 
-            ? `${window.location.origin}/auth/callback` 
+            ? `${window.location.origin}/` 
             : undefined,
+          skipBrowserRedirect: false,
         }
       });
-      console.log('🔵 OAuth response:', { data, error });
       if (error) throw error;
-      // If we get here with a URL, redirect manually
       if (data?.url) {
-        console.log('🔵 Redirecting to:', data.url);
         window.location.href = data.url;
       }
     } catch (err: any) {
-      console.error('🔴 Google Auth Error:', err);
+      console.error('Google Auth Error:', err);
       setAuthError(err.message || 'فشل تسجيل الدخول بجوجل');
       setLoading(false);
     }

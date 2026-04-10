@@ -11,5 +11,13 @@ export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 // but all operations should check isSupabaseConfigured first.
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      flowType: 'implicit',
+      detectSessionInUrl: true,
+      autoRefreshToken: true,
+      persistSession: true,
+    }
+  }
 );
