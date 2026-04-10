@@ -193,47 +193,31 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         onClose();
         location.reload();
       } else {
-        // Sign up with metadata for profile trigger
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            emailRedirectTo: typeof window !== 'undefined' 
-              ? `${window.location.origin}/auth/callback` 
-              : undefined,
-            data: {
-              full_name: email.split('@')[0],
-            }
-          }
+        // Sign up via server API (auto-confirms the user)
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, full_name: email.split('@')[0] }),
         });
-        if (error) {
-          // Better Arabic error messages
-          if (error.message.includes('already registered') || error.message.includes('already been registered')) {
-            throw new Error('هذا البريد مسجل مسبقاً. جرب تسجيل الدخول');
-          }
-          if (error.message.includes('Password should be at least')) {
-            throw new Error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-          }
-          if (error.message.includes('valid email')) {
-            throw new Error('يرجى إدخال بريد إلكتروني صحيح');
-          }
-          throw error;
+        const result = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(result.error || 'خطأ في إنشاء الحساب');
+        }
+
+        // Auto-login after successful signup
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginError) {
+          throw new Error('تم إنشاء الحساب! سجل دخول بالبريد وكلمة المرور');
         }
         
-        // Check if user was auto-confirmed (no email confirmation required)
-        if (data?.user?.confirmed_at || data?.session) {
-          await logSecurityEvent(supabase, {
-            type: 'AUTH_SUCCESS',
-            title: 'تسجيل حساب جديد',
-            account: email
-          });
-          onClose();
-          location.reload();
-          return;
-        }
-        
-        // Email confirmation is required
-        setAuthError('تم إرسال رابط التأكيد لبريدك الإلكتروني ✅ تحقق من صندوق الوارد أو مجلد السبام');
+        await logSecurityEvent(supabase, {
+          type: 'AUTH_SUCCESS',
+          title: 'تسجيل حساب جديد',
+          account: email
+        });
+        onClose();
+        location.reload();
         return;
       }
     } catch (err: any) {
