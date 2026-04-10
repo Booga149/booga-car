@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 // Rate limiter store (resets on cold start)
 const rateLimit = new Map<string, { count: number; reset: number }>();
@@ -27,7 +28,7 @@ function checkRateLimit(ip: string): boolean {
   return entry.count > RATE_LIMIT_MAX;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getIP(request);
 
@@ -36,15 +37,46 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
-  // 2. Security headers
-  const response = NextResponse.next();
+  // 2. Create response and refresh Supabase auth session
+  let response = NextResponse.next({
+    request: { headers: request.headers },
+  });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseAnonKey) {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
+    });
+
+    // Refresh session - this keeps the auth cookies up to date
+    await supabase.auth.getUser();
+  }
+
+  // 3. Security headers
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('X-Client-IP', ip);
 
-  // 3. Block sensitive API routes from direct browser access (CORS-like)
+  // 4. Block sensitive API routes from direct browser access (CORS-like)
   if (pathname.startsWith('/api/') && pathname !== '/api/track-visit') {
     // Allow all API calls (role checks done in route handlers)
     return response;
