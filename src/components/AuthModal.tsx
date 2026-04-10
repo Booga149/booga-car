@@ -632,10 +632,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
           {/* Saudi Flag */}
           <div style={{
             position: 'absolute', top: '1.2rem', right: '1.2rem',
-            fontSize: '2rem', lineHeight: 1,
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+            width: '48px', height: '32px', borderRadius: '4px', overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(0,0,0,0.08)',
           }}>
-            🇸🇦
+            <img src="https://flagcdn.com/w80/sa.png" alt="Saudi Arabia" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           {/* Header */}
           <div style={{ marginBottom: '1.8rem' }}>
