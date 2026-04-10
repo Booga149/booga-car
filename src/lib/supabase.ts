@@ -7,17 +7,16 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 // Check if Supabase is properly configured
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 
-// Create client - use a dummy URL if not configured to prevent crashes,
-// but all operations should check isSupabaseConfigured first.
+// Create client with PKCE flow (default, most secure)
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
   {
     auth: {
-      flowType: 'implicit',
-      detectSessionInUrl: true,
+      flowType: 'pkce',
       autoRefreshToken: true,
       persistSession: true,
+      detectSessionInUrl: true,
     }
   }
 );

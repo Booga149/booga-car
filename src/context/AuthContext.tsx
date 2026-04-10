@@ -77,53 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Handle OAuth implicit flow tokens in URL hash
-    const handleHashTokens = async () => {
-      if (typeof window === 'undefined') return false;
-      
-      const hash = window.location.hash;
-      if (!hash || !hash.includes('access_token')) return false;
-      
-      // Parse tokens from hash
-      const params = new URLSearchParams(hash.substring(1));
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-      
-      if (access_token && refresh_token) {
-        console.log('🔵 Found OAuth tokens in URL hash, setting session...');
-        const { data, error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-        
-        // Clean up the URL hash
-        window.history.replaceState(null, '', window.location.pathname);
-        
-        if (data.session && !error) {
-          console.log('✅ Session set successfully from hash tokens');
-          const u = data.session.user;
-          setUser(u);
-          if (u) await fetchProfile(u.id);
-          setLoading(false);
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // Try hash tokens first, then fall back to normal session check
-    handleHashTokens().then(async (handled) => {
-      if (!handled) {
-        // Get initial session normally
-        const { data: { session } } = await supabase.auth.getSession();
-        const u = session?.user || null;
-        setUser(u);
-        if (u) await fetchProfile(u.id);
-        setLoading(false);
-      }
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const u = session?.user || null;
+      setUser(u);
+      if (u) await fetchProfile(u.id);
+      setLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes (including OAuth callbacks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user || null;
       setUser(u);

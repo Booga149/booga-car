@@ -77,9 +77,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         provider: 'google',
         options: {
           redirectTo: typeof window !== 'undefined' 
-            ? `${window.location.origin}/` 
+            ? `${window.location.origin}/auth/callback` 
             : undefined,
-          skipBrowserRedirect: false,
         }
       });
       if (error) throw error;

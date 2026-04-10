@@ -1,70 +1,68 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
 
-function CallbackHandler() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function AuthCallbackPage() {
   const [status, setStatus] = useState('جاري تسجيل الدخول...');
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        const code = searchParams.get('code');
-        
-        if (code) {
-          // PKCE flow: exchange the code for a session
-          // The code_verifier is stored in localStorage by the Supabase client
-          setStatus('جاري التحقق من حسابك...');
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (error) {
-            console.error('Code exchange error:', error.message);
-            setStatus('حدث خطأ في تسجيل الدخول');
-            setTimeout(() => router.replace('/'), 2000);
-            return;
-          }
-          
-          if (data.session) {
-            console.log('✅ Session established via code exchange');
-            setStatus('تم تسجيل الدخول بنجاح! ✅');
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 500);
-            return;
-          }
-        }
-
-        // Fallback: check for hash-based tokens (implicit flow)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        
-        if (accessToken) {
-          setStatus('جاري تأكيد الجلسة...');
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            setStatus('تم تسجيل الدخول بنجاح! ✅');
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 500);
-            return;
-          }
-        }
-
-        // No code or token found
-        console.log('No auth params found, redirecting...');
-        router.replace('/');
-      } catch (err) {
-        console.error('Auth callback exception:', err);
-        setStatus('حدث خطأ، جاري إعادة التوجيه...');
-        setTimeout(() => router.replace('/'), 2000);
+    // The Supabase client has detectSessionInUrl: true
+    // When this page loads with ?code=xxx, the client automatically:
+    // 1. Detects the code in the URL
+    // 2. Retrieves the code_verifier from localStorage
+    // 3. Calls exchangeCodeForSession
+    // 4. Fires onAuthStateChange
+    
+    // We just need to listen for the auth state change
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setStatus('تم تسجيل الدخول بنجاح! ✅');
+        // Use window.location.href for full page reload to update all components
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 500);
       }
-    };
+      if (event === 'TOKEN_REFRESHED') {
+        // Session refreshed, redirect
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 500);
+      }
+    });
 
-    handleCallback();
-  }, [router, searchParams]);
+    // Fallback: if no auth event fires within 8 seconds, try manual approach
+    const fallbackTimer = setTimeout(async () => {
+      // Try to get session manually
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setStatus('تم تسجيل الدخول بنجاح! ✅');
+        window.location.href = '/';
+      } else {
+        // Try to exchange code manually from URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        if (code) {
+          try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            if (!error && data.session) {
+              setStatus('تم تسجيل الدخول بنجاح! ✅');
+              window.location.href = '/';
+              return;
+            }
+          } catch (e) {
+            console.error('Manual code exchange failed:', e);
+          }
+        }
+        setStatus('حدث خطأ في تسجيل الدخول. جاري إعادة التوجيه...');
+        setTimeout(() => { window.location.href = '/'; }, 2000);
+      }
+    }, 8000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
+    };
+  }, []);
 
   return (
     <div style={{
@@ -97,17 +95,5 @@ function CallbackHandler() {
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
-  );
-}
-
-export default function AuthCallbackPage() {
-  return (
-    <Suspense fallback={
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>جاري التحميل...</p>
-      </div>
-    }>
-      <CallbackHandler />
-    </Suspense>
   );
 }
