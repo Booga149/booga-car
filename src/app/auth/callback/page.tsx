@@ -15,7 +15,7 @@ export default function AuthCallbackPage() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         
-        setDebugInfo(`URL has code: ${!!code}, hash token: ${!!accessToken}`);
+        setDebugInfo(`Full URL: ${url}\ncode: ${!!code}, hash: ${!!accessToken}`);
         
         if (code) {
           // PKCE: exchange code for session

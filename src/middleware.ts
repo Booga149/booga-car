@@ -45,7 +45,8 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (supabaseUrl && supabaseAnonKey) {
+  // SKIP auth refresh on callback path - don't interfere with OAuth code exchange
+  if (supabaseUrl && supabaseAnonKey && !pathname.startsWith('/auth/callback')) {
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
