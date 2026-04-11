@@ -101,7 +101,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     try {
       let formattedPhone = phoneNumber.trim();
       if (formattedPhone.startsWith('0')) formattedPhone = formattedPhone.substring(1);
-      if (!formattedPhone.startsWith('+')) formattedPhone = `966${formattedPhone}`;
+      if (!formattedPhone.startsWith('+')) formattedPhone = `+966${formattedPhone.replace(/^966/, '')}`;
       
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     try {
       let formattedPhone = phoneNumber.trim();
       if (formattedPhone.startsWith('0')) formattedPhone = formattedPhone.substring(1);
-      if (!formattedPhone.startsWith('+')) formattedPhone = `966${formattedPhone}`;
+      if (!formattedPhone.startsWith('+')) formattedPhone = `+966${formattedPhone.replace(/^966/, '')}`;
 
       const { error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
