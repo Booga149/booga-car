@@ -211,7 +211,6 @@ export default function PWAInstaller() {
           ))}
         </div>
 
-        {/* Install Button */}
         <button onClick={handleInstall} style={{
           width: '100%', padding: '0.9rem',
           background: 'linear-gradient(135deg, #e11d48, #be123c)',
@@ -224,6 +223,15 @@ export default function PWAInstaller() {
           <Download size={18} />
           {isIOS ? 'كيفية التثبيت' : 'تثبيت التطبيق مجاناً'}
         </button>
+
+        {/* Security note */}
+        <div style={{
+          marginTop: '0.8rem', textAlign: 'center',
+          fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', fontWeight: 600,
+          lineHeight: 1.5,
+        }}>
+          🔒 تطبيق آمن 100% — لو ظهرت رسالة حماية اضغط &quot;التثبيت على أي حال&quot;
+        </div>
       </div>
 
       <style>{`
