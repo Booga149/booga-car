@@ -19,7 +19,7 @@ export default function CartDrawer() {
         }} 
       />
       <div className="glass-panel" style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0, width: '400px', maxWidth: '100vw',
+        position: 'fixed', top: 0, left: 0, bottom: 0, width: 'min(400px, 100%)',
         borderRight: '1px solid var(--border)', zIndex: 10000,
         background: 'var(--surface)',
         color: 'var(--text-primary)',
@@ -34,27 +34,52 @@ export default function CartDrawer() {
           }
         `}</style>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>سلة المشتريات</h2>
+        <div style={{ 
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+          marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' 
+        }}>
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>سلة المشتريات</h2>
           <button 
             onClick={() => setIsCartOpen(false)}
             style={{ 
-              background: 'rgba(0,0,0,0.06)', border: 'none', color: 'var(--text-primary)', 
-              width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s'
+              background: 'var(--surface-hover)', border: 'none', color: 'var(--text-primary)', 
+              width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
             }}
-            onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.1)'}
-            onMouseOut={e => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '0.5rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {cartItems.length === 0 ? (
-             <div style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                <ShoppingCart size={64} opacity={0.2} color="var(--text-secondary)" />
-                <p>سلتك فارغة حالياً</p>
+             <div style={{ 
+               textAlign: 'center', color: 'var(--text-secondary)', marginTop: '5rem', 
+               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' 
+             }}>
+                <div style={{ 
+                  width: '100px', height: '100px', borderRadius: '30px', 
+                  background: 'var(--primary-lighter)', display: 'flex', 
+                  alignItems: 'center', justifyContent: 'center', color: 'var(--primary)'
+                }}>
+                  <ShoppingCart size={48} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>سلتك فارغة حالياً</h3>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-tertiary)', maxWidth: '220px', lineHeight: 1.5 }}>
+                    ابدأ بإضافة قطع الغيار التي تحتاجها لسيارتك الآن وستظهر هنا
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsCartOpen(false)}
+                  style={{
+                    padding: '0.8rem 2rem', background: 'var(--primary)', color: 'white',
+                    border: 'none', borderRadius: '14px', fontWeight: 800, cursor: 'pointer',
+                    boxShadow: '0 8px 20px rgba(225,29,72,0.2)'
+                  }}
+                >
+                  تصفح المنتجات
+                </button>
              </div>
           ) : (
              cartItems.map(item => (

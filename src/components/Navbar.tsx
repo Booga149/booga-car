@@ -121,40 +121,41 @@ export default function Navbar() {
         }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
-            <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
               <div style={{ position: 'relative' }}>
-                <h1 className="mobile-logo-size" style={{
-                  color: 'var(--text-primary)', margin: 0, fontSize: '1.8rem', fontWeight: 900,
-                  letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '0.3rem',
-                }}>
-                  BOOGA <span style={{ color: 'var(--primary)' }}>CAR</span>
-                </h1>
+                <img src="/favicon.png" alt="Booga Car" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
                 {isAdmin ? (
                   <div style={{
-                    position: 'absolute', top: -12, right: -35,
-                    fontSize: '0.6rem', fontWeight: 800,
+                    position: 'absolute', top: -8, right: -20,
+                    fontSize: '0.55rem', fontWeight: 800,
                     background: 'var(--primary)', color: '#fff',
-                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    padding: '0.1rem 0.45rem', borderRadius: '30px',
                     boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
                   }}>ADMIN</div>
                 ) : isMerchant ? (
                   <div style={{
-                    position: 'absolute', top: -12, right: -20,
-                    fontSize: '0.6rem', fontWeight: 800,
+                    position: 'absolute', top: -8, right: -15,
+                    fontSize: '0.55rem', fontWeight: 800,
                     background: 'var(--primary)', color: '#fff',
-                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    padding: '0.1rem 0.45rem', borderRadius: '30px',
                     boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
                   }}>PRO</div>
                 ) : (
                   <div style={{
-                    position: 'absolute', top: -12, right: -25,
-                    fontSize: '0.6rem', fontWeight: 800,
+                    position: 'absolute', top: -8, right: -18,
+                    fontSize: '0.55rem', fontWeight: 800,
                     background: 'var(--primary)', color: '#fff',
-                    padding: '0.15rem 0.55rem', borderRadius: '30px',
+                    padding: '0.1rem 0.45rem', borderRadius: '30px',
                     boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
                   }}>🇸🇦 KSA</div>
                 )}
               </div>
+              <h1 className="mobile-logo-size" style={{
+                color: 'var(--text-primary)', margin: 0, fontSize: '1.4rem', fontWeight: 900,
+                letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}>
+                CAR <span style={{ color: 'var(--primary)' }}>BOOGA</span>
+              </h1>
             </Link>
 
             <nav className="desktop-nav" style={{ gap: '2rem' }}>
