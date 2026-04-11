@@ -131,7 +131,7 @@ export default function Home() {
         <Hero />
 
         {/* ═══ VEHICLE SEARCH ═══ */}
-        <div style={{ padding: '0 1rem', marginTop: '-4rem', marginBottom: '2rem', position: 'relative', zIndex: 20 }}>
+        <div style={{ padding: '0 1rem', marginTop: '1rem', marginBottom: '3rem', position: 'relative', zIndex: 20 }}>
           <VehicleSearch />
         </div>
         

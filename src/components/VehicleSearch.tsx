@@ -160,8 +160,8 @@ export default function VehicleSearch() {
       }}>
         مالقيت قطعتك؟{' '}
         <a href="/request-part" style={{
-          color: 'var(--primary)', fontWeight: 800,
-          textDecoration: 'none',
+          color: '#10b981', fontWeight: 900,
+          textDecoration: 'underline', textUnderlineOffset: '4px',
         }}>
           اطلبها وإحنا ندور لك! ←
         </a>
