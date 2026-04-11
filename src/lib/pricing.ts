@@ -59,11 +59,14 @@ export interface CartPriceResult {
   couponPercent: number;
   couponType: DiscountType | null;
   firstOrderDiscount: number;
+  vat: number;
+  vatRate: number;
   totalBeforeDiscount: number;
   finalTotal: number;
   formattedSubtotal: string;
   formattedShipping: string;
   formattedDiscount: string;
+  formattedVat: string;
   formattedTotal: string;
   isFreeShipping: boolean;
   items: PriceResult[];
@@ -74,6 +77,7 @@ export interface CartPriceResult {
 const FREE_SHIPPING_THRESHOLD = 500;
 const STANDARD_SHIPPING_COST = 35;
 const COMMISSION_RATE = 0.10;
+const VAT_RATE = 0.15;
 const FIRST_ORDER_DISCOUNT_PERCENT = 10;
 const FIRST_ORDER_MAX_DISCOUNT = 50;
 const CURRENCY = 'ر.س';
@@ -209,7 +213,9 @@ export function calculateCartTotal(
 
   const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
   const totalDiscount = roundPrice(couponResult.couponDiscount + firstOrderDiscount);
-  const finalTotal = roundPrice(Math.max(0, totalBeforeDiscount - totalDiscount));
+  const subtotalAfterDiscount = roundPrice(Math.max(0, subtotal - totalDiscount));
+  const vat = roundPrice(subtotalAfterDiscount * VAT_RATE);
+  const finalTotal = roundPrice(subtotalAfterDiscount + vat + shippingCost);
 
   return {
     subtotal, productDiscountTotal, shippingCost,
@@ -217,10 +223,13 @@ export function calculateCartTotal(
     couponPercent,
     couponType: couponResult.couponType,
     firstOrderDiscount,
+    vat,
+    vatRate: VAT_RATE,
     totalBeforeDiscount, finalTotal,
     formattedSubtotal: formatPrice(subtotal),
     formattedShipping: shippingCost === 0 ? 'مجاني' : formatPrice(shippingCost),
     formattedDiscount: formatPrice(totalDiscount),
+    formattedVat: formatPrice(vat),
     formattedTotal: formatPrice(finalTotal),
     isFreeShipping: shippingCost === 0,
     items: pricedItems,
@@ -323,4 +332,4 @@ export async function validateCoupon(
 
 // ─── Exports ────────────────────────────────────
 
-export { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, COMMISSION_RATE, FIRST_ORDER_DISCOUNT_PERCENT, FIRST_ORDER_MAX_DISCOUNT };
+export { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, COMMISSION_RATE, VAT_RATE, FIRST_ORDER_DISCOUNT_PERCENT, FIRST_ORDER_MAX_DISCOUNT };
