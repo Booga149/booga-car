@@ -134,6 +134,9 @@ export default function CartDrawer() {
                <span>الإجمالي:</span>
                <span style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 900 }}>{formatCurrency(cartTotal)}</span>
             </div>
+            <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '1rem', marginTop: '-0.8rem' }}>
+              * الأسعار لا تشمل ضريبة القيمة المضافة (15%) والشحن
+            </div>
             <a 
             href="/checkout"
             onClick={() => setIsCartOpen(false)}

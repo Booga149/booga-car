@@ -63,7 +63,7 @@ export default function Home() {
       position: 'relative'
     }}>
       {/* Global Precision Grid */}
-      <div className="mobile-hide-section" style={{
+      <div className="mobile-hide-decorative" style={{
         position: 'fixed', inset: 0,
         backgroundImage: isAdmin
           ? 'linear-gradient(rgba(76,201,240,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.03) 1px, transparent 1px)'
@@ -77,7 +77,7 @@ export default function Home() {
 
         {/* ═══ ADMIN COMMAND BAR ═══ */}
         {isAdmin && (
-          <div className="mobile-hide-section" style={{
+          <div className="mobile-hide-decorative" style={{
             marginTop: '120px', marginLeft: '2rem', marginRight: '2rem',
             background: 'rgba(5, 5, 12, 0.85)', backdropFilter: 'blur(20px)',
             border: '1px solid rgba(76,201,240,0.2)', borderRadius: '20px',
@@ -187,15 +187,79 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ═══ SECTION: Nearby Sellers — Desktop only ═══ */}
-        <div className="mobile-hide-section">
-          <NearbySellers />
+        {/* ═══ MOBILE QUICK SERVICES ═══ */}
+        <div className="mobile-only" style={{
+          display: 'none',
+          flexDirection: 'column',
+          padding: '1.5rem 1rem 0.5rem',
+        }}>
+          <h3 style={{
+            fontSize: '1.1rem', fontWeight: 900,
+            color: 'var(--text-primary)', margin: '0 0 1rem',
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+          }}>
+            ⚡ خدمات سريعة
+          </h3>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0.6rem',
+          }}>
+            {[
+              { name: 'أكسسوارات', emoji: '✨', href: '/accessories' },
+              { name: 'كراجي', emoji: '🚗', href: '/garage' },
+              { name: 'تتبع الشحنة', emoji: '📦', href: '/track-order' },
+              { name: 'اطلب قطعتك', emoji: '🔍', href: '/request-part', isNew: true },
+              { name: 'سعّرلي', emoji: '💰', href: '/price-request' },
+              { name: 'التصنيفات', emoji: '📋', href: '/categories' },
+              { name: 'المفضلة', emoji: '❤️', href: '/wishlist' },
+              { name: 'انضم كتاجر', emoji: '🤝', href: '/become-dealer' },
+            ].map(service => (
+              <a
+                key={service.name}
+                href={service.href}
+                className="btn-tap"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.9rem 0.3rem',
+                  borderRadius: '16px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s',
+                  position: 'relative',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                }}
+              >
+                <span style={{ fontSize: '1.4rem' }}>{service.emoji}</span>
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 700,
+                  color: 'var(--text-primary)', textAlign: 'center',
+                  lineHeight: 1.3,
+                }}>
+                  {service.name}
+                </span>
+                {service.isNew && (
+                  <span style={{
+                    position: 'absolute', top: '0.3rem', left: '0.3rem',
+                    fontSize: '0.45rem', fontWeight: 900,
+                    background: 'var(--primary)', color: 'white',
+                    padding: '0.1rem 0.25rem', borderRadius: '3px',
+                  }}>جديد</span>
+                )}
+              </a>
+            ))}
+          </div>
         </div>
 
-        {/* ═══ SECTION: Engineering Discovery — Desktop only ═══ */}
-        <div className="mobile-hide-section">
-          <EngineeringSystems />
-        </div>
+        {/* ═══ SECTION: Nearby Sellers ═══ */}
+        <NearbySellers />
+
+        {/* ═══ SECTION: Engineering Discovery ═══ */}
+        <EngineeringSystems />
 
         {/* ═══ BANNER SLIDER ═══ */}
         <BannerSlider />
@@ -230,9 +294,8 @@ export default function Home() {
           <RecentlyViewed />
         </div>
 
-        {/* ═══ Desktop-only sections ═══ */}
-        <div className="mobile-hide-section">
-          <section style={{
+        {/* ═══ Support & Trust Section ═══ */}
+          <section className="support-section-wrap" style={{
             padding: 'clamp(3rem, 8vw, 8rem) clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto',
             width: '100%', position: 'relative', zIndex: 10
           }}>
@@ -250,12 +313,12 @@ export default function Home() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(0.95rem, 2vw, 1.3rem)', lineHeight: 1.8, marginBottom: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 500 }}>
                   سواء كنت تمتلك سيارة نادرة أو حديثة، فريقنا الهندسي متصل بشبكة توريد عالمية تضمن لك الحصول على القطع الصحيحة بالرقم التسلسلي الأصلي.
                 </p>
-                <div style={{ display: 'flex', gap: 'clamp(1rem, 3vw, 2rem)', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="support-actions" style={{ display: 'flex', gap: 'clamp(1rem, 3vw, 2rem)', alignItems: 'center', flexWrap: 'wrap' }}>
                   <a href="https://wa.me/966500000000" style={{
                     background: 'var(--primary)', color: 'white', padding: '1.2rem 3rem',
                     borderRadius: '20px', fontWeight: 900, textDecoration: 'none',
                     boxShadow: '0 15px 35px rgba(244, 63, 94, 0.4)', fontSize: '1.2rem',
-                    transition: '0.3s'
+                    transition: '0.3s', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                   }}>تحدث مع المهندس</a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-primary)', fontWeight: 800 }}>
                     <Award size={28} color="#FFD700" /> موثق من تجارة
@@ -284,7 +347,6 @@ export default function Home() {
 
           <KSATrustBar />
           <WhatsAppHub />
-        </div>
       </div>
 
       <style jsx>{`

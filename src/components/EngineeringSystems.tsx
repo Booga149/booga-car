@@ -55,7 +55,7 @@ export default function EngineeringSystems() {
   };
 
   return (
-    <section style={{ 
+    <section className="engineering-section" style={{ 
       padding: '8rem 2rem', 
       background: 'var(--surface-hover)',
       position: 'relative',
@@ -63,7 +63,7 @@ export default function EngineeringSystems() {
       <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         
         {/* Section Header */}
-        <div style={{ textAlign: 'left', marginBottom: '5rem', maxWidth: '800px' }}>
+        <div className="section-header" style={{ textAlign: 'left', marginBottom: '5rem', maxWidth: '800px' }}>
           <div style={{ 
             color: '#e11d48', fontWeight: 900, textTransform: 'uppercase', 
             letterSpacing: '4px', fontSize: '0.75rem', marginBottom: '1.2rem',
@@ -85,7 +85,7 @@ export default function EngineeringSystems() {
         </div>
 
         {/* Cards Grid */}
-        <div style={{ 
+        <div className="cards-grid" style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
           gap: '1.5rem' 
@@ -95,6 +95,7 @@ export default function EngineeringSystems() {
             return (
               <div 
                 key={system.id}
+                className="engineering-card"
                 onMouseEnter={() => setHoveredId(system.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{
@@ -122,7 +123,7 @@ export default function EngineeringSystems() {
                 }} />
 
                 {/* Technical Label */}
-                <div style={{ 
+                <div className="eng-label" style={{ 
                   position: 'absolute', top: '1.5rem', right: '1.5rem', 
                   fontSize: '0.6rem', fontWeight: 800, color: 'rgba(0,0,0,0.15)',
                   letterSpacing: '2px', textTransform: 'uppercase'
@@ -131,7 +132,7 @@ export default function EngineeringSystems() {
                 </div>
 
                 {/* Icon with Glow */}
-                <div style={{ 
+                <div className="eng-icon" style={{ 
                   color: system.color, marginBottom: '2rem',
                   display: 'inline-flex', padding: '1.2rem',
                   background: `${system.color}08`,
@@ -152,7 +153,7 @@ export default function EngineeringSystems() {
                 </h3>
 
                 {/* Description - smaller, more transparent */}
-                <p style={{ 
+                <p className="eng-desc" style={{ 
                   color: 'var(--text-secondary)', lineHeight: 1.7, 
                   marginBottom: '2rem', fontSize: '0.92rem', fontWeight: 500 
                 }}>
@@ -160,7 +161,7 @@ export default function EngineeringSystems() {
                 </p>
 
                 {/* Sub-categories */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '2.5rem' }}>
+                <div className="eng-cats" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '2.5rem' }}>
                   {system.categories.map(cat => (
                     <button
                       key={cat}
@@ -194,6 +195,7 @@ export default function EngineeringSystems() {
 
                 {/* Explore Button - appears on hover */}
                 <button 
+                  className="eng-explore"
                   onClick={() => router.push(`/products?multi_search=${encodeURIComponent(system.categories.join(','))}`)}
                   style={{ 
                     background: 'none', border: 'none', color: system.color, 

@@ -488,13 +488,17 @@ export default function CheckoutPage() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   <span>المجموع الفرعي</span>
-                  <span style={{ color: 'var(--text-primary)' }}>{cartTotal?.toLocaleString()} ر.س</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{cartPricing.subtotal?.toLocaleString()} ر.س</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   <span>تكلفة الشحن</span>
                   <span style={{ color: shippingCost === 0 ? 'var(--success)' : 'var(--text-primary)', fontWeight: shippingCost === 0 ? 900 : 600 }}>
                     {shippingCost === 0 ? 'مجاني!' : `${shippingCost} ر.س`}
                   </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  <span>ضريبة القيمة المضافة (15%)</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{cartPricing.vat?.toLocaleString()} ر.س</span>
                 </div>
 
                 {/* --- VIP Discount Coupon Section --- */}
@@ -644,7 +648,7 @@ export default function CheckoutPage() {
                     padding: '1rem', borderRadius: '12px',
                     background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
                   }}>
-                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق ({Math.round(appliedDiscount * 100)}%)</span>
+                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق ({appliedDiscount}%)</span>
                     <span style={{ color: '#10b981' }}>- {discountAmount?.toLocaleString()} ر.س</span>
                   </div>
                 )}
@@ -656,7 +660,7 @@ export default function CheckoutPage() {
                     textAlign: 'center', background: 'rgba(244, 63, 94, 0.08)', 
                     padding: '0.8rem', borderRadius: '12px', fontWeight: 800, border: '1px solid rgba(244, 63, 94, 0.1)'
                   }}>
-                    أضف منتجات بقيمة {(500 - cartTotal)?.toLocaleString()} ر.س إضافية للحصول على شحن مجاني!
+                    أضف منتجات بقيمة {(500 - cartPricing.subtotal)?.toLocaleString()} ر.س إضافية للحصول على شحن مجاني!
                   </div>
                 )}
                 

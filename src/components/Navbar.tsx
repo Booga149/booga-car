@@ -61,7 +61,6 @@ export default function Navbar() {
     { href: '/accessories', label: 'أكسسوارات' },
     { href: '/track-order', label: 'تتبع الطلبات' },
     { href: '/garage', label: 'كراجي' },
-    { href: '/sell', label: 'اعرض قطعة' },
   ];
 
   return (
@@ -172,7 +171,6 @@ export default function Navbar() {
                     display: 'flex', alignItems: 'center', gap: '0.4rem',
                   }}>
                     {link.label}
-                    {link.href === '/sell' && !isMerchant && !isAdmin && <Tag size={14} />}
                     {(link as any).isNew && (
                       <span style={{
                         fontSize: '0.55rem', background: 'var(--primary)', color: 'white',

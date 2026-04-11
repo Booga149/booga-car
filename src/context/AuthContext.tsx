@@ -102,7 +102,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const openLoginModal = () => { setAuthMode('login'); setIsAuthModalOpen(true); };
   const openSignUpModal = () => { setAuthMode('signup'); setIsAuthModalOpen(true); };
   const closeAuthModal = () => setIsAuthModalOpen(false);
-  const signOut = async () => { await supabase.auth.signOut(); setProfile(null); };
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('Sign out error:', e);
+    }
+    setUser(null);
+    setProfile(null);
+    // Force full page reload to clear all cached state
+    window.location.href = '/';
+  };
 
   // Derived role flags
   const role = profile?.role || 'user';

@@ -4,7 +4,7 @@ import { ShieldCheck, CreditCard, Smartphone, CheckCircle2, Award } from 'lucide
 
 export default function KSATrustBar() {
   return (
-    <section style={{
+    <section className="ksa-trust-section" style={{
       background: 'var(--surface)',
       borderBottom: '1px solid var(--border)',
       padding: '1.5rem 0',
@@ -21,7 +21,7 @@ export default function KSATrustBar() {
         padding: '0 2rem'
       }}>
         {/* Trusted by Govt Sections */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        <div className="trust-badges" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', opacity: 0.9 }}>
              <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.5rem', borderRadius: '10px' }}>
                 <ShieldCheck size={20} color="#10b981" />
@@ -44,7 +44,7 @@ export default function KSATrustBar() {
         </div>
 
         {/* Payment Methods (The Saudi Flex) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'rgba(0,0,0,0.02)', padding: '0.8rem 1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
+        <div className="payment-methods" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'rgba(0,0,0,0.02)', padding: '0.8rem 1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 800 }}>طرق الدفع الآمنة:</span>
            <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 900, color: '#3b82f6', fontSize: '0.9rem' }}>
@@ -63,7 +63,7 @@ export default function KSATrustBar() {
         </div>
 
         {/* Global Stock Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+        <div className="stock-status" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
            <div style={{ position: 'relative' }}>
               <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }} />
               <div style={{ position: 'absolute', top: 0, left: 0, width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', animation: 'ping 1.5s infinite' }} />

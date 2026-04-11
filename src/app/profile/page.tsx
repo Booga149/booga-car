@@ -108,7 +108,10 @@ export default function ProfilePage() {
     if (!error) { setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'ملغي' } : o)); }
   };
 
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push('/'); };
+  const handleLogout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.error('Sign out error:', e); }
+    window.location.href = '/';
+  };
 
   if (loading) return <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 700 }}>جاري تحميل حسابك...</div>;
   if (!user) return null;

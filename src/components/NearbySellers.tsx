@@ -88,7 +88,7 @@ export default function NearbySellers() {
   if (!mounted || !isSupported) return null;
 
   return (
-    <section id="nearby-sellers" style={{
+    <section id="nearby-sellers" className="nearby-section" style={{
       padding: '5rem 2rem',
       position: 'relative',
       zIndex: 10,
@@ -124,7 +124,7 @@ export default function NearbySellers() {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* العنوان */}
-        <div style={{
+        <div className="nearby-header" style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
@@ -334,7 +334,7 @@ export default function NearbySellers() {
         {/* بطاقات البائعين */}
         {position && !isLoading && sellers.length > 0 && (
           <>
-            <div style={{
+            <div className="seller-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '1.5rem',
@@ -342,6 +342,7 @@ export default function NearbySellers() {
               {displayedSellers.map((seller, index) => (
                 <div
                   key={seller.id}
+                  className="seller-card"
                   style={{
                     background: hovered === seller.id
                       ? 'var(--surface-hover)'

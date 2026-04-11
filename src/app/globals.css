@@ -80,6 +80,11 @@ a {
   display: block;
 }
 
+/* Items that should truly be hidden on mobile (decorative/admin only) */
+.mobile-hide-decorative {
+  display: block;
+}
+
 @media (min-width: 769px) {
   .desktop-nav {
     display: flex;
@@ -105,7 +110,8 @@ a {
     margin-bottom: 1rem !important;
   }
 
-  .mobile-hide-section {
+  /* Only hide decorative/admin elements, NOT content sections */
+  .mobile-hide-decorative {
     display: none !important;
   }
 
@@ -294,6 +300,149 @@ a {
   /* ─── General: prevent horizontal overflow ─── */
   body, main {
     overflow-x: hidden;
+  }
+
+  /* ─── Engineering Systems: Mobile compact layout ─── */
+  .engineering-section {
+    padding: 2.5rem 1rem !important;
+  }
+  .engineering-section .section-header {
+    margin-bottom: 2rem !important;
+    text-align: center !important;
+  }
+  .engineering-section .section-header h2 {
+    font-size: 1.5rem !important;
+  }
+  .engineering-section .cards-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.8rem !important;
+  }
+  .engineering-card {
+    padding: 1.2rem !important;
+    border-radius: 16px !important;
+  }
+  .engineering-card .eng-icon {
+    margin-bottom: 0.8rem !important;
+    padding: 0.8rem !important;
+  }
+  .engineering-card h3 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .engineering-card .eng-desc {
+    display: none !important;
+  }
+  .engineering-card .eng-cats {
+    display: none !important;
+  }
+  .engineering-card .eng-explore {
+    display: none !important;
+  }
+  .engineering-card .eng-label {
+    display: none !important;
+  }
+
+  /* ─── NearbySellers: Mobile layout ─── */
+  .nearby-section {
+    padding: 2.5rem 1rem !important;
+  }
+  .nearby-section .nearby-header {
+    margin-bottom: 1.5rem !important;
+  }
+  .nearby-section .nearby-header h2 {
+    font-size: 1.5rem !important;
+  }
+  .nearby-section .seller-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .nearby-section .seller-card {
+    padding: 1.2rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* ─── Support Section: Mobile layout ─── */
+  .support-section-wrap {
+    padding: 2rem 1rem !important;
+  }
+  .support-section-inner {
+    flex-direction: column !important;
+    padding: 1.5rem !important;
+    border-radius: 20px !important;
+    text-align: center;
+  }
+  .support-section-inner > div:last-child {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.8rem !important;
+  }
+  .support-section-inner > div:last-child > div {
+    padding: 1.2rem !important;
+    border-radius: 16px !important;
+  }
+  .support-actions {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  .support-actions a {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* ─── KSA Trust Bar: Mobile compact ─── */
+  .ksa-trust-section {
+    padding: 1rem 0.8rem !important;
+  }
+  .ksa-trust-section > div {
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+    align-items: stretch !important;
+  }
+  .ksa-trust-section .trust-badges {
+    justify-content: center !important;
+    gap: 1.5rem !important;
+  }
+  .ksa-trust-section .payment-methods {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    padding: 0.6rem 1rem !important;
+  }
+  .ksa-trust-section .stock-status {
+    justify-content: center !important;
+    text-align: center;
+  }
+
+  /* ─── WhatsApp Hub: Mobile compact ─── */
+  .whatsapp-hub-section {
+    padding: 2rem 1rem !important;
+  }
+
+  /* ─── VehicleSearch: Mobile text fix ─── */
+  .vehicle-search-box {
+    padding: 1.2rem !important;
+    border-radius: 16px !important;
+  }
+  .vehicle-search-box select {
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    padding: 0.8rem 0.8rem !important;
+    min-width: 0 !important;
+  }
+  .vehicle-search-box .vs-header-title {
+    font-size: 0.95rem !important;
+  }
+  .vehicle-search-box .vs-selects {
+    flex-direction: column !important;
+  }
+  .vehicle-search-box .vs-selects select {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  .vehicle-search-box .vs-selects button {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
 

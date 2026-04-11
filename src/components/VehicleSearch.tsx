@@ -65,7 +65,7 @@ export default function VehicleSearch() {
   };
 
   return (
-    <div style={{
+    <div className="vehicle-search-box" style={{
       background: 'rgba(0, 0, 0, 0.55)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
@@ -88,7 +88,7 @@ export default function VehicleSearch() {
           <Car size={20} color="white" />
         </div>
         <div>
-          <div style={{ fontWeight: 900, color: 'white', fontSize: '1.1rem' }}>
+          <div className="vs-header-title" style={{ fontWeight: 900, color: 'white', fontSize: '1.1rem' }}>
             ابحث عن قطعة لسيارتك
           </div>
           <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
@@ -97,7 +97,7 @@ export default function VehicleSearch() {
         </div>
       </div>
 
-      <div style={{
+      <div className="vs-selects" style={{
         display: 'flex', flexWrap: 'wrap', gap: '0.8rem',
         alignItems: 'center',
       }}>
