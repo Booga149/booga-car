@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Trash2 } from 'lucide-react';
+import { ShoppingCart, Trash2, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 export default function CartDrawer() {

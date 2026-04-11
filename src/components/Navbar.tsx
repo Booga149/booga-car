@@ -150,7 +150,7 @@ export default function Navbar() {
                   }}>🇸🇦 KSA</div>
                 )}
               </div>
-              <h1 className="mobile-logo-size" style={{
+              <h1 className="mobile-logo-size desktop-only" style={{
                 color: 'var(--text-primary)', margin: 0, fontSize: '1.4rem', fontWeight: 900,
                 letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '0.3rem',
               }}>
