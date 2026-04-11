@@ -123,7 +123,7 @@ export default function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
               <div style={{ position: 'relative' }}>
-                <img src="/favicon.png" alt="Booga Car" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
+                <img src="/favicon.png?v=2" alt="Booga Car" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
                 {isAdmin ? (
                   <div style={{
                     position: 'absolute', top: -8, right: -20,
