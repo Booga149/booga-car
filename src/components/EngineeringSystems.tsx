@@ -198,12 +198,10 @@ export default function EngineeringSystems() {
                   className="eng-explore"
                   onClick={() => router.push(`/products?multi_search=${encodeURIComponent(system.categories.join(','))}`)}
                   style={{ 
-                    background: 'none', border: 'none', color: system.color, 
+                    background: 'none', border: 'none', color: '#10b981', 
                     fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', 
                     display: 'flex', alignItems: 'center', gap: '0.8rem',
                     padding: '0.5rem 0',
-                    opacity: isHovered ? 1 : 0,
-                    transform: isHovered ? 'translateX(0)' : 'translateX(10px)',
                     transition: 'all 0.4s ease',
                     letterSpacing: '0.3px',
                   }}
