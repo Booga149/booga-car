@@ -20,21 +20,17 @@ interface UserVehicle {
 }
 
 export default function GaragePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, openLoginModal } = useAuth();
   const { addToast } = useToast();
   const [vehicles, setVehicles] = useState<UserVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      window.location.href = '/';
-      return;
-    }
     if (user) {
       fetchVehicles();
     }
-  }, [user, authLoading]);
+  }, [user]);
 
   const fetchVehicles = async () => {
     try {
@@ -83,7 +79,48 @@ export default function GaragePage() {
     }
   };
 
-  if (loading || authLoading) {
+  if (authLoading) {
+    return (
+      <main style={{ minHeight: '100vh', background: 'var(--background)' }}>
+        <Navbar />
+        <div style={{ padding: '8rem 2rem', textAlign: 'center' }}>جاري تحميل كراجك...</div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--text-primary)' }}>
+        <Navbar />
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '10rem 2rem 5rem', textAlign: 'center' }}>
+          <div style={{ 
+            background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)',
+            padding: '3rem 2rem', boxShadow: 'var(--card-shadow)',
+          }}>
+            <Car size={64} style={{ color: 'var(--primary)', opacity: 0.3, marginBottom: '1.5rem' }} />
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.8rem' }}>سجّل دخولك أولاً</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+              عشان تقدر تستخدم الكراج وتتابع صيانة سيارتك، لازم تسجل دخول أو تنشئ حساب جديد.
+            </p>
+            <button
+              onClick={() => { openLoginModal(); }}
+              style={{
+                background: 'var(--primary)', color: 'white', border: 'none',
+                padding: '1rem 3rem', borderRadius: '14px', fontWeight: 800,
+                fontSize: '1.1rem', cursor: 'pointer',
+                boxShadow: '0 8px 25px rgba(37,99,235,0.3)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              تسجيل الدخول
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (loading) {
     return (
       <main style={{ minHeight: '100vh', background: 'var(--background)' }}>
         <Navbar />
