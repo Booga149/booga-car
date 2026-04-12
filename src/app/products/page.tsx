@@ -172,7 +172,7 @@ export default function ProductsPage() {
   }, [products, filters, sortBy, fitment, selectedCategories, multiSearch, position, distanceRange]);
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)', paddingTop: '73px' }}>
       <Navbar />
       <CategoriesBar />
       
