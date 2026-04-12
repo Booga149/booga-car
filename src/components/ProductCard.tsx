@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
-import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin, Phone, MessageCircle, Eye } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Check, Truck, ShieldCheck, MapPin } from 'lucide-react';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { calculateProductPrice, roundPrice } from '@/lib/pricing';
@@ -13,29 +13,7 @@ type ProductProps = Product & {
   imagePlaceholderColor: string;
 };
 
-/** Mask a phone number: show first 4 and last 2 digits, stars in between */
-function maskPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length <= 6) return phone; // too short to mask
-  const prefix = digits.slice(0, 4);
-  const suffix = digits.slice(-2);
-  const stars = '●'.repeat(Math.max(digits.length - 6, 4));
-  return `${prefix}${stars}${suffix}`;
-}
 
-/** Fire-and-forget click tracking to Supabase */
-async function trackClick(productId: string, sellerId: string | undefined, clickType: 'call' | 'whatsapp' | 'reveal_phone') {
-  if (!isSupabaseConfigured) return;
-  try {
-    await supabase.from('seller_click_analytics').insert({
-      product_id: productId,
-      seller_id: sellerId || null,
-      click_type: clickType,
-    });
-  } catch {
-    // Silent — analytics should never block UX
-  }
-}
 
 export default function ProductCard({
   id, name, price, oldPrice, brand, category, condition, stock, shipping, rating, reviews, image, imagePlaceholderColor, is_verified_seller = false, seller_name, part_number, seller_id, seller_distance, seller_city, seller_phone
@@ -45,7 +23,7 @@ export default function ProductCard({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
-  const [phoneRevealed, setPhoneRevealed] = useState(false);
+
 
   const priceCalc = calculateProductPrice({ originalPrice: price, oldPrice });
   const discount = priceCalc.discountPercent;
@@ -66,27 +44,7 @@ export default function ProductCard({
     setTimeout(() => setJustAdded(false), 1500);
   };
 
-  const handleRevealPhone = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setPhoneRevealed(true);
-    trackClick(id, seller_id, 'reveal_phone');
-  }, [id, seller_id]);
 
-  const handleCallClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    trackClick(id, seller_id, 'call');
-  }, [id, seller_id]);
-
-  const handleWhatsAppClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    trackClick(id, seller_id, 'whatsapp');
-  }, [id, seller_id]);
-
-  const cleanPhone = seller_phone?.replace(/\D/g, '') || '';
-  // Build WhatsApp URL — Saudi numbers: remove leading 0 and prepend 966
-  const waPhone = cleanPhone.startsWith('0') ? `966${cleanPhone.slice(1)}` : cleanPhone;
-  const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحبًا، أنا مهتم بالمنتج: ${name}`)}`;
 
   return (
     <a
@@ -494,160 +452,6 @@ export default function ProductCard({
             </button>
           )}
 
-          {/* ─── SECONDARY: Seller Contact Section (desktop only) ─── */}
-          {seller_phone && seller_phone.trim() !== '' && (
-            <div
-              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                marginTop: '0.3rem',
-                padding: '0.7rem 0.8rem',
-                background: 'rgba(0,0,0,0.02)',
-                borderRadius: '12px',
-                border: '1px solid rgba(0,0,0,0.05)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {/* Header: "تواصل مع التاجر" + masked/revealed phone */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <div style={{
-                    width: '26px',
-                    height: '26px',
-                    borderRadius: '7px',
-                    background: 'rgba(16, 185, 129, 0.12)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <Phone size={13} color="#10b981" />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
-                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.3px' }}>
-                      تواصل مع التاجر
-                    </span>
-                    <span style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 800,
-                      color: phoneRevealed ? '#10b981' : 'var(--text-secondary)',
-                      letterSpacing: '1px',
-                      direction: 'ltr',
-                      fontFamily: 'monospace',
-                      transition: 'color 0.3s ease',
-                    }}>
-                      {phoneRevealed ? seller_phone : maskPhone(seller_phone)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Reveal phone button */}
-                {!phoneRevealed && (
-                  <button
-                    onClick={handleRevealPhone}
-                    style={{
-                      fontSize: '0.62rem',
-                      fontWeight: 800,
-                      color: '#10b981',
-                      background: 'rgba(16, 185, 129, 0.1)',
-                      border: '1px solid rgba(16, 185, 129, 0.2)',
-                      borderRadius: '6px',
-                      padding: '4px 8px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '3px',
-                      transition: 'all 0.2s ease',
-                      whiteSpace: 'nowrap',
-                    }}
-                    onMouseOver={e => {
-                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.18)';
-                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)';
-                    }}
-                  >
-                    <Eye size={11} />
-                    إظهار الرقم
-                  </button>
-                )}
-              </div>
-
-              {/* Action buttons: Call + WhatsApp */}
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                {/* Call button */}
-                <a
-                  href={`tel:${seller_phone}`}
-                  onClick={handleCallClick}
-                  style={{
-                    flex: 1,
-                    fontSize: '0.68rem',
-                    fontWeight: 900,
-                    color: '#fff',
-                    textDecoration: 'none',
-                    padding: '0.45rem 0',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #059669, #10b981)',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 3px 10px rgba(16, 185, 129, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.3rem',
-                  }}
-                  onMouseOver={e => {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(16, 185, 129, 0.35)';
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 3px 10px rgba(16, 185, 129, 0.2)';
-                  }}
-                >
-                  <Phone size={13} />
-                  اتصال
-                </a>
-
-                {/* WhatsApp button */}
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={handleWhatsAppClick}
-                  style={{
-                    flex: 1,
-                    fontSize: '0.68rem',
-                    fontWeight: 900,
-                    color: '#fff',
-                    textDecoration: 'none',
-                    padding: '0.45rem 0',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #128C7E, #25D366)',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 3px 10px rgba(37, 211, 102, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.3rem',
-                  }}
-                  onMouseOver={e => {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(37, 211, 102, 0.35)';
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 3px 10px rgba(37, 211, 102, 0.2)';
-                  }}
-                >
-                  <MessageCircle size={13} />
-                  واتساب
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </a>

@@ -172,7 +172,7 @@ export default function MerchantSettingsPage() {
             {/* Phone Number */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                <Phone size={20} color="#10b981" /> رقم التواصل (يظهر على المنتجات)
+                <Phone size={20} color="#10b981" /> رقم التواصل
               </label>
               <input 
                 type="tel"
@@ -186,7 +186,7 @@ export default function MerchantSettingsPage() {
                 }}
               />
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                💡 رقم التلفون يظهر على كل منتجاتك لزيادة المصداقية وتسهيل التواصل مع المشترين
+                💡 رقم التلفون يُستخدم للتواصل الداخلي مع إدارة المنصة فقط ولا يظهر للعملاء
               </p>
             </div>
 

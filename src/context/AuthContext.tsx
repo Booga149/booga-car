@@ -104,9 +104,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const closeAuthModal = () => setIsAuthModalOpen(false);
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Use scope: 'global' to sign out from all tabs/devices
+      await supabase.auth.signOut({ scope: 'global' });
     } catch (e) {
       console.error('Sign out error:', e);
+    }
+    // Manually clear any remaining auth tokens from localStorage as fallback
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('sb-') && (key.endsWith('-auth-token') || key.endsWith('-auth-token-code-verifier'))) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      // localStorage may not be available
     }
     setUser(null);
     setProfile(null);
