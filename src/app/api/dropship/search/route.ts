@@ -18,9 +18,8 @@ export async function GET(req: NextRequest) {
 
   // Auto-translate Arabic queries to English for AliExpress
   const translatedQuery = translateSearchQuery(rawQuery);
-  const query = translatedQuery + ' car auto'; // Append "car auto" to improve relevance
 
-  console.log(`AliExpress search: "${rawQuery}" → "${translatedQuery}" → "${query}"`);
+  console.log(`AliExpress search: "${rawQuery}" → "${translatedQuery}"`);
 
   try {
     const sdk = await createAliExpressSDK(supabaseAdmin);
@@ -28,22 +27,39 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'AliExpress not configured. Go to Settings to connect your account.' }, { status: 400 });
     }
 
-    const result = await sdk.searchProducts({
-      query,
-      page,
-      pageSize: 20,
-      minPrice,
-      maxPrice,
-      sort,
-      shipToCountry: 'SA',
-    });
+    // Try search with retry on timeout
+    let result;
+    try {
+      result = await sdk.searchProducts({
+        query: translatedQuery,
+        page,
+        pageSize: 20,
+        minPrice,
+        maxPrice,
+        sort,
+        shipToCountry: 'SA',
+      });
+    } catch (firstErr: any) {
+      // If RPC timeout, retry once with simpler query
+      if (firstErr.message?.includes('timeout') || firstErr.message?.includes('RPC')) {
+        console.log('AliExpress timeout, retrying with simpler query...');
+        const simpleQuery = translatedQuery.split(' ').slice(0, 2).join(' ');
+        result = await sdk.searchProducts({
+          query: simpleQuery,
+          page,
+          pageSize: 20,
+          shipToCountry: 'SA',
+        });
+      } else {
+        throw firstErr;
+      }
+    }
 
     console.log('AliExpress search result:', JSON.stringify({
       rawQuery,
-      translatedQuery: query,
+      translatedQuery,
       productCount: result.products?.length || 0,
       totalCount: result.totalCount,
-      rawKeys: result._rawKeys || 'N/A',
     }));
 
     return NextResponse.json({
