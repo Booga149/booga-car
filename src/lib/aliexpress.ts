@@ -199,7 +199,72 @@ export class AliExpressSDK {
   // ═══ Product Search & Details ═══
 
   /**
-   * Search for products (DS recommended feed)
+   * Universal product parser - handles all AliExpress response formats
+   */
+  private parseProducts(rawProducts: any[]): AEProduct[] {
+    return rawProducts.map((p: any) => ({
+      productId: String(p.product_id || p.productId || p.item_id || ''),
+      title: p.product_title || p.title || p.product_name || '',
+      imageUrl: p.product_main_image_url || p.imageUrl || p.product_image || p.image_url || '',
+      images: p.product_small_image_urls?.string || [],
+      price: parseFloat(p.sale_price?.amount || p.target_sale_price || p.sale_price || p.app_sale_price || p.price || '0'),
+      originalPrice: p.original_price ? parseFloat(p.original_price?.amount || p.original_price || p.app_original_price || '0') : undefined,
+      currency: p.sale_price?.currency_code || p.target_sale_price_currency || p.currency || 'USD',
+      rating: parseFloat(p.evaluate_rate || p.rating || '0'),
+      orders: parseInt(p.lastest_volume || p.orders || '0', 10),
+      storeName: p.store_name || p.shop_name || '',
+      storeUrl: p.shop_url || '',
+      productUrl: p.product_detail_url || p.promotion_link || p.product_url || `https://www.aliexpress.com/item/${p.product_id || p.productId}.html`,
+      category: p.first_level_category_name || p.category || '',
+    }));
+  }
+
+  /**
+   * Deep extract products from any response structure
+   */
+  private extractProductsFromResponse(result: any): any[] {
+    if (!result) return [];
+
+    // Helper: extract array from container
+    const extract = (container: any): any[] => {
+      if (!container) return [];
+      if (Array.isArray(container)) return container;
+      for (const key of ['traffic_product_d_t_o', 'product', 'products', 'item']) {
+        if (container[key]) {
+          return Array.isArray(container[key]) ? container[key] : [container[key]];
+        }
+      }
+      return [];
+    };
+
+    // Try known paths
+    const paths = [
+      result?.result?.products,
+      result?.products,
+      result?.resp_result?.result?.products,
+      result?.result,
+    ];
+
+    for (const path of paths) {
+      const products = extract(path);
+      if (products.length > 0) return products;
+    }
+
+    // Deep scan fallback
+    const deepScan = (obj: any, depth = 0): any[] => {
+      if (depth > 5 || !obj || typeof obj !== 'object') return [];
+      if (Array.isArray(obj) && obj.length > 0 && (obj[0]?.product_id || obj[0]?.item_id)) return obj;
+      for (const key of Object.keys(obj)) {
+        const found = deepScan(obj[key], depth + 1);
+        if (found.length > 0) return found;
+      }
+      return [];
+    };
+    return deepScan(result);
+  }
+
+  /**
+   * Search for products - tries multiple API methods
    */
   async searchProducts(params: {
     query?: string;
@@ -210,93 +275,97 @@ export class AliExpressSDK {
     pageSize?: number;
     sort?: 'SALE_PRICE_ASC' | 'SALE_PRICE_DESC' | 'LAST_VOLUME_ASC' | 'LAST_VOLUME_DESC';
     shipToCountry?: string;
-  }): Promise<{ products: AEProduct[]; totalCount: number; _rawKeys?: string[] }> {
-    const apiParams: Record<string, any> = {
-      feed_name: 'DS recommend',
-      target_currency: 'USD',
-      target_language: 'EN',
-      ship_to_country: params.shipToCountry || 'SA',
-      page_no: params.page || 1,
-      page_size: Math.min(params.pageSize || 20, 50),
-    };
+  }): Promise<{ products: AEProduct[]; totalCount: number; _rawKeys?: string[]; _method?: string }> {
 
-    if (params.query) apiParams.keywords = params.query;
-    if (params.categoryId) apiParams.category_id = params.categoryId;
-    if (params.minPrice) apiParams.min_sale_price = params.minPrice;
-    if (params.maxPrice) apiParams.max_sale_price = params.maxPrice;
-    if (params.sort) apiParams.sort = params.sort;
+    const methods = [
+      // Method 1: Affiliate Product Query (best for keyword search)
+      async () => {
+        const apiParams: Record<string, any> = {
+          keywords: params.query || '',
+          target_currency: 'USD',
+          target_language: 'EN',
+          ship_to_country: params.shipToCountry || 'SA',
+          page_no: params.page || 1,
+          page_size: Math.min(params.pageSize || 20, 50),
+        };
+        if (params.categoryId) apiParams.category_ids = params.categoryId;
+        if (params.minPrice) apiParams.min_sale_price = params.minPrice;
+        if (params.maxPrice) apiParams.max_sale_price = params.maxPrice;
+        if (params.sort) apiParams.sort = params.sort;
 
-    const result = await this.apiCall('aliexpress.ds.recommend.feed.get', apiParams);
+        const result = await this.apiCall('aliexpress.affiliate.product.query', apiParams);
+        return { result, method: 'affiliate.product.query' };
+      },
 
-    // Debug: log the raw result structure
-    console.log('AliExpress raw result keys:', JSON.stringify(Object.keys(result || {})));
-    console.log('AliExpress raw result (first 500 chars):', JSON.stringify(result).substring(0, 500));
+      // Method 2: DS Recommend Feed
+      async () => {
+        const apiParams: Record<string, any> = {
+          feed_name: 'DS recommend',
+          target_currency: 'USD',
+          target_language: 'EN',
+          ship_to_country: params.shipToCountry || 'SA',
+          page_no: params.page || 1,
+          page_size: Math.min(params.pageSize || 20, 50),
+        };
+        if (params.query) apiParams.keywords = params.query;
 
-    // Try multiple possible response paths for products
-    let rawProducts: any[] = [];
-    
-    // Helper: extract array from various product container formats
-    const extractProducts = (container: any): any[] => {
-      if (!container) return [];
-      if (Array.isArray(container)) return container;
-      // DS recommend feed uses traffic_product_d_t_o
-      if (container.traffic_product_d_t_o) {
-        return Array.isArray(container.traffic_product_d_t_o) ? container.traffic_product_d_t_o : [container.traffic_product_d_t_o];
-      }
-      if (container.product) {
-        return Array.isArray(container.product) ? container.product : [container.product];
-      }
-      return [];
-    };
-    
-    // Path 1: result.result.products (DS recommend feed standard)
-    if (result?.result?.products) {
-      rawProducts = extractProducts(result.result.products);
-    }
-    // Path 2: result.products
-    else if (result?.products) {
-      rawProducts = extractProducts(result.products);
-    }
-    // Path 3: result.resp_result.result.products
-    else if (result?.resp_result?.result?.products) {
-      rawProducts = extractProducts(result.resp_result.result.products);
-    }
-    // Path 4: Deep scan - look for any array of objects with product_id
-    if (rawProducts.length === 0) {
-      const deepScan = (obj: any, depth = 0): any[] => {
-        if (depth > 4 || !obj || typeof obj !== 'object') return [];
-        if (Array.isArray(obj) && obj.length > 0 && obj[0]?.product_id) return obj;
-        for (const key of Object.keys(obj)) {
-          const found = deepScan(obj[key], depth + 1);
-          if (found.length > 0) return found;
+        const result = await this.apiCall('aliexpress.ds.recommend.feed.get', apiParams);
+        return { result, method: 'ds.recommend.feed' };
+      },
+
+      // Method 3: Affiliate Hot Products
+      async () => {
+        const apiParams: Record<string, any> = {
+          keywords: params.query || '',
+          target_currency: 'USD',
+          target_language: 'EN',
+          ship_to_country: params.shipToCountry || 'SA',
+          page_no: params.page || 1,
+          page_size: Math.min(params.pageSize || 20, 50),
+        };
+
+        const result = await this.apiCall('aliexpress.affiliate.hotproduct.query', apiParams);
+        return { result, method: 'affiliate.hotproduct' };
+      },
+    ];
+
+    let lastError: any = null;
+    let allRawKeys: string[] = [];
+
+    for (const method of methods) {
+      try {
+        const { result, method: methodName } = await method();
+        allRawKeys = Object.keys(result || {});
+        
+        console.log(`AliExpress [${methodName}] result keys:`, JSON.stringify(allRawKeys));
+        console.log(`AliExpress [${methodName}] result (first 800 chars):`, JSON.stringify(result).substring(0, 800));
+
+        const rawProducts = this.extractProductsFromResponse(result);
+        
+        if (rawProducts.length > 0) {
+          console.log(`AliExpress [${methodName}] found ${rawProducts.length} products ✓`);
+          return {
+            products: this.parseProducts(rawProducts),
+            totalCount: parseInt(result?.total_record_count || result?.result?.total_record_count || String(rawProducts.length), 10),
+            _rawKeys: allRawKeys,
+            _method: methodName,
+          };
         }
-        return [];
-      };
-      rawProducts = deepScan(result);
+        
+        console.log(`AliExpress [${methodName}] returned 0 products, trying next method...`);
+      } catch (err: any) {
+        console.log(`AliExpress method failed: ${err.message}, trying next...`);
+        lastError = err;
+      }
     }
 
-    console.log('AliExpress parsed products count:', rawProducts.length);
-
-    const products: AEProduct[] = rawProducts.map((p: any) => ({
-      productId: String(p.product_id || p.productId || ''),
-      title: p.product_title || p.title || '',
-      imageUrl: p.product_main_image_url || p.imageUrl || p.product_image || '',
-      images: p.product_small_image_urls?.string || [],
-      price: parseFloat(p.sale_price?.amount || p.target_sale_price || p.sale_price || p.price || '0'),
-      originalPrice: p.original_price ? parseFloat(p.original_price?.amount || p.original_price || '0') : undefined,
-      currency: p.sale_price?.currency_code || p.currency || 'USD',
-      rating: parseFloat(p.evaluate_rate || p.rating || '0'),
-      orders: parseInt(p.lastest_volume || p.orders || '0', 10),
-      storeName: p.store_name || '',
-      storeUrl: '',
-      productUrl: p.product_detail_url || p.promotion_link || `https://www.aliexpress.com/item/${p.product_id || p.productId}.html`,
-      category: p.first_level_category_name || p.category || '',
-    }));
-
+    // All methods exhausted
+    console.log('AliExpress: all search methods returned 0 products');
     return {
-      products,
-      totalCount: parseInt(result?.total_record_count || result?.result?.total_record_count || String(rawProducts.length), 10),
-      _rawKeys: Object.keys(result || {}),
+      products: [],
+      totalCount: 0,
+      _rawKeys: allRawKeys,
+      _method: 'all_failed',
     };
   }
 

@@ -33,6 +33,7 @@ export default function DropshipSearch() {
         totalCount: data.totalCount,
         translatedQuery: data._translatedQuery,
         originalQuery: data._originalQuery,
+        method: data._method,
       });
       setSearched(true);
     } catch (err: any) {
