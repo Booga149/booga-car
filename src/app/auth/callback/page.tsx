@@ -7,20 +7,34 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     let redirectTimer: NodeJS.Timeout;
+    let disposed = false;
+
+    const goHome = () => {
+      if (!disposed) {
+        disposed = true;
+        window.location.replace('/');
+      }
+    };
 
     const processAuth = async () => {
       try {
-        // Method 1: Exchange code from URL query params (PKCE flow)
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
-        
+
+        // Method 1: Exchange code (PKCE flow)
         if (code) {
           setStatus('جاري التحقق...');
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (!error && data.session) {
-            setStatus('تم تسجيل الدخول بنجاح! ✅');
-            window.location.replace('/');
-            return;
+          try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            if (!error && data.session) {
+              setStatus('تم تسجيل الدخول بنجاح! ✅');
+              setTimeout(goHome, 500);
+              return;
+            }
+            // If code exchange failed, continue to other methods
+            console.warn('Code exchange failed:', error?.message);
+          } catch (e) {
+            console.warn('Code exchange exception:', e);
           }
         }
 
@@ -28,57 +42,61 @@ export default function AuthCallbackPage() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
-        
+
         if (accessToken && refreshToken) {
           setStatus('جاري التحقق...');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (!error && data.session) {
-            setStatus('تم تسجيل الدخول بنجاح! ✅');
-            window.location.replace('/');
-            return;
+          try {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (!error && data.session) {
+              setStatus('تم تسجيل الدخول بنجاح! ✅');
+              setTimeout(goHome, 500);
+              return;
+            }
+          } catch (e) {
+            console.warn('Set session exception:', e);
           }
         }
 
-        // Method 3: Supabase might have auto-detected the session
-        // Wait a moment for Supabase to process
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Method 3: Check if Supabase auto-detected the session
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           setStatus('تم تسجيل الدخول بنجاح! ✅');
-          window.location.replace('/');
+          setTimeout(goHome, 500);
           return;
         }
 
-        // Method 4: Listen for auth state change (Supabase processes hash automatically)
+        // Method 4: Listen for auth state change briefly
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session) {
             setStatus('تم تسجيل الدخول بنجاح! ✅');
-            window.location.replace('/');
+            subscription.unsubscribe();
+            setTimeout(goHome, 500);
           }
         });
 
-        // Fallback: If nothing works after 5 seconds, redirect anyway
-        // The user might already be logged in (session stored in cookies)
+        // Fallback: redirect home after 3 seconds regardless
         redirectTimer = setTimeout(() => {
           subscription.unsubscribe();
           setStatus('جاري إعادة التوجيه...');
-          window.location.replace('/');
-        }, 5000);
+          goHome();
+        }, 3000);
 
       } catch (err) {
         console.error('Auth callback error:', err);
-        setStatus('جاري إعادة التوجيه...');
-        window.location.replace('/');
+        setStatus('حدث خطأ، جاري إعادة التوجيه...');
+        setTimeout(goHome, 1000);
       }
     };
 
     processAuth();
 
     return () => {
+      disposed = true;
       if (redirectTimer) clearTimeout(redirectTimer);
     };
   }, []);
@@ -104,7 +122,7 @@ export default function AuthCallbackPage() {
       }}>
         <div style={{
           width: '48px', height: '48px', margin: '0 auto 1.5rem',
-          border: '4px solid var(--border, #e5e7eb)', borderTopColor: 'var(--primary, #e11d48)',
+          border: '4px solid var(--border, #e5e7eb)', borderTopColor: 'var(--primary, #2563eb)',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
         }} />
