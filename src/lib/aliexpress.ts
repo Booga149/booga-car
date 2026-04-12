@@ -206,6 +206,7 @@ export class AliExpressSDK {
     shipToCountry?: string;
   }): Promise<{ products: AEProduct[]; totalCount: number }> {
     const apiParams: Record<string, any> = {
+      feed_name: 'DS recommend',
       target_currency: 'USD',
       target_language: 'EN',
       ship_to_country: params.shipToCountry || 'SA',
