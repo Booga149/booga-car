@@ -60,29 +60,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/logs', icon: <Activity size={20} />, label: 'سجل المراقبة' },
   ];
 
+  const adminColors = {
+    bg: '#0a0a0f',
+    surface: '#111118',
+    surfaceHover: '#1a1a24',
+    border: 'rgba(255,255,255,0.06)',
+    borderStrong: 'rgba(255,255,255,0.1)',
+    textPrimary: '#e8e8f0',
+    textSecondary: 'rgba(255,255,255,0.45)',
+    textTertiary: 'rgba(255,255,255,0.25)',
+    primary: '#D4AF37',
+    primaryLight: 'rgba(212,175,55,0.12)',
+    primaryLighter: 'rgba(212,175,55,0.06)',
+    cardShadow: '0 2px 12px rgba(0,0,0,0.4)',
+    success: '#10b981',
+    error: '#ef4444',
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="admin-dark-wrapper" style={{ display: 'flex', minHeight: '100vh', background: adminColors.bg, color: adminColors.textPrimary }}>
 
       {/* Sidebar */}
       <aside style={{
         width: sidebarOpen ? '260px' : '72px',
-        background: 'var(--surface)',
-        borderLeft: '1px solid var(--border)',
+        background: adminColors.surface,
+        borderLeft: `1px solid ${adminColors.border}`,
         padding: sidebarOpen ? '1.5rem 1rem' : '1.5rem 0.6rem',
         display: 'flex', flexDirection: 'column',
         transition: 'all 0.3s ease',
         alignItems: sidebarOpen ? 'stretch' : 'center',
-        boxShadow: '-2px 0 8px rgba(0,0,0,0.03)',
+        boxShadow: '-4px 0 20px rgba(0,0,0,0.3)',
       }}>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', marginBottom: '2rem' }}>
           {sidebarOpen && (
-            <h2 style={{ color: 'var(--primary)', fontSize: '1.2rem', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h2 style={{ color: adminColors.primary, fontSize: '1.2rem', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <LayoutDashboard size={20} /> الإدارة
             </h2>
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
-            background: 'var(--surface-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)',
+            background: adminColors.surfaceHover, border: `1px solid ${adminColors.border}`, color: adminColors.textSecondary,
             width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center',
             justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s'
           }}>
@@ -102,8 +119,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   textDecoration: 'none', fontWeight: active ? 700 : 500,
                   display: 'flex', alignItems: 'center', gap: '0.8rem',
                   transition: 'all 0.2s', cursor: 'pointer',
-                  background: active ? 'var(--primary-lighter)' : 'transparent',
-                  color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                  background: active ? adminColors.primaryLight : 'transparent',
+                  color: active ? adminColors.primary : adminColors.textSecondary,
                   justifyContent: sidebarOpen ? 'flex-start' : 'center',
                   fontSize: '0.9rem',
                 }} 
@@ -114,17 +131,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
           
-          <div style={{ height: '1px', background: 'var(--border)', margin: '1rem 0' }} />
+          <div style={{ height: '1px', background: adminColors.border, margin: '1rem 0' }} />
           
           <a href="/" style={{
-            padding: '0.8rem', borderRadius: '10px', color: 'var(--text-secondary)',
+            padding: '0.8rem', borderRadius: '10px', color: adminColors.textSecondary,
             textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center',
             justifyContent: 'center', gap: '0.5rem', transition: 'all 0.2s',
-            border: '1px solid var(--border)', fontSize: '0.85rem',
+            border: `1px solid ${adminColors.border}`, fontSize: '0.85rem',
           }}>
             <Globe size={16} /> {sidebarOpen ? 'الموقع الرئيسي' : ''}
           </a>
         </nav>
+
+        {/* Admin user badge at bottom */}
+        {sidebarOpen && (
+          <div style={{
+            marginTop: '1rem', padding: '0.8rem 1rem', borderRadius: '12px',
+            background: adminColors.surfaceHover, border: `1px solid ${adminColors.border}`,
+            display: 'flex', alignItems: 'center', gap: '0.8rem',
+          }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              background: `linear-gradient(135deg, ${adminColors.primary}, #B8860B)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <User size={16} color="#111" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: adminColors.textPrimary }}>
+                ⚙ مدير النظام
+              </div>
+              <div style={{ fontSize: '0.68rem', color: adminColors.textTertiary }}>
+                صلاحيات كاملة
+              </div>
+            </div>
+            <div style={{
+              width: '8px', height: '8px', borderRadius: '50%', marginRight: 'auto',
+              background: adminColors.success,
+              boxShadow: `0 0 8px ${adminColors.success}`,
+            }} />
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
@@ -132,34 +179,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         {/* Top Bar */}
         <header style={{
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px',
+          background: adminColors.surface, border: `1px solid ${adminColors.border}`, borderRadius: '14px',
           padding: '0.8rem 1.5rem', display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '2rem', boxShadow: 'var(--card-shadow)',
+          alignItems: 'center', marginBottom: '2rem', boxShadow: adminColors.cardShadow,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>لوحة الإدارة</span>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: adminColors.success, boxShadow: `0 0 6px ${adminColors.success}` }} />
+            <span style={{ fontSize: '0.85rem', color: adminColors.textSecondary, fontWeight: 600 }}>لوحة الإدارة</span>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ position: 'relative' }}>
               <input type="text" placeholder="بحث..." style={{
-                background: 'var(--surface-hover)', border: '1px solid var(--border)',
+                background: adminColors.surfaceHover, border: `1px solid ${adminColors.border}`,
                 padding: '0.6rem 1rem', paddingRight: '2.2rem', borderRadius: '10px',
-                color: 'var(--text-primary)', fontSize: '0.85rem', width: '200px', outline: 'none',
+                color: adminColors.textPrimary, fontSize: '0.85rem', width: '200px', outline: 'none',
               }} />
-              <Search size={14} color="var(--text-tertiary)" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Search size={14} color={adminColors.textTertiary} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
 
             <div onClick={() => setShowDropdown(!showDropdown)} style={{
               position: 'relative', cursor: 'pointer', padding: '0.5rem',
-              background: 'var(--surface-hover)', borderRadius: '10px', border: '1px solid var(--border)',
+              background: adminColors.surfaceHover, borderRadius: '10px', border: `1px solid ${adminColors.border}`,
               transition: 'all 0.2s',
             }}>
-              <Bell size={20} color={notifications.length > 0 ? 'var(--primary)' : 'var(--text-tertiary)'} />
+              <Bell size={20} color={notifications.length > 0 ? adminColors.primary : adminColors.textTertiary} />
               {notifications.length > 0 && (
                 <span style={{
-                  position: 'absolute', top: -4, right: -4, background: 'var(--error)',
+                  position: 'absolute', top: -4, right: -4, background: adminColors.error,
                   color: 'white', borderRadius: '50%', width: '20px', height: '20px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.7rem', fontWeight: 800,
@@ -173,30 +220,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {showDropdown && (
             <div style={{
               position: 'absolute', top: '5rem', left: '2rem', width: '340px',
-              background: 'var(--surface)', border: '1px solid var(--border)',
+              background: adminColors.surface, border: `1px solid ${adminColors.borderStrong}`,
               borderRadius: '16px', zIndex: 50, padding: '1rem',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.8rem', marginBottom: '0.8rem' }}>
-                <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>الإشعارات</h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${adminColors.border}`, paddingBottom: '0.8rem', marginBottom: '0.8rem' }}>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', color: adminColors.textPrimary, fontWeight: 700 }}>الإشعارات</h3>
+                <span style={{ fontSize: '0.75rem', color: adminColors.primary, cursor: 'pointer', fontWeight: 600 }}
                   onClick={() => { notifications.forEach(n => markAsRead(n.id)); setShowDropdown(false); }}>
                   تنظيف الكل
                 </span>
               </div>
               {notifications.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '2rem', fontWeight: 600 }}>
+                <div style={{ textAlign: 'center', color: adminColors.textTertiary, padding: '2rem', fontWeight: 600 }}>
                   لا توجد إشعارات جديدة
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
                   {notifications.map(n => (
                     <div key={n.id} onClick={() => markAsRead(n.id)} style={{
-                      padding: '0.8rem', background: 'var(--primary-lighter)', borderRadius: '10px',
-                      cursor: 'pointer', transition: 'all 0.2s', borderRight: '3px solid var(--primary)',
+                      padding: '0.8rem', background: adminColors.primaryLighter, borderRadius: '10px',
+                      cursor: 'pointer', transition: 'all 0.2s', borderRight: `3px solid ${adminColors.primary}`,
                     }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.3rem', color: 'var(--text-primary)' }}>{n.title}</div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{n.message}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.3rem', color: adminColors.textPrimary }}>{n.title}</div>
+                      <div style={{ color: adminColors.textSecondary, fontSize: '0.78rem' }}>{n.message}</div>
                     </div>
                   ))}
                 </div>
@@ -210,6 +257,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <style jsx global>{`
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        /* Override CSS variables for admin panel children */
+        .admin-dark-wrapper,
+        .admin-dark-wrapper * {
+          --background: #0a0a0f;
+          --surface: #111118;
+          --surface-hover: #1a1a24;
+          --surface-active: #22222e;
+          --primary: #D4AF37;
+          --primary-hover: #B8860B;
+          --primary-light: rgba(212,175,55,0.15);
+          --primary-lighter: rgba(212,175,55,0.06);
+          --text-primary: #e8e8f0;
+          --text-secondary: rgba(255,255,255,0.45);
+          --text-tertiary: rgba(255,255,255,0.25);
+          --border: rgba(255,255,255,0.06);
+          --border-strong: rgba(255,255,255,0.1);
+          --card-shadow: 0 2px 12px rgba(0,0,0,0.4);
+          --card-shadow-hover: 0 4px 20px rgba(212,175,55,0.08), 0 8px 30px rgba(0,0,0,0.5);
+          --error: #ef4444;
+          --success: #10b981;
+          --warning: #f59e0b;
+        }
       `}</style>
     </div>
   );
