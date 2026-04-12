@@ -31,6 +31,14 @@ export async function GET(req: NextRequest) {
       shipToCountry: 'SA',
     });
 
+    // Log for debugging
+    console.log('AliExpress search result:', JSON.stringify({
+      query,
+      productCount: result.products?.length || 0,
+      totalCount: result.totalCount,
+      rawKeys: result._rawKeys || 'N/A',
+    }));
+
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('AliExpress search error:', error);

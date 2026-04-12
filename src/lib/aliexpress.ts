@@ -125,9 +125,15 @@ export class AliExpressSDK {
 
     const data = await response.json();
     
+    // Debug: log raw API response structure
+    console.log(`AliExpress API [${method}] raw response keys:`, Object.keys(data));
+    
     // Check for API-level errors
     const responseKey = method.replace(/\./g, '_') + '_response';
     const result = data[responseKey] || data;
+    
+    console.log(`AliExpress API [${method}] response key "${responseKey}" found:`, !!data[responseKey]);
+    console.log(`AliExpress API [${method}] result keys:`, Object.keys(result || {}));
     
     if (result?.error_response) {
       throw new Error(`AliExpress API Error: ${result.error_response.msg || JSON.stringify(result.error_response)}`);
@@ -204,7 +210,7 @@ export class AliExpressSDK {
     pageSize?: number;
     sort?: 'SALE_PRICE_ASC' | 'SALE_PRICE_DESC' | 'LAST_VOLUME_ASC' | 'LAST_VOLUME_DESC';
     shipToCountry?: string;
-  }): Promise<{ products: AEProduct[]; totalCount: number }> {
+  }): Promise<{ products: AEProduct[]; totalCount: number; _rawKeys?: string[] }> {
     const apiParams: Record<string, any> = {
       feed_name: 'DS recommend',
       target_currency: 'USD',
@@ -222,25 +228,53 @@ export class AliExpressSDK {
 
     const result = await this.apiCall('aliexpress.ds.recommend.feed.get', apiParams);
 
-    const products: AEProduct[] = (result?.products?.product || []).map((p: any) => ({
-      productId: String(p.product_id),
-      title: p.product_title || '',
-      imageUrl: p.product_main_image_url || '',
+    // Debug: log the raw result structure
+    console.log('AliExpress raw result keys:', JSON.stringify(Object.keys(result || {})));
+    console.log('AliExpress raw result (first 500 chars):', JSON.stringify(result).substring(0, 500));
+
+    // Try multiple possible response paths
+    let rawProducts: any[] = [];
+    
+    // Path 1: result.products.product (array)
+    if (result?.products?.product) {
+      rawProducts = Array.isArray(result.products.product) ? result.products.product : [result.products.product];
+    }
+    // Path 2: result.products (if it's directly an array)
+    else if (Array.isArray(result?.products)) {
+      rawProducts = result.products;
+    }
+    // Path 3: result.result.products
+    else if (result?.result?.products?.product) {
+      rawProducts = Array.isArray(result.result.products.product) ? result.result.products.product : [result.result.products.product];
+    }
+    // Path 4: result.resp_result.result.products
+    else if (result?.resp_result?.result?.products) {
+      const p = result.resp_result.result.products;
+      rawProducts = Array.isArray(p) ? p : (p.product ? (Array.isArray(p.product) ? p.product : [p.product]) : []);
+    }
+
+    console.log('AliExpress parsed products count:', rawProducts.length);
+
+    const products: AEProduct[] = rawProducts.map((p: any) => ({
+      productId: String(p.product_id || p.productId || ''),
+      title: p.product_title || p.title || '',
+      imageUrl: p.product_main_image_url || p.imageUrl || p.product_image || '',
       images: p.product_small_image_urls?.string || [],
-      price: parseFloat(p.sale_price?.amount || p.target_sale_price || '0'),
-      originalPrice: p.original_price ? parseFloat(p.original_price.amount || '0') : undefined,
-      currency: p.sale_price?.currency_code || 'USD',
-      rating: parseFloat(p.evaluate_rate || '0'),
-      orders: parseInt(p.lastest_volume || '0', 10),
-      storeName: '',
+      price: parseFloat(p.sale_price?.amount || p.target_sale_price || p.sale_price || p.price || '0'),
+      originalPrice: p.original_price ? parseFloat(p.original_price?.amount || p.original_price || '0') : undefined,
+      currency: p.sale_price?.currency_code || p.currency || 'USD',
+      rating: parseFloat(p.evaluate_rate || p.rating || '0'),
+      orders: parseInt(p.lastest_volume || p.orders || '0', 10),
+      storeName: p.store_name || '',
       storeUrl: '',
-      productUrl: p.product_detail_url || `https://www.aliexpress.com/item/${p.product_id}.html`,
-      category: p.first_level_category_name || '',
+      productUrl: p.product_detail_url || p.promotion_link || `https://www.aliexpress.com/item/${p.product_id || p.productId}.html`,
+      category: p.first_level_category_name || p.category || '',
     }));
 
     return {
       products,
-      totalCount: parseInt(result?.total_record_count || '0', 10),
+      totalCount: parseInt(result?.total_record_count || result?.result?.total_record_count || String(rawProducts.length), 10),
+      _rawKeys: Object.keys(result || {}),
     };
   }
 

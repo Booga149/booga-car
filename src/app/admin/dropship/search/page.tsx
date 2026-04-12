@@ -10,6 +10,8 @@ export default function DropshipSearch() {
   const [importing, setImporting] = useState<string | null>(null);
   const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
+  const [searched, setSearched] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -25,9 +27,12 @@ export default function DropshipSearch() {
       if (!res.ok) throw new Error(data.error);
       setResults(data.products || []);
       setTotalCount(data.totalCount || 0);
+      setDebugInfo({ rawKeys: data._rawKeys, productCount: data.products?.length, totalCount: data.totalCount });
+      setSearched(true);
     } catch (err: any) {
       setError(err.message);
       setResults([]);
+      setSearched(true);
     }
     setLoading(false);
   }
@@ -110,6 +115,29 @@ export default function DropshipSearch() {
           borderRadius: '10px', color: '#dc2626', marginBottom: '1rem', fontWeight: 600,
         }}>
           {error}
+        </div>
+      )}
+
+      {/* No results message */}
+      {searched && !loading && results.length === 0 && !error && (
+        <div style={{
+          padding: '3rem 2rem', textAlign: 'center',
+          background: 'var(--surface)', borderRadius: '16px',
+          border: '1px solid var(--border)', marginBottom: '1.5rem',
+        }}>
+          <Package size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+          <h3 style={{ margin: '0 0 0.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>لا توجد نتائج</h3>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            جرب كلمات بحث مختلفة بالإنجليزية مثل: "brake pads", "oil filter", "spark plugs"
+          </p>
+          {debugInfo && (
+            <details style={{ marginTop: '1.5rem', textAlign: 'left' }}>
+              <summary style={{ cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>Debug Info</summary>
+              <pre style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>
+                {JSON.stringify(debugInfo, null, 2)}
+              </pre>
+            </details>
+          )}
         </div>
       )}
 
