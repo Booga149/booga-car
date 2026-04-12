@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAliExpressSDK } from '@/lib/aliexpress';
+import { translateSearchQuery } from '@/lib/carPartsTranslator';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin();
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get('q') || '';
+  const rawQuery = searchParams.get('q') || '';
   const page = parseInt(searchParams.get('page') || '1');
   const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined;
   const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
   const sort = searchParams.get('sort') as any;
 
-  if (!query) return NextResponse.json({ error: 'Search query required' }, { status: 400 });
+  if (!rawQuery) return NextResponse.json({ error: 'Search query required' }, { status: 400 });
+
+  // Auto-translate Arabic queries to English for AliExpress
+  const translatedQuery = translateSearchQuery(rawQuery);
+  const query = translatedQuery + ' car auto'; // Append "car auto" to improve relevance
+
+  console.log(`AliExpress search: "${rawQuery}" → "${translatedQuery}" → "${query}"`);
 
   try {
     const sdk = await createAliExpressSDK(supabaseAdmin);
@@ -31,15 +38,19 @@ export async function GET(req: NextRequest) {
       shipToCountry: 'SA',
     });
 
-    // Log for debugging
     console.log('AliExpress search result:', JSON.stringify({
-      query,
+      rawQuery,
+      translatedQuery: query,
       productCount: result.products?.length || 0,
       totalCount: result.totalCount,
       rawKeys: result._rawKeys || 'N/A',
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      _translatedQuery: translatedQuery,
+      _originalQuery: rawQuery,
+    });
   } catch (error: any) {
     console.error('AliExpress search error:', error);
     return NextResponse.json({ error: error.message || 'Search failed' }, { status: 500 });

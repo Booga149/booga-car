@@ -27,7 +27,13 @@ export default function DropshipSearch() {
       if (!res.ok) throw new Error(data.error);
       setResults(data.products || []);
       setTotalCount(data.totalCount || 0);
-      setDebugInfo({ rawKeys: data._rawKeys, productCount: data.products?.length, totalCount: data.totalCount });
+      setDebugInfo({ 
+        rawKeys: data._rawKeys, 
+        productCount: data.products?.length, 
+        totalCount: data.totalCount,
+        translatedQuery: data._translatedQuery,
+        originalQuery: data._originalQuery,
+      });
       setSearched(true);
     } catch (err: any) {
       setError(err.message);
@@ -144,8 +150,16 @@ export default function DropshipSearch() {
       {/* Results */}
       {results.length > 0 && (
         <>
-          <div style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>
-            عثرنا على {totalCount.toLocaleString()} منتج
+          <div style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <span>عثرنا على {totalCount.toLocaleString()} منتج</span>
+            {debugInfo?.translatedQuery && debugInfo.translatedQuery !== debugInfo.originalQuery && (
+              <span style={{ 
+                background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)',
+                padding: '0.3rem 0.8rem', borderRadius: '8px', fontSize: '0.78rem', color: 'var(--primary)',
+              }}>
+                🔄 ترجمة: <strong style={{ direction: 'ltr', display: 'inline' }}>{debugInfo.translatedQuery}</strong>
+              </span>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.2rem' }}>
