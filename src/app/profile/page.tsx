@@ -109,7 +109,30 @@ export default function ProfilePage() {
   };
 
   const handleLogout = async () => {
-    try { await supabase.auth.signOut(); } catch (e) { console.error('Sign out error:', e); }
+    // Clear all Supabase tokens immediately
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {}
+    // Try signOut with timeout
+    try {
+      const signOutPromise = supabase.auth.signOut({ scope: 'local' });
+      await Promise.race([signOutPromise, new Promise((_, r) => setTimeout(() => r('timeout'), 3000))]);
+    } catch (e) {}
+    // Clear cookies
+    try {
+      document.cookie.split(';').forEach(c => {
+        const name = c.trim().split('=')[0];
+        if (name.startsWith('sb-') || name.includes('supabase')) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+    } catch (e) {}
+    // Always redirect
     window.location.href = '/';
   };
 

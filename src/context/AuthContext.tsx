@@ -103,26 +103,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const openSignUpModal = () => { setAuthMode('signup'); setIsAuthModalOpen(true); };
   const closeAuthModal = () => setIsAuthModalOpen(false);
   const signOut = async () => {
+    // 1. Clear state immediately so UI updates
+    setUser(null);
+    setProfile(null);
+
+    // 2. Try Supabase signOut with timeout (never hang)
     try {
-      // Use scope: 'global' to sign out from all tabs/devices
-      await supabase.auth.signOut({ scope: 'global' });
+      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('signOut timeout')), 3000)
+      );
+      await Promise.race([signOutPromise, timeoutPromise]);
     } catch (e) {
-      console.error('Sign out error:', e);
+      console.warn('Global signOut failed, trying local:', e);
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (e2) {
+        console.warn('Local signOut also failed:', e2);
+      }
     }
-    // Manually clear any remaining auth tokens from localStorage as fallback
+
+    // 3. Aggressively clear ALL auth tokens from localStorage
     try {
       const keys = Object.keys(localStorage);
       keys.forEach(key => {
-        if (key.startsWith('sb-') && (key.endsWith('-auth-token') || key.endsWith('-auth-token-code-verifier'))) {
+        if (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth-token')) {
           localStorage.removeItem(key);
         }
       });
     } catch (e) {
       // localStorage may not be available
     }
-    setUser(null);
-    setProfile(null);
-    // Force full page reload to clear all cached state
+
+    // 4. Clear cookies too (some Supabase setups use cookies)
+    try {
+      document.cookie.split(';').forEach(c => {
+        const name = c.trim().split('=')[0];
+        if (name.startsWith('sb-') || name.includes('supabase')) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+    } catch (e) {}
+
+    // 5. Force full page reload - guaranteed redirect
     window.location.href = '/';
   };
 
