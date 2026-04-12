@@ -176,30 +176,37 @@ export default function ProductsPage() {
       <Navbar />
       <CategoriesBar />
       
-      <div className="products-page-container" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2.5rem 2rem 5rem', flex: 1 }}>
+      <div className="products-page-container" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '1.5rem 2rem 5rem', flex: 1 }}>
         
         {/* Fitment & Global Banner */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
           {fitment && (
             <div style={{ 
-              background: isVinVerified ? 'rgba(37, 99, 235, 0.08)' : 'rgba(16, 185, 129, 0.08)', 
-              border: isVinVerified ? '1px solid rgba(37, 99, 235, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)', 
-              padding: '1.2rem 2rem', 
-              borderRadius: '20px',
+              background: isVinVerified ? 'rgba(37, 99, 235, 0.12)' : 'rgba(16, 185, 129, 0.12)', 
+              border: isVinVerified ? '1.5px solid rgba(37, 99, 235, 0.3)' : '1.5px solid rgba(16, 185, 129, 0.3)', 
+              padding: '1rem 1.8rem', 
+              borderRadius: '16px',
               display: 'flex', 
               alignItems: 'center', 
-              gap: '1.5rem', 
-              boxShadow: 'var(--card-shadow)',
-              flexWrap: 'wrap'
+              gap: '1.2rem', 
+              boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+              flexWrap: 'wrap',
             }}>
-              <div style={{ background: isVinVerified ? '#2563eb' : '#10b981', color: 'white', padding: '0.6rem', borderRadius: '10px', display: 'flex' }}>
-                {isVinVerified ? <Shield size={24} /> : <CheckCircle2 size={24} />}
+              <div style={{ 
+                background: isVinVerified ? '#2563eb' : '#10b981', 
+                color: 'white', 
+                padding: '0.6rem', 
+                borderRadius: '12px', 
+                display: 'flex',
+                boxShadow: isVinVerified ? '0 4px 12px rgba(37,99,235,0.3)' : '0 4px 12px rgba(16,185,129,0.3)',
+              }}>
+                {isVinVerified ? <Shield size={22} /> : <CheckCircle2 size={22} />}
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ margin: '0 0 0.2rem', color: isVinVerified ? '#2563eb' : '#10b981', fontSize: '1.2rem', fontWeight: 900 }}>
-                  {isVinVerified ? 'تأكيد VIN نشط' : 'تطابق سيارة الكراج'}
+                <h3 style={{ margin: '0 0 0.15rem', color: isVinVerified ? '#2563eb' : '#059669', fontSize: '1.05rem', fontWeight: 900 }}>
+                  {isVinVerified ? 'تأكيد VIN نشط' : '✅ تطابق سيارة الكراج'}
                 </h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 600 }}>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>
                   النتائج مخصصة لسيارتك: <span style={{ color: '#e11d48', fontWeight: 800 }}>{fitment.make} {fitment.model} {fitment.year}</span>
                 </p>
               </div>
