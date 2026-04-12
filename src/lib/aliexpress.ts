@@ -232,25 +232,47 @@ export class AliExpressSDK {
     console.log('AliExpress raw result keys:', JSON.stringify(Object.keys(result || {})));
     console.log('AliExpress raw result (first 500 chars):', JSON.stringify(result).substring(0, 500));
 
-    // Try multiple possible response paths
+    // Try multiple possible response paths for products
     let rawProducts: any[] = [];
     
-    // Path 1: result.products.product (array)
-    if (result?.products?.product) {
-      rawProducts = Array.isArray(result.products.product) ? result.products.product : [result.products.product];
+    // Helper: extract array from various product container formats
+    const extractProducts = (container: any): any[] => {
+      if (!container) return [];
+      if (Array.isArray(container)) return container;
+      // DS recommend feed uses traffic_product_d_t_o
+      if (container.traffic_product_d_t_o) {
+        return Array.isArray(container.traffic_product_d_t_o) ? container.traffic_product_d_t_o : [container.traffic_product_d_t_o];
+      }
+      if (container.product) {
+        return Array.isArray(container.product) ? container.product : [container.product];
+      }
+      return [];
+    };
+    
+    // Path 1: result.result.products (DS recommend feed standard)
+    if (result?.result?.products) {
+      rawProducts = extractProducts(result.result.products);
     }
-    // Path 2: result.products (if it's directly an array)
-    else if (Array.isArray(result?.products)) {
-      rawProducts = result.products;
+    // Path 2: result.products
+    else if (result?.products) {
+      rawProducts = extractProducts(result.products);
     }
-    // Path 3: result.result.products
-    else if (result?.result?.products?.product) {
-      rawProducts = Array.isArray(result.result.products.product) ? result.result.products.product : [result.result.products.product];
-    }
-    // Path 4: result.resp_result.result.products
+    // Path 3: result.resp_result.result.products
     else if (result?.resp_result?.result?.products) {
-      const p = result.resp_result.result.products;
-      rawProducts = Array.isArray(p) ? p : (p.product ? (Array.isArray(p.product) ? p.product : [p.product]) : []);
+      rawProducts = extractProducts(result.resp_result.result.products);
+    }
+    // Path 4: Deep scan - look for any array of objects with product_id
+    if (rawProducts.length === 0) {
+      const deepScan = (obj: any, depth = 0): any[] => {
+        if (depth > 4 || !obj || typeof obj !== 'object') return [];
+        if (Array.isArray(obj) && obj.length > 0 && obj[0]?.product_id) return obj;
+        for (const key of Object.keys(obj)) {
+          const found = deepScan(obj[key], depth + 1);
+          if (found.length > 0) return found;
+        }
+        return [];
+      };
+      rawProducts = deepScan(result);
     }
 
     console.log('AliExpress parsed products count:', rawProducts.length);
