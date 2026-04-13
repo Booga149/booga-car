@@ -8,9 +8,19 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let disposed = false;
     
+    // 1) ABSOLUTE SAFETY FALLBACK:
+    // If the page gets stuck for whatever reason (e.g. Supabase auth lock deadlocks),
+    // force a redirect after 5 seconds so the user is never trapped.
+    const safetyTimer = setTimeout(() => {
+      if (!disposed) {
+        window.location.replace('/');
+      }
+    }, 5000);
+
     const goHome = (path = '/') => {
       if (!disposed) {
         disposed = true;
+        clearTimeout(safetyTimer);
         window.location.replace(path);
       }
     };
@@ -22,46 +32,71 @@ export default function AuthCallbackPage() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         
+        // Supabase `detectSessionInUrl` might be running simultaneously, 
+        // causing `navigator.locks` to deadlock if we `await` infinitely.
+        // We use Promise.race to timeout after 2 seconds to overcome the deadlock.
+        const withTimeout = (promise: Promise<any>) => {
+          return Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+          ]);
+        };
+        
         if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) {
-            console.warn('Exchange code error:', error.message);
-          }
+          await withTimeout(supabase.auth.exchangeCodeForSession(code)).catch(e => console.warn('Supabase exchange:', e.message));
         } else if (accessToken) {
-            const { error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: hashParams.get('refresh_token') || '',
-            });
-            if (error) console.warn('Set session error:', error.message);
+          await withTimeout(supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: hashParams.get('refresh_token') || '',
+          })).catch(e => console.warn('Supabase setSession:', e.message));
         }
 
         // Add a delay to allow Supabase to persist the session securely to browser storage
         setTimeout(async () => {
           if (disposed) return;
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            setStatus('تم تسجيل الدخول بنجاح! ✅');
-            setTimeout(() => goHome('/'), 1000);
-          } else {
-            console.warn('No session found after exchange.');
-            setStatus('فشل تسجيل الدخول، جاري التوجيه...');
-            setTimeout(() => goHome('/'), 2000);
+          try {
+            const { data: { session } } = await withTimeout(supabase.auth.getSession());
+            if (session) {
+              setStatus('تم تسجيل الدخول بنجاح! ✅');
+              setTimeout(() => goHome('/'), 500);
+            } else {
+               // Next fallback: see if `onAuthStateChange` got it. If no session, go home anyway.
+               setStatus('لم نتمكن من جلب الجلسة، جاري التوجيه...');
+               setTimeout(() => goHome('/'), 1000);
+            }
+          } catch(e) {
+            goHome('/');
           }
-        }, 1500);
+        }, 800);
 
       } catch (err) {
         console.error('Auth callback exception:', err);
         setStatus('حدث خطأ، جاري إعادة التوجيه...');
-        setTimeout(() => goHome('/'), 2000);
+        setTimeout(() => goHome('/'), 1000);
       }
     };
 
     if (typeof window !== 'undefined') {
        processAuth();
+       
+       // Subscription fallback in case the lock resolves and emits an event
+       const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+         if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+           setStatus('تم الدخول، سيتم التوجيه... ✅');
+           setTimeout(() => goHome('/'), 500);
+         }
+       });
+       
+       return () => {
+         disposed = true;
+         clearTimeout(safetyTimer);
+         authListener?.subscription?.unsubscribe();
+       };
     }
 
     return () => {
       disposed = true;
+      clearTimeout(safetyTimer);
     };
   }, []);
 
