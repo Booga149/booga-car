@@ -113,22 +113,32 @@ export async function POST(req: NextRequest) {
     const finalCalculatedTotal = roundPrice(totalBeforeDiscount - couponDiscount);
 
     // 7. Secure Insertion (via Admin Client, bypassing broken/unsafe RLS)
-    const { data: newOrder, error: orderError } = await supabase
+    let insertPayload: any = {
+      user_id: userId || null,
+      total: finalCalculatedTotal,
+      shipping_cost: shippingCost,
+      status: 'قيد المراجعة',
+      shipping_address: `${shippingDetails.city} - ${shippingDetails.address}`,
+      city: shippingDetails.city,
+      phone: shippingDetails.phone,
+      buyer_name: shippingDetails.name,
+      payment_method: paymentMethod,
+      payment_status: 'pending'
+    };
+
+    let { data: newOrder, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        user_id: userId || null,
-        total: finalCalculatedTotal,
-        shipping_cost: shippingCost,
-        status: 'قيد المراجعة',
-        shipping_address: `${shippingDetails.city} - ${shippingDetails.address}`,
-        city: shippingDetails.city,
-        phone: shippingDetails.phone,
-        buyer_name: shippingDetails.name,
-        payment_method: paymentMethod,
-        payment_status: 'pending'
-      })
+      .insert(insertPayload)
       .select()
       .single();
+
+    // Fallback if the user hasn't run the migration for payment_status yet
+    if (orderError && orderError.message && orderError.message.includes('payment_status')) {
+      delete insertPayload.payment_status;
+      const retry = await supabase.from('orders').insert(insertPayload).select().single();
+      newOrder = retry.data;
+      orderError = retry.error;
+    }
 
     if (orderError || !newOrder) {
       throw new Error(orderError?.message || "Failed to create secure order");

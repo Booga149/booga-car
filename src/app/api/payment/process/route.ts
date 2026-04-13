@@ -20,10 +20,15 @@ export async function POST(req: NextRequest) {
     // ─── COD: No payment processing needed ───
     if (sourceType === 'cod') {
       const supabase = getSupabaseAdmin();
-      await supabase.from('orders').update({
+      let cPay: any = {
         payment_method: 'الدفع عند الاستلام',
         payment_status: 'pending',
-      }).eq('id', orderId);
+      };
+      let { error: cErr } = await supabase.from('orders').update(cPay).eq('id', orderId);
+      if (cErr && cErr.message && cErr.message.includes('payment_status')) {
+        delete cPay.payment_status;
+        await supabase.from('orders').update(cPay).eq('id', orderId);
+      }
 
       // Send confirmation email
       try {
@@ -58,10 +63,15 @@ export async function POST(req: NextRequest) {
     if (!moyasar.isConfigured()) {
       // Fallback: Save order as pending payment
       const supabase = getSupabaseAdmin();
-      await supabase.from('orders').update({
+      let pPay: any = {
         payment_method: paymentMethod,
         payment_status: 'pending_configuration',
-      }).eq('id', orderId);
+      };
+      let { error: pErr } = await supabase.from('orders').update(pPay).eq('id', orderId);
+      if (pErr && pErr.message && pErr.message.includes('payment_status')) {
+        delete pPay.payment_status;
+        await supabase.from('orders').update(pPay).eq('id', orderId);
+      }
 
       // Still send confirmation email
       try {
@@ -99,11 +109,17 @@ export async function POST(req: NextRequest) {
 
     // Save payment reference
     const supabase = getSupabaseAdmin();
-    await supabase.from('orders').update({
+    let mPay: any = {
       payment_method: paymentMethod,
       payment_status: payment.status,
       payment_id: payment.id,
-    }).eq('id', orderId);
+    };
+    let { error: mErr } = await supabase.from('orders').update(mPay).eq('id', orderId);
+    if (mErr && mErr.message && mErr.message.includes('payment_status')) {
+      delete mPay.payment_status;
+      delete mPay.payment_id;
+      await supabase.from('orders').update(mPay).eq('id', orderId);
+    }
 
     return NextResponse.json({
       success: true,

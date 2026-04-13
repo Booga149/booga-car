@@ -30,11 +30,17 @@ export async function GET(req: NextRequest) {
 
         if (payment.status === 'paid') {
           // ✅ Payment successful
-          await supabase.from('orders').update({
+          let updatePayload: any = {
             payment_status: 'paid',
             payment_id: paymentId,
             status: 'تم التأكيد',
-          }).eq('id', orderId);
+          };
+          let { error: updateError } = await supabase.from('orders').update(updatePayload).eq('id', orderId);
+          if (updateError && updateError.message && updateError.message.includes('payment_status')) {
+            delete updatePayload.payment_status;
+            delete updatePayload.payment_id;
+            await supabase.from('orders').update(updatePayload).eq('id', orderId);
+          }
 
           // Send confirmation email
           try {
@@ -57,9 +63,12 @@ export async function GET(req: NextRequest) {
           return NextResponse.redirect(`${SITE_URL}/checkout/success?id=${orderId}&paid=true`);
         } else {
           // ❌ Payment failed
-          await supabase.from('orders').update({
-            payment_status: 'failed',
-          }).eq('id', orderId);
+          let failedPayload: any = { payment_status: 'failed' };
+          let { error: fError } = await supabase.from('orders').update(failedPayload).eq('id', orderId);
+          if (fError && fError.message && fError.message.includes('payment_status')) {
+            // Remove the key, do nothing basically but it won't crash
+            delete failedPayload.payment_status;
+          }
 
           return NextResponse.redirect(`${SITE_URL}/checkout?error=payment_failed&order_id=${orderId}`);
         }
@@ -68,10 +77,15 @@ export async function GET(req: NextRequest) {
 
     // Fallback: redirect based on status param
     if (status === 'paid') {
-      await supabase.from('orders').update({
+      let fPay: any = {
         payment_status: 'paid',
         status: 'تم التأكيد',
-      }).eq('id', orderId);
+      };
+      let { error: fErr } = await supabase.from('orders').update(fPay).eq('id', orderId);
+      if (fErr && fErr.message && fErr.message.includes('payment_status')) {
+        delete fPay.payment_status;
+        await supabase.from('orders').update(fPay).eq('id', orderId);
+      }
 
       return NextResponse.redirect(`${SITE_URL}/checkout/success?id=${orderId}`);
     }
