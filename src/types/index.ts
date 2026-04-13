@@ -45,6 +45,8 @@ export interface Order {
   status: string;
   shipping_address: string;
   payment_method: string;
+  payment_status?: string;
+  payment_id?: string;
   created_at: string;
   order_items?: OrderItem[];
 }
