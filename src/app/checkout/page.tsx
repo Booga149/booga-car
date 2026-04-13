@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   const [discountMsg, setDiscountMsg] = useState('');
 
   const applyDiscount = async () => {
-    let code = discountCode.trim().toUpperCase();
+    let code = discountCode.replace(/\s/g, '').toUpperCase();
     if (!code) {
       // Auto-apply SAUDI15 if they click apply with an empty field
       code = 'SAUDI15';
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
-            coupon_code: appliedDiscount > 0 ? discountCode : null,
+            coupon_code: appliedDiscount > 0 ? discountCode.replace(/\s/g, '').toUpperCase() : null,
           }),
         });
         const validation = await validationRes.json();
@@ -141,7 +141,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cartItems.map(item => ({ id: item.id, quantity: item.quantity })),
-          coupon_code: appliedDiscount > 0 ? discountCode : undefined,
+          coupon_code: appliedDiscount > 0 ? discountCode.replace(/\s/g, '').toUpperCase() : undefined,
           shippingDetails: {
             name: formData.name,
             phone: formData.phone,
