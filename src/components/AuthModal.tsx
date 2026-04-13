@@ -285,22 +285,22 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               animation: 'pulseGlow 2s ease-in-out infinite',
             }} />
             
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
               <img 
                 src="/favicon.png?v=2" 
                 alt="Booga Car Logo" 
                 style={{ 
-                  width: '140px', height: '140px', 
-                  borderRadius: '35px', 
-                  boxShadow: '0 15px 40px rgba(255,215,0,0.25)',
+                  width: '260px', height: '260px', 
+                  borderRadius: '60px', 
+                  boxShadow: '0 20px 50px rgba(255,215,0,0.3)',
                   animation: 'logoReveal 1s cubic-bezier(0.77, 0, 0.175, 1)' 
                 }} 
               />
               <div style={{ 
-                fontSize: 'clamp(2rem, 8vw, 3.5rem)', fontWeight: 950, letterSpacing: '-1px',
+                fontSize: 'clamp(3rem, 12vw, 5rem)', fontWeight: 950, letterSpacing: '-2px',
                 color: 'var(--text-primary)',
                 animation: 'logoReveal 1s cubic-bezier(0.77, 0, 0.175, 1) 0.2s both',
-                display: 'flex', alignItems: 'center', gap: '0.4rem'
+                display: 'flex', alignItems: 'center', gap: '0.6rem'
               }}>
                 CAR <span style={{ color: 'var(--primary)' }}>BOOGA</span>
               </div>
