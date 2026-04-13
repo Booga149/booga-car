@@ -73,7 +73,7 @@ export default function AdminImport() {
 
           const { error } = await supabase.from('products').insert({
             name: p.name,
-            brand: p.brand || 'غير محدد',
+            brand: p.brand || '',
             category: p.category || 'أخرى',
             price: parseFloat(p.price),
             old_price: p.old_price ? parseFloat(p.old_price) : null,

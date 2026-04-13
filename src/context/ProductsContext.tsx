@@ -42,7 +42,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
           const mapped: Product[] = data.map((d: any) => ({
             id: d.id,
             name: d.name,
-            brand: d.brand || 'غير محدد',
+            brand: d.brand || '',
             category: d.category || 'أخرى',
             price: Number(d.price),
             oldPrice: d.old_price ? Number(d.old_price) : undefined,
@@ -82,7 +82,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     // Prepare Db Record
     const dbRecord = {
       name: product.name,
-      brand: product.brand || 'غير محدد',
+      brand: product.brand || '',
       category: product.category || 'أخرى',
       price: product.price,
       condition: product.condition || 'جديد',
@@ -101,7 +101,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         const newlyAdded: Product = {
           id: data.id,
           name: data.name,
-          brand: data.brand || 'غير محدد',
+          brand: data.brand || '',
           category: data.category || 'أخرى',
           price: Number(data.price),
           oldPrice: data.old_price ? Number(data.old_price) : undefined,
@@ -126,7 +126,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     const fallbackAdd: Product = {
       id: Date.now().toString(),
       name: product.name,
-      brand: product.brand || 'غير محدد',
+      brand: product.brand || '',
       category: product.category || 'أخرى',
       price: product.price,
       condition: product.condition || 'جديد',

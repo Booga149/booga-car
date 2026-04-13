@@ -234,7 +234,7 @@ export default function MerchantImportPage() {
 
         return {
           name: p.name,
-          brand: p.brand || 'غير محدد',
+          brand: p.brand || '',
           category: p.category,
           price: p.price,
           old_price: p.old_price || null,

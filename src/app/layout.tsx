@@ -184,9 +184,6 @@ export default function RootLayout({
                     `}
                   </Script>
                   
-                  {/* Floating WhatsApp Support Module */}
-                  <WhatsAppButtonWrapper />
-                  
                   {children}
                   <BackButton />
                   <CartDrawer />

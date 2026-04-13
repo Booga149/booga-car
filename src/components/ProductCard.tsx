@@ -23,6 +23,7 @@ export default function ProductCard({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
 
   const priceCalc = calculateProductPrice({ originalPrice: price, oldPrice });
@@ -108,18 +109,35 @@ export default function ProductCard({
           background: '#f8f9fb',
           overflow: 'hidden',
         }}>
-          <img
-            src={image}
-            alt=""
-            loading="lazy"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transition: 'transform 0.6s ease',
-              transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-            }}
-          />
+          {!imgError && image ? (
+            <img
+              src={image}
+              alt={name}
+              loading="lazy"
+              onError={() => setImgError(true)}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.6s ease',
+                transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%)',
+              gap: '0.5rem',
+            }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/>
+              </svg>
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700 }}>قطعة غيار</span>
+            </div>
+          )}
 
           {/* Distance Badge Bottom-Left */}
           {seller_distance !== undefined && seller_distance > 0 && (
@@ -222,23 +240,27 @@ export default function ProductCard({
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            <span style={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              color: '#e11d48',
-              background: 'rgba(225,29,72,0.1)',
-              padding: '3px 10px',
-              borderRadius: '6px',
-            }}>
-              {brand}
-            </span>
-            <span style={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-            }}>
-              {seller_name ? `بواسطة: ${seller_name}` : category}
-            </span>
+            {brand && brand !== 'غير محدد' && (
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                color: '#e11d48',
+                background: 'rgba(225,29,72,0.1)',
+                padding: '3px 10px',
+                borderRadius: '6px',
+              }}>
+                {brand}
+              </span>
+            )}
+            {category && category !== 'غير محدد' && (
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+              }}>
+                {seller_name ? `بواسطة: ${seller_name}` : category}
+              </span>
+            )}
           </div>
 
           {/* Title */}

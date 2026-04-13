@@ -40,7 +40,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           setProduct({
             id: data.id,
             name: data.name,
-            brand: data.brand || 'غير محدد',
+            brand: data.brand || '',
             category: data.category || 'أخرى',
             price: Number(data.price),
             oldPrice: data.old_price ? Number(data.old_price) : undefined,
