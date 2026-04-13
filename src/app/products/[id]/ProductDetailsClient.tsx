@@ -34,6 +34,15 @@ export default function ProductDetailsClient({ id }: { id: string }) {
         setLoading(false);
         return;
       }
+
+      // 1. Instantly check local cache to show UI immediately if possible
+      const localMatch = products.find(p => p.id === id);
+      if (localMatch) {
+        setProduct(localMatch);
+        setRelated(products.filter(p => p.category === localMatch.category && p.id !== id).slice(0, 4));
+        setLoading(false); // Instant UI rendering!
+      }
+
       try {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
         if (data) {
@@ -53,16 +62,17 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             color: 'var(--border)',
             stock_quantity: data.stock_quantity ?? 0,
           });
+          
+          setLoading(false); // Ensure UI unblocks once we have the product!
 
-          // Fetch Related Products (Same category, exclude current)
-          const { data: relatedData } = await supabase.from('products')
-            .select('*')
-            .eq('category', data.category)
-            .neq('id', id)
-            .limit(4);
-            
-          if (relatedData) {
-            setRelated(relatedData.map(d => ({
+          // Fetch Related Products and Seller Profile in PARALLEL silently
+          const pRelated = supabase.from('products').select('*').eq('category', data.category).neq('id', id).limit(4);
+          const pProfile = data.seller_id ? supabase.from('profiles').select('full_name, business_name, cr_number').eq('id', data.seller_id).single() : Promise.resolve({ data: null });
+
+          const [relRes, profRes] = await Promise.all([pRelated, pProfile]);
+
+          if (relRes.data) {
+            setRelated(relRes.data.map((d: any) => ({
               id: d.id, name: d.name, brand: d.brand || '', category: d.category || '',
               price: Number(d.price), oldPrice: d.old_price ? Number(d.old_price) : undefined,
               condition: d.condition || 'جديد', stock: d.stock || 'متوفر', shipping: d.shipping || 'عادي',
@@ -70,29 +80,23 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             })));
           }
 
-          // Fetch Seller Profile
-          if (data.seller_id) {
-             const { data: profileData } = await supabase.from('profiles').select('full_name, business_name, cr_number').eq('id', data.seller_id).single();
-             if (profileData) {
-                setSellerProfile(profileData);
-             }
+          if (profRes.data) {
+            setSellerProfile(profRes.data);
           }
-        } else {
-          // Fallback to local context in case the user clicked an unsynced, locally generated product or pseudo-ID
-          const localMatch = products.find(p => p.id === id);
-          if (localMatch) {
-            setProduct(localMatch);
-            setRelated(products.filter(p => p.category === localMatch.category && p.id !== id).slice(0, 4));
-          }
+        } else if (!localMatch) {
+          // If no data and no local match
+          setLoading(false);
         }
       } catch (e) {
         console.error("Error fetching detail:", e);
-      } finally {
         setLoading(false);
       }
     }
+    
+    // Only run if products has been loaded (to allow instant cache lookup) 
+    // OR if products context isn't running
     fetchProductDetails();
-  }, [id, products]);
+  }, [id]);
 
   // Fetch reviews
   useEffect(() => {
