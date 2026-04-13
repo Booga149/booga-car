@@ -12,7 +12,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
 // Role-specific bottom nav items
-const USER_NAV = [
+const USER_NAV: any[] = [
   { href: '/', label: 'الرئيسية', icon: Home },
   { href: '/products', label: 'المنتجات', icon: ShoppingBag },
   { href: '#cart', label: 'السلة', icon: ShoppingCart, isCart: true },
@@ -20,7 +20,7 @@ const USER_NAV = [
   { href: '#more', label: 'المزيد', icon: Menu, isMore: true },
 ];
 
-const SELLER_NAV = [
+const SELLER_NAV: any[] = [
   { href: '/seller/dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
   { href: '/seller/products', label: 'منتجاتي', icon: Package },
   { href: '/sell', label: 'إضافة', icon: PlusCircle, isCenter: true },
@@ -28,7 +28,7 @@ const SELLER_NAV = [
   { href: '#more', label: 'المزيد', icon: Menu, isMore: true },
 ];
 
-const ADMIN_NAV = [
+const ADMIN_NAV: any[] = [
   { href: '/admin', label: 'لوحة التحكم', icon: LayoutDashboard },
   { href: '/admin/users', label: 'المستخدمين', icon: Users },
   { href: '/admin/products', label: 'المنتجات', icon: Package },

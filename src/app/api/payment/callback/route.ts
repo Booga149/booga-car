@@ -46,11 +46,13 @@ export async function GET(req: NextRequest) {
           } catch {}
 
           // Notify admin
-          await supabase.from('admin_notifications').insert({
-            type: 'PAYMENT_SUCCESS',
-            title: '💳 دفعة ناجحة',
-            message: `تم استلام دفعة بقيمة ${(payment.amount / 100).toFixed(2)} ر.س للطلب #${orderId.slice(0, 8)}`,
-          }).catch(() => {});
+          try {
+            await supabase.from('admin_notifications').insert({
+              type: 'PAYMENT_SUCCESS',
+              title: '💳 دفعة ناجحة',
+              message: `تم استلام دفعة بقيمة ${(payment.amount / 100).toFixed(2)} ر.س للطلب #${orderId.slice(0, 8)}`,
+            });
+          } catch {}
 
           return NextResponse.redirect(`${SITE_URL}/checkout/success?id=${orderId}&paid=true`);
         } else {

@@ -5,7 +5,30 @@ import { translateSearchQuery } from '@/lib/carPartsTranslator';
 
 export const dynamic = 'force-dynamic';
 
+// In-memory rate limiting store (clears on server restart, fine for Next.js API unless edge-deployed)
+const limitStore = new Map<string, { count: number, lastReq: number }>();
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const MAX_REQS_PER_WINDOW = 30; // Max 30 requests per IP per minute
+
 export async function GET(req: NextRequest) {
+  // 0. Rate Limiting Check
+  const ip = req.headers.get('x-forwarded-for') || req.ip || 'unknown';
+  const now = Date.now();
+  const userData = limitStore.get(ip) || { count: 0, lastReq: now };
+
+  if (now - userData.lastReq > RATE_LIMIT_WINDOW_MS) {
+    userData.count = 1;
+    userData.lastReq = now;
+  } else {
+    userData.count++;
+  }
+  
+  limitStore.set(ip, userData);
+
+  if (userData.count > MAX_REQS_PER_WINDOW) {
+    return NextResponse.json({ error: 'طلبات كثيرة جداً. يرجى المحاولة بعد قليل.' }, { status: 429 });
+  }
+
   const supabaseAdmin = getSupabaseAdmin();
   const { searchParams } = new URL(req.url);
   const rawQuery = searchParams.get('q') || '';

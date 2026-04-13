@@ -108,7 +108,7 @@ export default function CheckoutPage() {
       const reservationIds: string[] = [];
       try {
         // Release expired reservations first
-        await supabase.rpc('release_expired_reservations').catch(() => {});
+        try { await supabase.rpc('release_expired_reservations'); } catch {}
         
         for (const item of cartItems) {
           const { data: resId, error: resErr } = await supabase.rpc('reserve_stock', {
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
           if (resErr) {
             // Release all previous reservations on failure
             for (const rid of reservationIds) {
-              await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid).catch(() => {});
+              try { await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid); } catch {}
             }
             addToast(resErr.message || 'الكمية المطلوبة غير متاحة حالياً', 'error');
             setLoading(false);
@@ -131,175 +131,46 @@ export default function CheckoutPage() {
         console.warn('Reservation system unavailable:', resErr.message);
       }
 
-      // ─── STEP 1: Insert Order ───
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: userId,
-          total: finalTotal,
-          status: 'قيد المراجعة',
-          shipping_address: `${formData.city} - ${formData.address}`,
-          payment_method: formData.paymentMethod
-        })
-        .select()
-        .single();
+      // ─── 🚀 SECURE SERVER-SIDE ORDER CREATION ───
+      const orderRes = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({ id: item.id, quantity: item.quantity })),
+          coupon_code: appliedDiscount > 0 ? discountCode : undefined,
+          shippingDetails: {
+            name: formData.name,
+            phone: formData.phone,
+            city: formData.city,
+            address: formData.address,
+          },
+          paymentMethod: formData.paymentMethod,
+          userId: userId || null,
+        }),
+      });
 
-      if (orderError) {
-        // Release reservations on order failure
-        for (const rid of reservationIds) {
-          await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid).catch(() => {});
-        }
-        throw new Error(orderError.message || "Failed to create order");
+      const orderResult = await orderRes.json();
+
+      if (!orderRes.ok || orderResult.error) {
+        throw new Error(orderResult.error || "فشل في معالجة الطلب الآمن");
       }
 
-      // ─── STEP 2: Insert Order Items (centralized commission) ───
-      if (orderData) {
-        const orderItemsData = cartItems.map(item => {
-          const commission = calculateCommission(item.price);
-          return {
-            order_id: orderData.id,
-            product_id: item.id,
-            product_name: item.name,
-            product_image: item.image,
-            quantity: item.quantity,
-            price: roundPrice(item.price),
-          };
-        });
-
-        const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
-        if (itemsError) throw itemsError;
-
-        // ─── STEP 2b: Decrement Stock + Complete Reservations ───
-        for (const item of cartItems) {
-          try {
-            const { error: decErr } = await supabase.rpc('decrement_stock', {
-              p_product_id: item.id,
-              p_quantity: item.quantity,
-            });
-            if (decErr) console.warn('Stock decrement warning:', decErr.message);
-            
-            await supabase.rpc('check_low_stock', { p_product_id: item.id }).catch(() => {});
-          } catch (stockErr) {
-            console.warn('Stock decrement failed for', item.id, stockErr);
-          }
-        }
-
-        // Complete all reservations
-        for (const rid of reservationIds) {
-          await supabase.rpc('complete_reservation', { p_reservation_id: rid }).catch(() => {});
-        }
-
-        // ─── STEP 2c: Create Invoice (non-blocking) ───
-        try {
-          // Get seller_id from first product
-          const { data: firstProduct } = await supabase
-            .from('products').select('seller_id').eq('id', cartItems[0].id).single();
-
-          if (firstProduct?.seller_id) {
-            const { data: invNumber } = await supabase.rpc('create_invoice', {
-              p_seller_id: firstProduct.seller_id,
-              p_source: 'online',
-              p_order_id: orderData.id,
-              p_subtotal: totalBeforeDiscount,
-              p_discount: discountAmount,
-              p_total: finalTotal,
-              p_customer_name: formData.name,
-              p_customer_phone: formData.phone,
-            });
-
-            // Insert invoice items
-            if (invNumber) {
-              const { data: inv } = await supabase
-                .from('invoices').select('id').eq('invoice_number', invNumber).single();
-              if (inv) {
-                const invoiceItems = cartItems.map(item => ({
-                  invoice_id: inv.id,
-                  product_id: item.id,
-                  product_name: item.name,
-                  quantity: item.quantity,
-                  unit_price: roundPrice(item.price),
-                  total: roundPrice(item.price * item.quantity),
-                }));
-                await supabase.from('invoice_items').insert(invoiceItems);
-              }
-            }
-          }
-        } catch (invErr) {
-          console.warn('Invoice creation (non-blocking):', invErr);
-        }
-
-        // ─── STEP 2c: Price Audit Log (non-blocking) ───
-        try {
-          const auditEntry = createPriceAuditEntry(
-            orderData.id,
-            cartPricing.items,
-            cartPricing,
-            appliedDiscount > 0 ? discountCode : undefined
-          );
-          await supabase.from('admin_notifications').insert({
-            type: 'PRICE_AUDIT',
-            title: `سجل أسعار طلب #${orderData.id.slice(0, 8)}`,
-            message: JSON.stringify(auditEntry),
-          });
-        } catch {}
-      }
-      
-      // Notify Admin Board (non-blocking)
-      try {
-        await supabase.from('admin_notifications').insert({
-          type: 'NEW_ORDER',
-          title: 'طلب جديد',
-          message: `طلب مبدئي بقيمة ${finalTotal} ر.س تم استلامه من ${formData.name}.`
-        });
-      } catch {}
-
-      // Notify User (non-blocking)
-      if (userId) {
-        try {
-          await supabase.from('user_notifications').insert({
-            user_id: userId,
-            type: 'order_update',
-            title: 'تم استلام طلبك بنجاح! 🎉',
-            message: `طلبك بقيمة ${finalTotal} ر.س قيد المراجعة. سنقوم بإعلامك عند تحديث حالة الشحن.`,
-            link: `/track-order?id=${orderData.id}`
-          });
-        } catch {}
-      }
-
-      // ─── STEP 3: Process Payment via Gateway ───
-      try {
-        const payRes = await fetch('/api/payment/process', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: orderData.id,
-            amount: finalTotal,
-            paymentMethod: formData.paymentMethod,
-            customerName: formData.name,
-            customerPhone: formData.phone,
-          }),
-        });
-        const payResult = await payRes.json();
-        
-        // If payment gateway returns a redirect URL (3D Secure / STC Pay)
-        if (payResult.redirectUrl) {
-          window.location.href = payResult.redirectUrl;
-          return;
-        }
-      } catch (payErr) {
-        console.warn('Payment processing (non-blocking):', payErr);
-      }
-
-      // ─── STEP 4: Send Confirmation Email ───
+      // Send Email Confirmation asynchronously
       try {
         await fetch('/api/email/order-confirmation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: orderData.id }),
+          body: JSON.stringify({ orderId: orderResult.orderId }),
         });
       } catch {}
 
-      setSuccessOrderId(orderData.id);
+      // Handle Payment Gateways Redirects (Moyasar 3D secure, STC Pay)
+      if (orderResult.paymentResult?.redirectUrl) {
+        window.location.href = orderResult.paymentResult.redirectUrl;
+        return;
+      }
+
+      setSuccessOrderId(orderResult.orderId);
       clearCart();
 
     } catch (err: any) {

@@ -89,7 +89,7 @@ export default function SellerPOSPage() {
       if (decErr) console.warn('Stock decrement warning:', decErr.message);
 
       // 3. Check low stock
-      await supabase.rpc('check_low_stock', { p_product_id: selectedProduct.id }).catch(() => {});
+      try { await supabase.rpc('check_low_stock', { p_product_id: selectedProduct.id }); } catch {}
 
       // 4. Create Invoice (POS-XXXXXX)
       let invoiceNumber = '';

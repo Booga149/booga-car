@@ -158,11 +158,13 @@ export default function SellerReturnsPage() {
 
         // Restore stock
         if (item.product_id) {
-          await supabase.rpc('restore_stock', {
-            p_product_id: item.product_id,
-            p_quantity: qty,
-            p_reason: `إرجاع فاتورة ${invoice.invoice_number}`,
-          }).catch(() => {});
+          try {
+            await supabase.rpc('restore_stock', {
+              p_product_id: item.product_id,
+              p_quantity: qty,
+              p_reason: `إرجاع فاتورة ${invoice.invoice_number}`,
+            });
+          } catch {}
         }
       }
 

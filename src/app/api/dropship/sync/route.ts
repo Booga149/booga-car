@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
         // Update stock
         if (dp.auto_sync_stock) {
-          const stockStatus = details.orders > 0 ? 'in_stock' : 'unknown';
+          const stockStatus = details.orders > 0 ? 'in_stock' : 'out_of_stock';
           updates.provider_stock_status = stockStatus;
 
           if (stockStatus === 'out_of_stock') {

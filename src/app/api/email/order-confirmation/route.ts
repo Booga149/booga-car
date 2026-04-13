@@ -118,11 +118,13 @@ export async function POST(req: NextRequest) {
 
       if (res.ok) {
         // Log success
-        await supabase.from('admin_notifications').insert({
-          type: 'EMAIL_SENT',
-          title: '📧 إيميل تأكيد',
-          message: `تم إرسال إيميل تأكيد الطلب #${orderId.slice(0, 8)} إلى ${customerEmail}`,
-        }).catch(() => {});
+        try {
+          await supabase.from('admin_notifications').insert({
+            type: 'EMAIL_SENT',
+            title: '📧 إيميل تأكيد',
+            message: `تم إرسال إيميل تأكيد الطلب #${orderId.slice(0, 8)} إلى ${customerEmail}`,
+          });
+        } catch {}
 
         return NextResponse.json({ sent: true, emailId: result.id });
       } else {
@@ -133,11 +135,13 @@ export async function POST(req: NextRequest) {
 
     // ─── No email provider configured ───
     // Log that email would have been sent
-    await supabase.from('admin_notifications').insert({
-      type: 'EMAIL_QUEUED',
-      title: '📧 إيميل معلّق',
-      message: `تأكيد الطلب #${orderId.slice(0, 8)} لم يُرسل — مطلوب إعداد RESEND_API_KEY. العميل: ${customerEmail}`,
-    }).catch(() => {});
+    try {
+      await supabase.from('admin_notifications').insert({
+        type: 'EMAIL_QUEUED',
+        title: '📧 إيميل معلّق',
+        message: `تأكيد الطلب #${orderId.slice(0, 8)} لم يُرسل — مطلوب إعداد RESEND_API_KEY. العميل: ${customerEmail}`,
+      });
+    } catch {}
 
     return NextResponse.json({ 
       sent: false, 
