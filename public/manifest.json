@@ -1,17 +1,18 @@
 {
-  "name": "Booga Car — قطع غيار السيارات",
-  "short_name": "Booga Car",
-  "description": "منصة قطع غيار السيارات الأولى في السعودية. تسوق، أدر متجرك، وتتبع طلباتك من أي مكان.",
+  "name": "بوجا كار — قطع غيار السيارات",
+  "short_name": "بوجا كار",
+  "description": "المنصة الأكبر لقطع غيار السيارات في المملكة العربية السعودية. تسوق، أدر متجرك، وتتبع طلباتك من أي مكان.",
   "start_url": "/",
   "id": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "dir": "rtl",
   "lang": "ar",
   "background_color": "#0f172a",
   "theme_color": "#e11d48",
-  "categories": ["shopping", "business", "auto"],
+  "categories": ["shopping", "business", "auto", "lifestyle"],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -43,26 +44,33 @@
     {
       "name": "تصفح المنتجات",
       "short_name": "المنتجات",
+      "description": "تصفح جميع قطع الغيار",
       "url": "/products",
       "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
     },
     {
-      "name": "لوحة تحكم التاجر",
-      "short_name": "لوحة التحكم",
-      "url": "/seller/dashboard",
+      "name": "طلب قطعة غيار",
+      "short_name": "طلب قطعة",
+      "description": "اطلب قطعة غيار مش متوفرة",
+      "url": "/request-part",
       "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
     },
     {
       "name": "تتبع الطلبات",
       "short_name": "تتبع",
+      "description": "تتبع حالة طلباتك",
       "url": "/track-order",
       "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
     },
     {
-      "name": "إضافة منتج",
-      "short_name": "إضافة",
-      "url": "/sell",
+      "name": "الكراج",
+      "short_name": "الكراج",
+      "description": "أضف سيارتك وتأكد من التطابق",
+      "url": "/garage",
       "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "auto"
+  }
 }
