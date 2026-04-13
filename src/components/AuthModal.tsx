@@ -285,31 +285,25 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               animation: 'pulseGlow 2s ease-in-out infinite',
             }} />
             
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+              <img 
+                src="/favicon.png?v=2" 
+                alt="Booga Car Logo" 
+                style={{ 
+                  width: '140px', height: '140px', 
+                  borderRadius: '35px', 
+                  boxShadow: '0 15px 40px rgba(255,215,0,0.25)',
+                  animation: 'logoReveal 1s cubic-bezier(0.77, 0, 0.175, 1)' 
+                }} 
+              />
               <div style={{ 
-                fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', fontWeight: 950, letterSpacing: '-3px',
-                background: 'linear-gradient(135deg, #FFD700, #FFA500, #FFD700)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                animation: 'logoReveal 1s cubic-bezier(0.77, 0, 0.175, 1), gradientShift 3s ease infinite',
-                textShadow: 'none',
+                fontSize: 'clamp(2rem, 8vw, 3.5rem)', fontWeight: 950, letterSpacing: '-1px',
+                color: 'var(--text-primary)',
+                animation: 'logoReveal 1s cubic-bezier(0.77, 0, 0.175, 1) 0.2s both',
+                display: 'flex', alignItems: 'center', gap: '0.4rem'
               }}>
-                BOOGA CAR
+                CAR <span style={{ color: 'var(--primary)' }}>BOOGA</span>
               </div>
-              <div style={{
-                position: 'absolute', bottom: '-10px', left: '50%', transform: 'translateX(-50%)',
-                height: '3px', borderRadius: '2px',
-                background: 'linear-gradient(90deg, transparent, #FFD700, transparent)',
-                animation: 'lineGrow 0.8s ease 0.4s forwards', width: '0'
-              }} />
-            </div>
-            <div style={{ 
-              color: 'rgba(255,215,0,0.5)', fontSize: '1rem', fontWeight: 700, 
-              opacity: 0, animation: 'fadeInUp 0.5s ease 0.7s forwards',
-              letterSpacing: '6px', textTransform: 'uppercase'
-            }}>
-              Premium Auto Parts
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
               {[0, 1, 2].map(i => (
