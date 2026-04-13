@@ -266,6 +266,39 @@ export default function CheckoutPage() {
         } catch {}
       }
 
+      // ─── STEP 3: Process Payment via Gateway ───
+      try {
+        const payRes = await fetch('/api/payment/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderData.id,
+            amount: finalTotal,
+            paymentMethod: formData.paymentMethod,
+            customerName: formData.name,
+            customerPhone: formData.phone,
+          }),
+        });
+        const payResult = await payRes.json();
+        
+        // If payment gateway returns a redirect URL (3D Secure / STC Pay)
+        if (payResult.redirectUrl) {
+          window.location.href = payResult.redirectUrl;
+          return;
+        }
+      } catch (payErr) {
+        console.warn('Payment processing (non-blocking):', payErr);
+      }
+
+      // ─── STEP 4: Send Confirmation Email ───
+      try {
+        await fetch('/api/email/order-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: orderData.id }),
+        });
+      } catch {}
+
       setSuccessOrderId(orderData.id);
       clearCart();
 
