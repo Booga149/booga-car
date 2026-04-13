@@ -35,12 +35,22 @@ export async function POST(req: NextRequest) {
 
     // 1. Fetch ALL product prices from database (NEVER trust frontend)
     const productIds = items.map((i: any) => i.product_id);
-    const { data: products, error: productsError } = await supabase
+    let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id';
+    let { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, price, old_price, stock, stock_quantity, seller_id')
+      .select(selectFields)
       .in('id', productIds);
 
+    // Schema fallback if stock_quantity wasn't added to live DB yet
+    if (productsError && productsError.message && productsError.message.includes('stock_quantity')) {
+      selectFields = 'id, name, price, old_price, stock, seller_id';
+      const retry = await supabase.from('products').select(selectFields).in('id', productIds);
+      products = retry.data;
+      productsError = retry.error;
+    }
+
     if (productsError || !products) {
+      console.error('[ValidateOrder] Supabase Error:', productsError);
       return NextResponse.json({ error: 'فشل في جلب بيانات المنتجات' }, { status: 500 });
     }
 
