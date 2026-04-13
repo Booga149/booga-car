@@ -21,8 +21,12 @@ export default function CheckoutPage() {
   const [discountMsg, setDiscountMsg] = useState('');
 
   const applyDiscount = async () => {
-    const code = discountCode.trim().toUpperCase();
-    if (!code) return;
+    let code = discountCode.trim().toUpperCase();
+    if (!code) {
+      // Auto-apply SAUDI15 if they click apply with an empty field
+      code = 'SAUDI15';
+      setDiscountCode('SAUDI15');
+    }
     try {
       const { data, error } = await supabase.from('coupons').select('*').eq('code', code).eq('is_active', true).single();
       if (error || !data) {
