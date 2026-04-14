@@ -40,7 +40,7 @@ export default function ProductCard({
       return;
     }
 
-    addToCart({ id, name, price: Number(price), brand, image });
+    addToCart({ id, name, price: Number(price), brand, image, category });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
   };

@@ -63,7 +63,7 @@ export default function CheckoutPage() {
 
   // ─── CENTRALIZED PRICING (Single Source of Truth) ───
   const cartPricing = calculateCartTotal(
-    cartItems.map(item => ({ price: item.price, quantity: item.quantity })),
+    cartItems.map(item => ({ price: item.price, quantity: item.quantity, productId: item.id, category: item.category })),
     appliedDiscount
   );
 

@@ -76,7 +76,7 @@ export default function AccessoryGrid({ products }: { products: Product[] }) {
                 <button 
                   onClick={() => {
                     const { id, name, price, image, brand } = item;
-                    addToCart({ id, name, price, image, brand });
+                    addToCart({ id, name, price, image, brand, category: 'إكسسوارات' });
                     addToast('تمت إضافة الإكسسوار إلى سلة مشترياتك', 'success');
                   }}
                   style={{

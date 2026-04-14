@@ -195,7 +195,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
     }
 
     for (let i = 0; i < quantity; i++) {
-        addToCart({ id: product.id, name: product.name, price: product.price, brand: product.brand, image: product.image });
+        addToCart({ id: product.id, name: product.name, price: product.price, brand: product.brand, image: product.image, category: product.category });
     }
     addToast(`تم إضافة ${quantity} قطعة من ${product.name} إلى السلة`, 'success');
   };
