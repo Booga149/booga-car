@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * ═══════════════════════════════════════════
@@ -24,14 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize Supabase with service role for server-side
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = getSupabaseAdmin();
 
     // 1. Fetch ALL product prices from database (NEVER trust frontend)
     const productIds = items.map((i: any) => i.product_id);
@@ -51,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     if (productsError || !products) {
       console.error('[ValidateOrder] Supabase Error:', productsError);
-      return NextResponse.json({ error: 'فشل في جلب بيانات المنتجات' }, { status: 500 });
+      return NextResponse.json({ error: `فشل في جلب بيانات المنتجات السبب: ${productsError?.message || 'unknown'}` }, { status: 500 });
     }
 
     // 2. Validate stock & calculate line totals

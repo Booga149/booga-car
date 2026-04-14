@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       .in('id', productIds);
 
     if (productsError && productsError.message && productsError.message.includes('stock_quantity')) {
-      selectFields = 'id, name, price, old_price, stock, seller_id, image_url';
+      selectFields = 'id, name, price, old_price, stock, seller_id, image_url, category';
       const retry = await supabase.from('products').select(selectFields as any).in('id', productIds);
       products = retry.data;
       productsError = retry.error;
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     if (productsError || !products || products.length === 0) {
       console.error('[CreateOrder] Supabase Error:', productsError);
-      return NextResponse.json({ error: 'فشل في جلب بيانات المنتجات أو المنتجات غير موجودة' }, { status: 500 });
+      return NextResponse.json({ error: `فشل في جلب بيانات المنتجات أو المنتجات غير موجودة السبب: ${productsError?.message || 'unknown'}` }, { status: 500 });
     }
 
     // 3. Validate stock & calculate line totals securely
