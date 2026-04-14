@@ -84,7 +84,7 @@ export default function Hero() {
           fontWeight: 500,
           letterSpacing: '0.5px',
         }}>
-          أداء أقوى يبدأ بقطع <span style={{ color: '#ffffff', fontWeight: 800 }}>أصلية موثوقة</span>
+          لأن سيارتك تستحق الفخامة والأداء الاستثنائي، نأتيك بـ <span style={{ color: '#D4AF37', fontWeight: 800 }}>أرقى قطع الغيار الأصلية</span>
         </p>
 
         {/* ──── Search Bar ──── */}
