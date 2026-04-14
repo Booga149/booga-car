@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/lib/pricing';
+import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Fetch ALL product prices from database (NEVER trust frontend)
     const productIds = items.map((i: any) => i.product_id || i.id);
-    let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id, image_url';
+    let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id, image_url, category';
     let { data: products, error: productsError } = await supabase
       .from('products')
       .select(selectFields)
@@ -107,9 +107,11 @@ export async function POST(req: NextRequest) {
         const meetsMinimum = !coupon.min_order_amount || subtotal >= coupon.min_order_amount;
 
         if (notExpired && notExhausted && meetsMinimum) {
-          const couponPercent = coupon.discount_percent;
-          const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
-          couponDiscount = roundPrice(totalBeforeDiscount * (couponPercent / 100));
+          const formattedItems = orderItemsToInsert.map((i: any) => ({
+            originalPrice: i.price, quantity: i.quantity, productId: i.product_id, category: products.find((p:any) => p.id === i.product_id)?.category
+          }));
+          const couponResult = applyCouponDiscount(subtotal, shippingCost, coupon, formattedItems);
+          couponDiscount = couponResult.couponDiscount;
           
           // Increment coupon uses
           try { await supabase.rpc('increment_coupon_usage', { coupon_code_param: coupon.code }); } catch {}

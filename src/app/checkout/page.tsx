@@ -16,44 +16,45 @@ export default function CheckoutPage() {
 
   // Discount logic
   const [discountCode, setDiscountCode] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
   const [discountStatus, setDiscountStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [discountMsg, setDiscountMsg] = useState('');
+
+  const [couponCode, setCouponCode] = useState('');
 
   const applyDiscount = async () => {
     let code = discountCode.replace(/\s/g, '').toUpperCase();
     if (!code) {
-      // Auto-apply SAUDI15 if they click apply with an empty field
       code = 'SAUDI15';
       setDiscountCode('SAUDI15');
     }
     try {
       const { data, error } = await supabase.from('coupons').select('*').eq('code', code).eq('is_active', true).single();
       if (error || !data) {
-        setAppliedDiscount(0);
+        setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg('كود الخصم غير صحيح أو منتهي الصلاحية');
       } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        setAppliedDiscount(0);
+        setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg('كود الخصم منتهي الصلاحية');
       } else if (data.max_uses && data.current_uses >= data.max_uses) {
-        setAppliedDiscount(0);
+        setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg('تم استنفاد عدد استخدامات هذا الكود');
       } else if (data.min_order_amount && cartTotal < data.min_order_amount) {
-        setAppliedDiscount(0);
+        setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg(`الحد الأدنى للطلب ${data.min_order_amount} ر.س لاستخدام هذا الكود`);
       } else {
-        setAppliedDiscount(data.discount_percent);
+        setAppliedDiscount(data);
         setDiscountStatus('success');
-        setDiscountMsg(`🎉 مبروك! تم تطبيق خصم ${data.discount_percent}% بنجاح`);
-        // Increment usage
-        await supabase.from('coupons').update({ current_uses: (data.current_uses || 0) + 1 }).eq('id', data.id);
+        const val = data.discount_value || data.discount_percent;
+        const msgType = data.discount_type === 'percent' ? `${val}%` : data.discount_type === 'fixed' ? `${val} ر.س` : 'شحن مجاني';
+        setDiscountMsg(`🎉 مبروك! تم تطبيق خصم ${msgType} بنجاح`);
       }
     } catch {
-      setAppliedDiscount(0);
+      setAppliedDiscount(null);
       setDiscountStatus('error');
       setDiscountMsg('حدث خطأ أثناء التحقق من الكود');
     }
@@ -88,7 +89,7 @@ export default function CheckoutPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
-            coupon_code: appliedDiscount > 0 ? discountCode.replace(/\s/g, '').toUpperCase() : null,
+            coupon_code: appliedDiscount ? discountCode.replace(/\s/g, '').toUpperCase() : null,
           }),
         });
         const validation = await validationRes.json();
@@ -141,7 +142,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cartItems.map(item => ({ id: item.id, quantity: item.quantity })),
-          coupon_code: appliedDiscount > 0 ? discountCode.replace(/\s/g, '').toUpperCase() : undefined,
+          coupon_code: appliedDiscount ? discountCode.replace(/\s/g, '').toUpperCase() : undefined,
           shippingDetails: {
             name: formData.name,
             phone: formData.phone,
@@ -549,15 +550,18 @@ export default function CheckoutPage() {
                   }
                 `}</style>
 
-                {appliedDiscount > 0 && (
+                {appliedDiscount && cartPricing.couponDiscount > 0 && (
                   <div style={{ 
                     display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', 
                     fontSize: '1.1rem', fontWeight: 800,
                     padding: '1rem', borderRadius: '12px',
                     background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
                   }}>
-                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>✅ الخصم المطبق ({appliedDiscount}%)</span>
-                    <span style={{ color: '#10b981' }}>- {discountAmount?.toLocaleString()} ر.س</span>
+                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      ✅ الخصم المطبق
+                      {appliedDiscount.discount_type === 'percent' ? ` (${appliedDiscount.discount_value || appliedDiscount.discount_percent}%)` : ''}
+                    </span>
+                    <span style={{ color: '#10b981' }}>- {cartPricing.couponDiscount?.toLocaleString()} ر.س</span>
                   </div>
                 )}
 

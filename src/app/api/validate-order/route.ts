@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/lib/pricing';
+import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
 
 /**
  * ═══════════════════════════════════════════
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Fetch ALL product prices from database (NEVER trust frontend)
     const productIds = items.map((i: any) => i.product_id);
-    let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id';
+    let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id, category';
     let { data: products, error: productsError } = await supabase
       .from('products')
       .select(selectFields)
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     // Schema fallback if stock_quantity wasn't added to live DB yet
     if (productsError && productsError.message && productsError.message.includes('stock_quantity')) {
-      selectFields = 'id, name, price, old_price, stock, seller_id';
+      selectFields = 'id, name, price, old_price, stock, seller_id, category';
       const retry = await supabase.from('products').select(selectFields).in('id', productIds);
       products = retry.data;
       productsError = retry.error;
@@ -133,7 +133,11 @@ export async function POST(req: NextRequest) {
         const meetsMinimum = !coupon.min_order_amount || subtotal >= coupon.min_order_amount;
 
         if (notExpired && notExhausted && meetsMinimum) {
-          couponPercent = coupon.discount_percent;
+          const formattedItems = orderItems.map((i: any) => ({
+            originalPrice: i.unit_price, quantity: i.quantity, productId: i.product_id, category: products.find((p:any) => p.id === i.product_id)?.category
+          }));
+          const couponResult = applyCouponDiscount(subtotal, shippingCost, coupon, formattedItems);
+          couponDiscount = couponResult.couponDiscount;
           couponValid = true;
         }
       }
@@ -141,7 +145,6 @@ export async function POST(req: NextRequest) {
 
     // 5. Calculate final total
     const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
-    couponDiscount = couponValid ? roundPrice(totalBeforeDiscount * (couponPercent / 100)) : 0;
     const finalTotal = roundPrice(totalBeforeDiscount - couponDiscount);
 
     // 6. Return validated order
