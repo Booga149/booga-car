@@ -27,12 +27,12 @@ export async function POST(req: NextRequest) {
     let selectFields = 'id, name, price, old_price, stock, stock_quantity, seller_id, image_url, category';
     let { data: products, error: productsError } = await supabase
       .from('products')
-      .select(selectFields)
+      .select(selectFields as any)
       .in('id', productIds);
 
     if (productsError && productsError.message && productsError.message.includes('stock_quantity')) {
       selectFields = 'id, name, price, old_price, stock, seller_id, image_url';
-      const retry = await supabase.from('products').select(selectFields).in('id', productIds);
+      const retry = await supabase.from('products').select(selectFields as any).in('id', productIds);
       products = retry.data;
       productsError = retry.error;
     }
