@@ -22,8 +22,8 @@ export default function TrackOrderPage() {
     }
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!orderId) {
       setError('يرجى إدخال رقم الطلب.');
       return;
@@ -34,40 +34,30 @@ export default function TrackOrderPage() {
     setOrderItems([]);
 
     try {
-      // 1. Fetch Order securely (matching ID)
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId.trim())
-        .maybeSingle();
+      const res = await fetch('/api/orders/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: orderId.trim() })
+      });
 
-      if (orderError) throw orderError;
-      
-      if (!orderData) {
+      const data = await res.json();
+
+      if (!res.ok || data.error === 'not_found') {
         setError('عذراً، لم نتمكن من العثور على طلب مطابق لهذا الرقم. يرجى التأكد من البيانات.');
         setLoading(false);
         return;
       }
 
-      setOrder(orderData);
-
-      // 2. Fetch Order Items
-      const { data: itemsData, error: itemsError } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', orderId.trim());
-
-      if (!itemsError && itemsData) {
-        setOrderItems(itemsData);
+      if (data.error || !data.success) {
+        throw new Error(data.error);
       }
+
+      setOrder(data.order);
+      setOrderItems(data.items || []);
 
     } catch (err: any) {
       console.error("Tracking Error:", err);
-      if (err.code === '22P02') {
-         setError('رقم الطلب غير صحيح، يرجى إدخال رقم الطلب بصيغة صحيحة.');
-      } else {
-         setError('حدث خطأ أثناء البحث عن الطلب. يرجى المحاولة لاحقاً.');
-      }
+      setError('حدث خطأ أثناء البحث عن الطلب. يرجى التأكد من إدخال رقم طلب صحيح والمحاولة لاحقاً.');
     } finally {
       setLoading(false);
     }
