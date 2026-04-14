@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { CircleDollarSign, Package, Users, User, Activity, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck, ShieldAlert, Terminal, Crosshair, Zap, Building2, Phone } from 'lucide-react';
+import { CircleDollarSign, Package, Users, User, Activity, ChevronDown, ChevronUp, Clock, Truck, CheckCircle2, XCircle, MapPin, ShieldCheck, ShieldAlert, Terminal, Crosshair, Zap, Building2, Phone, BarChart2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Order } from '@/types';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, BarChart, Bar } from 'recharts';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ products: 0, orders: 0, users: 0, revenue: 0, merchants: 0 });
@@ -39,8 +40,23 @@ export default function AdminDashboard() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+      const { data: order } = await supabase.from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .select('user_id')
+        .single();
+        
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+      if (order?.user_id) {
+        await supabase.from('user_notifications').insert([{
+           user_id: order.user_id,
+           type: 'order_update',
+           title: `تحديث حالة طلبك 📦`,
+           message: `طلبك رقم #${orderId.substring(0,6).toUpperCase()} أصبح الآن في حالة: ${newStatus}`,
+           link: `/track-order?id=${orderId}`
+        }]);
+      }
     } catch (e) {}
   };
 
@@ -94,6 +110,27 @@ export default function AdminDashboard() {
 
   const allStatuses = ['الكل', 'قيد المراجعة', 'تم التأكيد', 'جاري الشحن', 'تم التوصيل', 'ملغي'];
 
+  // Calculate Chart Data
+  const getChartData = () => {
+    const dataMap: Record<string, number> = {};
+    const reversed = [...orders].reverse();
+    reversed.forEach(o => {
+      const date = new Date(o.created_at).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+      dataMap[date] = (dataMap[date] || 0) + Number(o.total || 0);
+    });
+    return Object.entries(dataMap).map(([date, total]) => ({ date, total }));
+  };
+  const getStatusChartData = () => {
+    const dataMap: Record<string, number> = {};
+    orders.forEach(o => {
+      dataMap[o.status] = (dataMap[o.status] || 0) + 1;
+    });
+    return Object.entries(dataMap).map(([name, value]) => ({ name, value }));
+  };
+
+  const revenueChartData = getChartData();
+  const statusChartData = getStatusChartData();
+
   return (
     <div style={{ color: '#fff', paddingBottom: '4rem' }}>
       {/* Hero Header */}
@@ -118,6 +155,52 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Analytics Charts */}
+      {orders.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
+          {/* Revenue Area Chart */}
+          <div style={{ background: 'rgba(10, 10, 15, 0.7)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(16,185,129,0.2)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+             <h3 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#10b981', fontSize: '1.2rem', fontWeight: 900 }}>
+               <BarChart2 size={20} /> المبيعات اليومية
+             </h3>
+             <div style={{ width: '100%', height: 300 }} dir="ltr">
+               <ResponsiveContainer>
+                 <AreaChart data={revenueChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                   <defs>
+                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                       <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                   <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={12} tickMargin={10} />
+                   <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickFormatter={(val) => `${val/1000}k`} />
+                   <RechartsTooltip contentStyle={{ background: '#0a0a0f', borderColor: '#10b981', borderRadius: '12px', fontWeight: 700 }} formatter={(value: number) => [`${value} ر.س`, 'المبيعات']} />
+                   <Area type="monotone" dataKey="total" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                 </AreaChart>
+               </ResponsiveContainer>
+             </div>
+          </div>
+          
+          {/* Status Bar Chart */}
+          <div style={{ background: 'rgba(10, 10, 15, 0.7)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(76,201,240,0.2)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+             <h3 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#4cc9f0', fontSize: '1.2rem', fontWeight: 900 }}>
+               <Package size={20} /> انتشار حالات الطلب
+             </h3>
+             <div style={{ width: '100%', height: 300 }} dir="ltr">
+               <ResponsiveContainer>
+                 <BarChart data={statusChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                   <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} tickMargin={10} />
+                   <RechartsTooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#0a0a0f', borderColor: '#4cc9f0', borderRadius: '12px', fontWeight: 700 }} formatter={(value: number) => [value, 'عدد الطلبات']} />
+                   <Bar dataKey="value" fill="#4cc9f0" radius={[6, 6, 0, 0]} />
+                 </BarChart>
+               </ResponsiveContainer>
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* Pending Dealer Applications */}
       {pendingDealers.length > 0 && (
