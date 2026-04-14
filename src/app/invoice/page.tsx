@@ -27,7 +27,7 @@ function InvoiceContent() {
     async function fetchOrder() {
       const { data } = await supabase
         .from('orders')
-        .select('*, order_items(*)')
+        .select('*, order_items(*, product:products(name, sku))')
         .eq('id', orderId)
         .single();
       if (data) setOrder(data as any);
@@ -54,7 +54,7 @@ function InvoiceContent() {
 
   const invoiceNumber = `INV-${order.id.substring(0, 8).toUpperCase()}`;
   const orderDate = new Date(order.created_at);
-  const subtotal = order.order_items?.reduce((s, i) => s + (i.price * i.quantity), 0) || 0;
+  const subtotal = order.order_items?.reduce((s, i: any) => s + ((i.price_at_time || i.price || 0) * i.quantity), 0) || 0;
   const vat = Math.round(subtotal * 0.15 * 100) / 100;
   const shipping = order.total > 500 ? 0 : 35;
 
@@ -124,13 +124,20 @@ function InvoiceContent() {
                 </tr>
               </thead>
               <tbody>
-                {order.order_items?.map((item, idx) => (
+                {order.order_items?.map((item: any, idx) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '1rem 0.5rem', color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.85rem' }}>{idx + 1}</td>
-                    <td style={{ padding: '1rem 0.5rem', color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.85rem' }}>{item.product_name || '—'}</td>
+                    <td style={{ padding: '1rem 0.5rem' }}>
+                      <div style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.2rem' }}>
+                        {item.product?.name || item.product_name || 'قطعة غيار مجهولة'}
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                        رقم القطعة: {item.product?.sku || 'غير متوفر'}
+                      </div>
+                    </td>
                     <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.85rem' }}>{item.quantity}</td>
-                    <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{item.price?.toLocaleString()} ر.س</td>
-                    <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 900, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{(item.price * item.quantity)?.toLocaleString()} ر.س</td>
+                    <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{(item.price_at_time || item.price || 0)?.toLocaleString()} ر.س</td>
+                    <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 900, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{((item.price_at_time || item.price || 0) * item.quantity)?.toLocaleString()} ر.س</td>
                   </tr>
                 ))}
               </tbody>
