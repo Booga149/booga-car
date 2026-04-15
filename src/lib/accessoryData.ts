@@ -2,7 +2,7 @@ import { Product } from '@/types';
 
 export const ACCESSORY_DATA: Product[] = [
   {
-    id: 'acc_01',
+    id: 'd1a00001-acc0-4000-8000-000000000001',
     name: 'طقم ألياف بصرية (Starlight) سقف النجوم',
     brand: 'Booga Elite',
     category: 'إضاءة محيطية',
@@ -18,7 +18,7 @@ export const ACCESSORY_DATA: Product[] = [
     description: 'حوّل سقف سيارتك إلى سماء من النجوم بـ 450 نقطة ضوئية وتقنية الألياف البصرية المتطورة.'
   },
   {
-    id: 'acc_02',
+    id: 'd1a00002-acc0-4000-8000-000000000002',
     name: 'شاشة تسلا 13.6 بوصة لنظام أندرويد',
     brand: 'SmartLink',
     category: 'قمرة القيادة الذكية',
@@ -34,7 +34,7 @@ export const ACCESSORY_DATA: Product[] = [
     description: 'شاشة عالية القفاوة مع دعم كامل لـ Apple CarPlay و Android Auto.'
   },
   {
-    id: 'acc_03',
+    id: 'd1a00003-acc0-4000-8000-000000000003',
     name: 'طقم عطرة العود الملكي الفاخر (ثلاث عبوات)',
     brand: 'Oud Essence',
     category: 'منكهات وجوهر',
@@ -50,7 +50,7 @@ export const ACCESSORY_DATA: Product[] = [
     description: 'زيوت عطرية أصلية مستوردة مصممة لتدوم طويلاً داخل مقصورات السيارات الفاخرة.'
   },
   {
-    id: 'acc_04',
+    id: 'd1a00004-acc0-4000-8000-000000000004',
     name: 'تلبيسة مقاعد جلد نابا إيطالي متكاملة',
     brand: 'CRAFT Italia',
     category: 'راحة وحرفة',
@@ -66,7 +66,7 @@ export const ACCESSORY_DATA: Product[] = [
     description: 'جلد طبيعي فائق النعومة متوفر بخمسة ألوان ملكية ليمنح سيارتك فخامة لا تضاهى.'
   },
   {
-    id: 'acc_05',
+    id: 'd1a00005-acc0-4000-8000-000000000005',
     name: 'كاميرا لوحة القيادة (Dashcam) أمامية وخلفية 4K',
     brand: 'VisionSafe',
     category: 'قمرة القيادة الذكية',
@@ -82,8 +82,8 @@ export const ACCESSORY_DATA: Product[] = [
     description: 'تسجيل مستمر بأعلى دقة مع حساسات صدمات ذكية لضمان توثيق كل لحظة.'
   },
   {
-    id: 'acc_06',
-    name: 'نظام إضاءة داخلية ذكبي بـ 64 لون (App Control)',
+    id: 'd1a00006-acc0-4000-8000-000000000006',
+    name: 'نظام إضاءة داخلية ذكي بـ 64 لون (App Control)',
     brand: 'NeonVibe',
     category: 'إضاءة محيطية',
     price: 850,
