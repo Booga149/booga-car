@@ -1,5 +1,6 @@
 "use client"; // force reload
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Filters from '@/components/products/Filters';
 import SortDropdown from '@/components/products/SortDropdown';
@@ -37,20 +38,21 @@ export default function ProductsPage() {
   const [distanceRange, setDistanceRange] = useState<number>(0); // 0 = كل المسافات
   const { position, requestLocation, isLoading: geoLoading, permissionState } = useGeolocation(true);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    // Read URL queries on mount for filtering from categories/vehicles pages
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const m = params.get('make');
-      const mo = params.get('model');
-      const y = params.get('year');
-      const cat = params.get('category');
-      const cats = params.get('categories');
-      const brand = params.get('brand');
-      const s = params.get('search');
-      const ms = params.get('multi_search');
-      const g = params.get('global');
-      const vinV = params.get('vin_verified');
+    // Read URL queries for filtering from categories/vehicles pages reactively
+    if (searchParams) {
+      const m = searchParams.get('make');
+      const mo = searchParams.get('model');
+      const y = searchParams.get('year');
+      const cat = searchParams.get('category');
+      const cats = searchParams.get('categories');
+      const brand = searchParams.get('brand');
+      const s = searchParams.get('search');
+      const ms = searchParams.get('multi_search');
+      const g = searchParams.get('global');
+      const vinV = searchParams.get('vin_verified');
       
       if (m) {
         setFitment({ make: m, model: mo || '', year: y || '' });
@@ -76,7 +78,7 @@ export default function ProductsPage() {
         setFilters(prev => ({ ...prev, brand: brand }));
       }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);

@@ -157,7 +157,7 @@ export default function PWAInstaller() {
   // Install Banner
   return (
     <div style={{
-      position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+      position: 'fixed', bottom: '90px', left: '50%', transform: 'translateX(-50%)',
       zIndex: 99998, width: '92%', maxWidth: '420px',
       animation: 'slideUpBanner 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
     }}>

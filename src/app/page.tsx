@@ -244,10 +244,10 @@ export default function Home() {
                 </span>
                 {service.isNew && (
                   <span style={{
-                    position: 'absolute', top: '0.3rem', left: '0.3rem',
+                    position: 'absolute', top: '-0.3rem', left: '-0.3rem',
                     fontSize: '0.45rem', fontWeight: 900,
                     background: 'var(--primary)', color: 'white',
-                    padding: '0.1rem 0.25rem', borderRadius: '3px',
+                    padding: '0.1rem 0.25rem', borderRadius: '4px',
                   }}>جديد</span>
                 )}
               </a>

@@ -105,7 +105,7 @@ function CategoriesBarInner() {
     }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', position: 'relative' }}>
         {/* Left Arrow */}
-        <div onClick={() => scroll('left')} style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginRight: '4px' }}
+        <div onClick={() => scroll('left')} className="desktop-only" style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginRight: '4px' }}
           onMouseOver={e => { e.currentTarget.style.background = '#f59e0b'; e.currentTarget.style.color = '#fff'; }}
           onMouseOut={e => { e.currentTarget.style.background = 'var(--surface-hover)'; e.currentTarget.style.color = '#f59e0b'; }}>
           <ChevronLeft size={20} />
@@ -153,7 +153,7 @@ function CategoriesBarInner() {
         </div>
 
         {/* Right Arrow */}
-        <div onClick={() => scroll('right')} style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginLeft: '4px' }}
+        <div onClick={() => scroll('right')} className="desktop-only" style={{ ...arrowStyle(), position: 'relative', top: 'auto', transform: 'none', flexShrink: 0, marginLeft: '4px' }}
           onMouseOver={e => { e.currentTarget.style.background = '#f59e0b'; e.currentTarget.style.color = '#fff'; }}
           onMouseOut={e => { e.currentTarget.style.background = 'var(--surface-hover)'; e.currentTarget.style.color = '#f59e0b'; }}>
           <ChevronRight size={20} />

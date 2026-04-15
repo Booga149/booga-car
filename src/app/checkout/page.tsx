@@ -22,8 +22,8 @@ export default function CheckoutPage() {
 
   const [couponCode, setCouponCode] = useState('');
 
-  const applyDiscount = async () => {
-    let code = discountCode.replace(/\s/g, '').toUpperCase();
+  const applyDiscount = async (codeOverride?: string) => {
+    let code = (typeof codeOverride === 'string' ? codeOverride : discountCode).replace(/\s/g, '').toUpperCase();
     if (!code) {
       code = 'SAUDI15';
       setDiscountCode('SAUDI15');
@@ -500,8 +500,9 @@ export default function CheckoutPage() {
                           <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', opacity: 0.5 }}>🏷️</span>
                         </div>
                         <button 
-                          type="button" onClick={applyDiscount} 
+                          type="button" onClick={() => applyDiscount()} 
                           style={{
+                            flexShrink: 0,
                             padding: '0.9rem 1.3rem', 
                             background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #c01038 100%)', 
                             color: 'white',
@@ -534,12 +535,32 @@ export default function CheckoutPage() {
 
                     {/* Bottom hint row */}
                     <div style={{
-                      padding: '0.6rem 1.5rem 0.8rem',
+                      padding: '0.8rem 1.5rem',
                       borderTop: '1px solid rgba(244,63,94,0.08)',
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem',
                       background: 'rgba(244,63,94,0.03)',
                     }}>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(244,100,120,0.5)', fontWeight: 700 }}>💡 هل لديك كود خصم؟ أدخله أعلاه واحصل على خصمك الفوري!</span>
+                      <span style={{ fontSize: '0.8rem', color: 'rgba(244,100,120,0.8)', fontWeight: 800 }}>💡 كوبونات سريعة:</span>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setDiscountCode('SAUDI15');
+                          applyDiscount('SAUDI15');
+                        }}
+                        style={{
+                          background: 'rgba(244,63,94,0.15)',
+                          border: '1px dashed rgba(244,63,94,0.4)',
+                          color: '#f43f5e',
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '8px',
+                          fontWeight: 900,
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          transition: '0.2s'
+                        }}
+                      >
+                        SAUDI15 (خصم 15%)
+                      </button>
                     </div>
                   </div>
                 </div>

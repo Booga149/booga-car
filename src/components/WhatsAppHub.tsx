@@ -7,7 +7,7 @@ export default function WhatsAppHub() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div style={{ position: 'fixed', bottom: '2.5rem', right: '2.5rem', zIndex: 1000 }}>
+    <div className="desktop-only" style={{ position: 'fixed', bottom: '2.5rem', right: '2.5rem', zIndex: 1000 }}>
       {/* Floating Bubble */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
