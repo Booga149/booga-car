@@ -33,12 +33,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const { addToast } = useToast();
 
+  // Migrate old fake accessory IDs to real UUIDs
+  const OLD_TO_NEW_IDS: Record<string, string> = {
+    'acc_01': 'd1a00001-acc0-4000-8000-000000000001',
+    'acc_02': 'd1a00002-acc0-4000-8000-000000000002',
+    'acc_03': 'd1a00003-acc0-4000-8000-000000000003',
+    'acc_04': 'd1a00004-acc0-4000-8000-000000000004',
+    'acc_05': 'd1a00005-acc0-4000-8000-000000000005',
+    'acc_06': 'd1a00006-acc0-4000-8000-000000000006',
+  };
+
   // Load from local storage on mount
   useEffect(() => {
     const saved = localStorage.getItem('booga_cart');
     if (saved) {
       try {
-        setCartItems(JSON.parse(saved));
+        let items: CartItem[] = JSON.parse(saved);
+        // Auto-migrate old accessory IDs to real UUIDs
+        let migrated = false;
+        items = items.map(item => {
+          if (OLD_TO_NEW_IDS[item.id]) {
+            migrated = true;
+            return { ...item, id: OLD_TO_NEW_IDS[item.id] };
+          }
+          return item;
+        });
+        setCartItems(items);
+        if (migrated) {
+          localStorage.setItem('booga_cart', JSON.stringify(items));
+        }
       } catch (e) {
         console.error("Failed to parse cart", e);
       }
