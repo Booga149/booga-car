@@ -172,7 +172,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 8. Insert Order Items
-    const itemsWithOrderId = orderItemsToInsert.map(i => ({ ...i, order_id: newOrder.id }));
+    const itemsWithOrderId = orderItemsToInsert.map(i => {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(i.product_id);
+      return { 
+        ...i, 
+        order_id: newOrder.id,
+        product_id: isUUID ? i.product_id : null
+      };
+    });
     const { error: itemsError } = await supabase
       .from('order_items')
       .insert(itemsWithOrderId);
