@@ -415,7 +415,7 @@ export default function ProductCard({
             <button
               disabled={stock !== 'متوفر'}
               onClick={handleAddToCart}
-              className="btn-tap"
+              className="btn-tap product-card-quick-add"
               style={{
                 marginTop: '0.5rem',
                 width: '100%',
@@ -462,14 +462,14 @@ export default function ProductCard({
             >
               {justAdded ? (
                 <>
-                  <Check size={20} /> تمت الإضافة ✓
+                  <Check size={20} /> <span className="btn-text">تمت</span>
                 </>
               ) : stock === 'متوفر' ? (
                 <>
-                  <ShoppingCart size={20} /> أضف للسلة
+                  <ShoppingCart size={20} /> <span className="btn-text">أضف للسلة</span>
                 </>
               ) : (
-                'غير متوفر حالياً'
+                <span className="btn-text">نفذت</span>
               )}
             </button>
           )}

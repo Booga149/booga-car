@@ -13,8 +13,9 @@ import {
 import CategoriesBar from '@/components/CategoriesBar';
 import { useGeolocation, calculateDistance } from '@/hooks/useGeolocation';
 
+import { Suspense } from 'react';
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const { products } = useProducts();
   
   const [filters, setFilters] = useState({
@@ -620,5 +621,13 @@ function MobileFilterSheet({ filters, setFilters, clearFilters, brands, sortBy, 
         </div>
       </div>
     </>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '8rem 2rem', textAlign: 'center', fontWeight: 'bold' }}>جاري التحميل...</div>}>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

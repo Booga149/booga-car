@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, coupon_code, shippingDetails, paymentMethod, userId } = body;
+    const { items, coupon_code, shippingDetails, paymentMethod, cro_version } = body;
 
     // 1. Basic body validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -19,6 +21,16 @@ export async function POST(req: NextRequest) {
     if (!paymentMethod) {
       return NextResponse.json({ error: 'طريقة الدفع غير محددة' }, { status: 400 });
     }
+
+    // Securely retrieve the user from session cookies so they cannot impersonate purchases
+    const cookieStore = cookies();
+    const authClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { get: (name: string) => cookieStore.get(name)?.value } }
+    );
+    const { data: { user } } = await authClient.auth.getUser();
+    const secureUserId = user?.id || null;
 
     const supabase = getSupabaseAdmin();
 
@@ -125,7 +137,7 @@ export async function POST(req: NextRequest) {
 
     // 7. Secure Insertion (via Admin Client, bypassing broken/unsafe RLS)
     let insertPayload: any = {
-      user_id: userId || null,
+      user_id: secureUserId,
       total: finalCalculatedTotal,
       shipping_cost: shippingCost,
       status: 'قيد المراجعة',
@@ -134,7 +146,8 @@ export async function POST(req: NextRequest) {
       phone: shippingDetails.phone,
       buyer_name: shippingDetails.name,
       payment_method: paymentMethod,
-      payment_status: 'pending'
+      payment_status: 'pending',
+      cro_version: cro_version || 'v1'
     };
 
     let { data: newOrder, error: orderError } = await supabase
@@ -212,9 +225,9 @@ export async function POST(req: NextRequest) {
         message: `طلب بقيمة ${finalCalculatedTotal} ر.س تم استلامه من ${shippingDetails.name}.`
       });
       
-      if (userId) {
+      if (secureUserId) {
         await supabase.from('user_notifications').insert({
-          user_id: userId,
+          user_id: secureUserId,
           type: 'order_update',
           title: 'تم استلام طلبك بنجاح! 🎉',
           message: `طلبك بقيمة ${finalCalculatedTotal} ر.س قيد المراجعة.`,
@@ -223,39 +236,11 @@ export async function POST(req: NextRequest) {
       }
     } catch(e) {}
 
-    // 9. Process Payment (Internally fetch our existing payment API)
-    // To avoid circular fetch limits inside Vercel, we can simulate the fetch output directly 
-    // OR we just send absolute URL. For safety, we use absolute URL or directly process here.
-    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    try {
-      const payRes = await fetch(`${SITE_URL}/api/payment/process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: newOrder.id,
-          amount: finalCalculatedTotal,
-          paymentMethod: paymentMethod,
-          customerName: shippingDetails.name,
-          customerPhone: shippingDetails.phone
-        }),
-      });
-      const payResult = await payRes.json();
-      
-      return NextResponse.json({
-        success: true,
-        orderId: newOrder.id,
-        finalTotal: finalCalculatedTotal,
-        paymentResult: payResult
-      });
-    } catch (payErr: any) {
-      console.warn("Payment generation failed:", payErr);
-      return NextResponse.json({
-        success: true,
-        orderId: newOrder.id,
-        finalTotal: finalCalculatedTotal,
-        paymentResult: { error: 'فشل في الاتصال ببوابة الدفع', success: false }
-      });
-    }
+    return NextResponse.json({
+      success: true,
+      orderId: newOrder.id,
+      finalTotal: finalCalculatedTotal
+    });
 
   } catch (error: any) {
     console.error('[Secure Order Creation Error]', error);

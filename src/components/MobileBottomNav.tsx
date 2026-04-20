@@ -83,35 +83,14 @@ export default function MobileBottomNav() {
   const NAV_ITEMS = role === 'admin' ? ADMIN_NAV : role === 'seller' ? SELLER_NAV : USER_NAV;
   const MORE_LINKS = role === 'seller' ? MORE_LINKS_SELLER : MORE_LINKS_USER;
 
+  // Checkout pages must be deeply focus-oriented—hide all navigation & chat buttons
+  if (pathname?.startsWith('/checkout')) {
+    return null;
+  }
+
   return (
     <>
-      {/* WhatsApp CTA Button */}
-      <div className="mobile-only" style={{
-        position: 'fixed',
-        bottom: '80px',
-        right: '1rem',
-        zIndex: 99990,
-      }}>
-        <a
-          href="https://wa.me/966500000000?text=مرحباً، أحتاج مساعدة في قطع الغيار"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '54px',
-            height: '54px',
-            background: 'linear-gradient(135deg, #25D366, #128C7E)',
-            color: 'white',
-            borderRadius: '16px',
-            textDecoration: 'none',
-            boxShadow: '0 6px 20px rgba(37,211,102,0.4)',
-          }}
-        >
-          <MessageCircle size={28} />
-        </a>
-      </div>
+
 
       {/* ═══ MORE DRAWER (Overlay) ═══ */}
       {showMore && (

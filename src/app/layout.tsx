@@ -77,7 +77,6 @@ import { AuthProvider } from '@/context/AuthContext';
 import Footer from '@/components/Footer';
 
 import AdminToastListener from '@/components/AdminToastListener';
-import BackButton from '@/components/BackButton';
 import AdminGodModeEnforcer from '@/components/AdminGodModeEnforcer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import VisitorTracker from '@/components/VisitorTracker';
@@ -185,7 +184,6 @@ export default function RootLayout({
                   </Script>
                   
                   {children}
-                  <BackButton />
                   <CartDrawer />
                   <Footer />
                   <AdminToastListener />

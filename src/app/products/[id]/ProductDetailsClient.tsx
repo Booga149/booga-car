@@ -357,8 +357,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                 disabled={isOutOfStock}
                 style={{
                   flex: 1, height: '54px', background: !isOutOfStock ? 'var(--primary)' : 'var(--surface-hover)', 
-                  color: '#fff', border: 'none', borderRadius: '12px', cursor: !isOutOfStock ? 'pointer' : 'not-allowed', 
-                  fontWeight: 900, fontSize: '1rem', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(225, 29, 72, 0.3)',
+                  color: !isOutOfStock ? '#fff' : 'var(--text-secondary)', border: 'none', borderRadius: '12px', cursor: !isOutOfStock ? 'pointer' : 'not-allowed', 
+                  fontWeight: 900, fontSize: '1rem', transition: 'all 0.2s', boxShadow: !isOutOfStock ? '0 8px 20px rgba(37, 99, 235, 0.3)' : 'none',
                   opacity: !isOutOfStock ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 }}
               >
@@ -529,7 +529,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                <a href={`/products?category=${encodeURIComponent(product.category)}`} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>عرض الكل</a>
             </div>
             
-            <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            <div className="product-grid mobile-swipeable-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                {related.map(p => (
                  <ProductCard key={p.id} {...p} imagePlaceholderColor="var(--border)" />
                ))}
@@ -543,7 +543,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             <h2 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.6rem)', color: 'var(--text-primary)', margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               🛒 ناس اشترت ده اشترت كمان...
             </h2>
-            <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            <div className="product-grid mobile-swipeable-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
               {products
                 .filter(p => p.id !== product.id && p.category !== product.category)
                 .sort((a, b) => b.rating - a.rating)
@@ -579,13 +579,13 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             className="btn-tap"
             style={{
               flex: 1, height: '48px',
-              background: !isOutOfStock ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'var(--surface-hover)',
+              background: !isOutOfStock ? 'var(--primary)' : 'var(--surface-hover)',
               color: !isOutOfStock ? '#fff' : 'var(--text-secondary)',
               border: 'none', borderRadius: '12px',
               fontWeight: 900, fontSize: '1rem',
               cursor: !isOutOfStock ? 'pointer' : 'not-allowed',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-              boxShadow: !isOutOfStock ? '0 6px 20px rgba(225,29,72,0.4)' : 'none',
+              boxShadow: !isOutOfStock ? '0 6px 20px rgba(37,99,235,0.4)' : 'none',
             }}
           >
             <ShoppingCart size={20} />

@@ -33,9 +33,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       
       {/* Global Toast Container */}
-      <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', zIndex: 99999 }}>
+      <div className="toast-container" style={{ position: 'fixed', bottom: '2rem', left: '2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', zIndex: 99999 }}>
         {toasts.map(t => (
-          <div key={t.id} style={{ 
+          <div key={t.id} className="toast" style={{ 
             background: t.type === 'success' ? '#1f2937' : t.type === 'error' ? '#3d161a' : '#1e3a5f',
             border: `1px solid ${t.type === 'success' ? '#4cc9f0' : t.type === 'error' ? '#e63946' : '#4361ee'}`,
             color: '#ffffff', padding: '1rem 1.5rem', borderRadius: '12px', 

@@ -12,7 +12,6 @@ import {
 import EngineeringSystems from '@/components/EngineeringSystems';
 import KSATrustBar from '@/components/KSATrustBar';
 import WhatsAppHub from '@/components/WhatsAppHub';
-import WelcomeOffer from '@/components/WelcomeOffer';
 import NearbySellers from '@/components/NearbySellers';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -21,16 +20,10 @@ import VehicleSearch from '@/components/VehicleSearch';
 export default function Home() {
   const { products } = useProducts();
   const { user } = useAuth();
-  const [showWelcome, setShowWelcome] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminStats, setAdminStats] = useState({ users: 0, orders: 0, products: 0, revenue: 0 });
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowWelcome(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+
 
   // Admin detection + stats (role-based only)
   const { role: authRole } = useAuth();
@@ -60,6 +53,7 @@ export default function Home() {
       flexDirection: 'column', 
       overflowX: 'hidden', 
       background: 'var(--background)',
+      paddingTop: 'calc(var(--navbar-height, 73px) + 15px)',
       position: 'relative'
     }}>
       {/* Global Precision Grid */}
@@ -548,7 +542,7 @@ function ProductSection({ title, emoji, products, isLoading, showViewAll }: {
         </div>
 
         {/* Product Grid */}
-        <div className="product-grid" style={{
+        <div className="product-grid mobile-swipeable-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
           gap: 'clamp(1rem, 3vw, 2rem)',

@@ -61,7 +61,7 @@ export default function WhatsAppButton() {
         aria-label="تواصل معنا عبر واتساب"
         style={{
           position: 'fixed',
-          bottom: '24px',
+          bottom: 'var(--wa-bottom, 24px)',
           left: '24px',
           width: hover ? '56px' : '52px',
           height: hover ? '56px' : '52px',
@@ -93,6 +93,11 @@ export default function WhatsAppButton() {
         @keyframes slideInLeft {
           from { opacity: 0; transform: translateX(-20px); }
           to { opacity: 1; transform: translateX(0); }
+        }
+        @media (max-width: 768px) {
+          button {
+            --wa-bottom: 85px;
+          }
         }
       `}</style>
     </>

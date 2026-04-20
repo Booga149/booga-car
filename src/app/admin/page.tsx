@@ -256,16 +256,32 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div style={{ overflowX: 'auto', padding: '0.5rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem', fontSize: '0.95rem', minWidth: '800px' }}>
-            <thead><tr>
-              <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>معرف العملية</th>
-              <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>التاريخ</th>
-              <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>القيمة</th>
-              <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>قناة الدفع</th>
-              <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الحالة</th>
-              <th style={{ padding: '0 1.5rem', textAlign: 'center', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الإجراءات</th>
-            </tr></thead>
-            <tbody>
+            <style>{`
+              @media (max-width: 768px) {
+                .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td {
+                  display: block; width: 100%;
+                }
+                .responsive-table thead { display: none; }
+                .responsive-table td {
+                  text-align: right; position: relative; padding-left: 50%;
+                  border-bottom: 1px solid rgba(255,255,255,0.05);
+                }
+                .responsive-table td::before {
+                  content: attr(data-label); position: absolute; left: 1rem; top: 1.2rem;
+                  font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase;
+                }
+              }
+            `}</style>
+            <table className="responsive-table" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem', fontSize: '0.95rem' }}>
+              <thead><tr>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>معرف العملية</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>التاريخ</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>القيمة</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>قناة الدفع</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'right', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الحالة</th>
+                <th style={{ padding: '0 1.5rem', textAlign: 'center', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>الإجراءات</th>
+              </tr></thead>
+              <tbody>
               {filteredOrders.length === 0 ? (
                 <tr><td colSpan={6} style={{ padding: '5rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '1.2rem' }}>لا توجد أهداف نشطة حالياً</td></tr>
               ) : filteredOrders.map(order => (
@@ -273,16 +289,16 @@ export default function AdminDashboard() {
                   <tr style={{ background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.2s', border: expandedOrder === order.id ? '1px solid rgba(76,201,240,0.5)' : '1px solid transparent' }}
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                     onMouseOver={e => { e.currentTarget.style.background = 'rgba(76,201,240,0.05)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}>
-                    <td style={{ padding: '1.2rem 1.5rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}><span style={{ color: '#4cc9f0' }}>#BC</span>-{order.id.substring(0, 6).toUpperCase()}</td>
-                    <td style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{new Date(order.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    <td style={{ padding: '1.2rem 1.5rem', fontWeight: 950, color: '#10b981' }}>{formatCurrency(order.total)}</td>
-                    <td style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{order.payment_method || '—'}</td>
-                    <td style={{ padding: '1.2rem 1.5rem' }}>
+                    <td data-label="معرف العملية" style={{ padding: '1.2rem 1.5rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}><span style={{ color: '#4cc9f0' }}>#BC</span>-{order.id.substring(0, 6).toUpperCase()}</td>
+                    <td data-label="التاريخ" style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{new Date(order.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    <td data-label="القيمة" style={{ padding: '1.2rem 1.5rem', fontWeight: 950, color: '#10b981' }}>{formatCurrency(order.total)}</td>
+                    <td data-label="قناة الدفع" style={{ padding: '1.2rem 1.5rem', color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{order.payment_method || '—'}</td>
+                    <td data-label="الحالة" style={{ padding: '1.2rem 1.5rem' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 900, color: statusColor(order.status), background: 'rgba(0,0,0,0.5)', border: `1px solid ${statusColor(order.status)}` }}>
                         {statusIcon(order.status)} {order.status}
                       </span>
                     </td>
-                    <td style={{ padding: '1.2rem 1.5rem', textAlign: 'center' }}>
+                    <td data-label="الإجراءات" style={{ padding: '1.2rem 1.5rem', textAlign: 'center' }}>
                       <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: expandedOrder === order.id ? '#4cc9f0' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
                         {expandedOrder === order.id ? <ChevronUp size={18} color="#000" /> : <ChevronDown size={18} color="#fff" />}
                       </div>

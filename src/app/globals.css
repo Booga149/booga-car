@@ -753,3 +753,76 @@ a {
 
 /* Admin layout uses same design system, no dark overrides */
 
+
+/* AMAZON/NOON MOBILE UX CLASSES */
+@media (max-width: 768px) {
+  /* 1. Horizontal Swipeable Carousel */
+  .mobile-swipeable-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 1rem !important;
+    padding-bottom: 1rem !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .mobile-swipeable-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+  .mobile-swipeable-grid > * {
+    scroll-snap-align: start !important;
+    flex: 0 0 75% !important; /* Items take up 75% of screen width */
+    max-width: 250px !important;
+  }
+  
+  /* 2. Sticky Product Add-to-Cart Bar */
+  .mobile-sticky-cta {
+    display: block !important;
+    position: fixed !important;
+    bottom: 60px !important; /* Above MobileBottomNav */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99 !important;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.1) !important;
+    animation: slideUp 0.3s ease-out !important;
+  }
+  .product-detail-container {
+    padding-bottom: 140px !important; /* Make room for sticky bars */
+  }
+
+  /* 3. Quick-Add Product Card Button (replaces large block button) */
+  .product-card-quick-add {
+    position: absolute !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    box-shadow: 0 4px 10px rgba(225,29,72,0.3) !important;
+  }
+  .product-card-quick-add span {
+    display: none !important; /* Hide text */
+  }
+  .product-card-quick-add svg {
+    margin: 0 auto !important;
+  }
+
+  /* 4. Bottom Sheet Toast instead of top float */
+  .toast-container {
+    top: auto !important;
+    bottom: 80px !important; /* Above bottom nav */
+    align-items: center !important;
+  }
+  .toast {
+    border-radius: 20px !important;
+    width: 90vw !important;
+    justify-content: center !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
