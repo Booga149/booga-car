@@ -8,36 +8,32 @@ import { useAuth } from '@/context/AuthContext';
 import { BarChart2, Package, ShoppingCart, Users, Activity, Globe, Bell, User, Upload, Search, Menu, ShieldAlert, Ticket, LayoutDashboard } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, role, loading: authLoading, profile } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { user, role, loading: authLoading } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
   const { notifications, markAsRead } = useAdminNotifications();
 
+  // Log unauthorized access attempt once if auth is resolved and user is not admin
   useEffect(() => {
-    if (authLoading) return;
-    if (role === 'admin') {
-      setIsAdmin(true);
-    } else {
-      setIsAdmin(false);
+    if (!authLoading && role !== 'admin') {
       logSecurityEvent(supabase, {
         type: 'SECURITY_ALERT',
-        title: 'محاولة دخول غير مصرحة!',
+        title: 'محاولة دخول غير مصرحة لصفحة الإدارة!',
         account: user?.email ? `مستخدم (${user.email})` : 'زائر مجهول'
       }).catch(() => {});
     }
-    setLoading(false);
   }, [authLoading, role, user]);
 
-  if (loading) return (
+  if (authLoading) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
       <LayoutDashboard size={48} color="var(--primary)" style={{ animation: 'pulse 2s infinite' }} />
       <h2 style={{ marginTop: '1.5rem', color: 'var(--primary)', fontSize: '1rem', fontWeight: 700 }}>جارٍ التحقق من الصلاحيات...</h2>
       <style>{`@keyframes pulse { 0%,100% { opacity: 0.4; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }`}</style>
     </div>
   );
+
+  const isAdmin = role === 'admin';
 
   if (!isAdmin) return (
     <div style={{ padding: '5rem', textAlign: 'center', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
