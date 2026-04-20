@@ -150,10 +150,10 @@ a {
     display: none !important;
   }
 
-  /* Compact product grid on mobile — single column for full readability */
+  /* Compact product grid on mobile — two columns for better aesthetic */
   .product-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
   }
 
   /* ─── Mobile ProductCard simplification ─── */
