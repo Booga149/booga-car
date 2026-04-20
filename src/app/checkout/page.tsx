@@ -74,20 +74,19 @@ export default function CheckoutPage() {
       
       // Exit Intent Behavior (Only on V2)
       if (cv === 'v2') {
-      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-        if (cartItems.length > 0 && !successOrderId) {
-          e.preventDefault();
-          e.returnValue = ''; // Required for generic browser warning
-        }
-      };
-      
-      const handleMouseLeave = (e: MouseEvent) => {
-        if (e.clientY <= 0 && cartItems.length > 0 && !successOrderId && !showExitModal) {
-          setShowExitModal(true);
-        }
-      };
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+          if (cartItems.length > 0 && !successOrderId) {
+            e.preventDefault();
+            e.returnValue = ''; // Required for generic browser warning
+          }
+        };
+        
+        const handleMouseLeave = (e: MouseEvent) => {
+          if (e.clientY <= 0 && cartItems.length > 0 && !successOrderId && !showExitModal) {
+            setShowExitModal(true);
+          }
+        };
 
-      if (cv === 'v2') {
         window.addEventListener('beforeunload', handleBeforeUnload);
         document.addEventListener('mouseleave', handleMouseLeave);
         
@@ -825,5 +824,6 @@ export default function CheckoutPage() {
         )}
       </div>
     </main>
+    </>
   );
 }
