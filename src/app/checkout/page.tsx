@@ -562,6 +562,14 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                 )}
+
+                {!appliedDiscount && showCoupon && (
+                  <button type="button" onClick={() => { setDiscountCode('SAUDI15'); setTimeout(() => applyDiscount(), 100); }} style={{
+                    background: 'none', border: 'none', color: '#d97706', fontSize: '0.85rem', fontWeight: 700, padding: '0.4rem 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem'
+                  }}>
+                    🎁 خصم 15% للطلب الأول - كود: SAUDI15
+                  </button>
+                )}
                 
                 {discountMsg && (
                   <div style={{ marginTop: '0.6rem', fontSize: '0.85rem', fontWeight: 800, color: discountStatus === 'success' ? '#10b981' : '#ef4444' }}>
