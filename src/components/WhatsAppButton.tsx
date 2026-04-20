@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const WHATSAPP_NUMBER = '966500000000'; // غيّره لرقمك
 
@@ -7,10 +8,14 @@ export default function WhatsAppButton() {
   const [hover, setHover] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
 
+  const pathname = usePathname();
+
   const handleClick = () => {
     const message = encodeURIComponent('السلام عليكم، أبغى أسأل عن قطعة غيار 🚗');
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
   };
+
+  if (pathname === '/checkout') return null;
 
   // Hide tooltip after 5 seconds
   React.useEffect(() => {

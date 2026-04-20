@@ -26,4 +26,4 @@ CREATE POLICY "Admins can view metrics"
 ON public.checkout_metrics 
 FOR SELECT 
 TO authenticated 
-USING (auth.uid() IN (SELECT id FROM public.users WHERE role = 'admin'));
+USING (auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'admin'));

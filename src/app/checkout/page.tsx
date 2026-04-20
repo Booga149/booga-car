@@ -606,78 +606,58 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* 3. الكوبون الاختياري */}
-              <div className="checkout-card" style={{ 
-                padding: '1.2rem', borderRadius: '16px', border: '1px dashed var(--border-strong)',
-                background: 'var(--background)'
-              }}>
-                <button type="button" onClick={() => setShowCoupon(!showCoupon)} style={{
-                  width: '100%', background: 'none', border: 'none', color: 'var(--text-primary)',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  fontSize: '1rem', fontWeight: 800, cursor: 'pointer', padding: 0
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <PartyPopper size={18} color="var(--primary)" /> هل لديك كود خصم؟
-                  </div>
-                  <span style={{ fontSize: '1.2rem', color: 'var(--primary)', transform: showCoupon ? 'rotate(45deg)' : 'none', transition: '0.3s' }}>+</span>
-                </button>
-                
-                {showCoupon && (
-                  <div style={{ marginTop: '1rem', animation: 'fadeInDown 0.3s ease' }}>
-                    {/* Welcome Gift Promo Banner */}
-                    <div style={{ 
-                      background: 'rgba(245, 158, 11, 0.1)', 
-                      border: '1px dashed rgba(245, 158, 11, 0.3)',
-                      padding: '0.8rem', borderRadius: '12px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                      marginBottom: '1rem',
+              {/* 3. الكوبون (تصميم مبسط) */}
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '16px', border: '1px dashed var(--border-strong)', background: 'var(--background)' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    placeholder="لديك كود خصم؟" 
+                    value={discountCode} 
+                    onChange={e => setDiscountCode(e.target.value)} 
+                    onPaste={e => {
+                      const clipboardData = e.clipboardData;
+                      if (!clipboardData) return;
+                      const pastedText = clipboardData.getData('text').toUpperCase();
+                      setDiscountCode(pastedText);
+                      setTimeout(() => applyDiscount(), 100);
+                    }}
+                    style={{
+                      flex: 1, padding: '1rem', background: 'var(--surface)',
+                      border: '1px solid var(--border)', borderRadius: '12px', 
+                      color: 'var(--text-primary)', outline: 'none', fontWeight: 800, fontSize: '1rem', 
+                      textTransform: 'uppercase'
+                    }} 
+                  />
+                  <button type="button" onClick={() => applyDiscount()} style={{
+                      padding: '0 1.5rem', background: 'var(--primary)', color: 'white',
+                      border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '1rem'
                     }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.8rem', color: '#d97706', fontWeight: 900 }}>🎁 هدية أول طلب: خصم 15%</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 950, color: 'var(--text-primary)' }}>SAUDI15</div>
-                      </div>
-                      <button type="button" onClick={() => { setDiscountCode('SAUDI15'); addToast('تم نسخ الكود!', 'success'); }} style={{
-                        background: '#f59e0b', color: 'white', border: 'none', padding: '0.5rem 0.8rem', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer'
-                      }}>نسخ</button>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <input 
-                        type="text" placeholder="اكتب الكود هنا" 
-                        value={discountCode} onChange={e => setDiscountCode(e.target.value)} 
-                        style={{
-                          flex: 1, padding: '0.8rem', background: 'var(--surface)',
-                          border: '1px solid var(--border)', borderRadius: '10px', 
-                          color: 'var(--text-primary)', outline: 'none', fontWeight: 800, fontSize: '1rem', 
-                          textTransform: 'uppercase'
-                        }} 
-                      />
-                      <button type="button" onClick={() => applyDiscount()} style={{
-                          padding: '0 1.2rem', background: 'var(--text-primary)', color: 'white',
-                          border: 'none', borderRadius: '10px', fontWeight: 900, cursor: 'pointer', fontSize: '0.9rem'
-                        }}>
-                        تطبيق
-                      </button>
-                    </div>
-                    {discountMsg && (
-                      <div style={{ 
-                        marginTop: '0.6rem', padding: '0.6rem', borderRadius: '8px', 
-                        fontSize: '0.85rem', fontWeight: 800, textAlign: 'center',
-                        color: discountStatus === 'success' ? '#10b981' : '#ef4444',
-                        background: discountStatus === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'
-                      }}>
-                        {discountMsg}
-                      </div>
-                    )}
-                    {appliedDiscount && cartPricing.couponDiscount > 0 && (
-                      <div style={{ 
-                        display: 'flex', justifyContent: 'space-between', marginTop: '0.8rem', 
-                        fontSize: '0.95rem', fontWeight: 900, color: '#10b981'
-                      }}>
-                        <span>✅ خصمك:</span>
-                        <span>- {cartPricing.couponDiscount?.toLocaleString()} ر.س</span>
-                      </div>
-                    )}
+                    تطبيق
+                  </button>
+                </div>
+                {!appliedDiscount && (
+                  <button type="button" onClick={() => { setDiscountCode('SAUDI15'); setTimeout(() => applyDiscount(), 100); }} style={{
+                    background: 'none', border: 'none', color: '#d97706', fontSize: '0.85rem', fontWeight: 700, padding: '0.4rem 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem'
+                  }}>
+                    🎁 خصم 15% - استخدم كود: SAUDI15
+                  </button>
+                )}
+                
+                {discountMsg && (
+                  <div style={{ 
+                    marginTop: '0.5rem', fontSize: '0.85rem', fontWeight: 800,
+                    color: discountStatus === 'success' ? '#10b981' : '#ef4444'
+                  }}>
+                    {discountMsg}
+                  </div>
+                )}
+                {appliedDiscount && cartPricing.couponDiscount > 0 && (
+                  <div style={{ 
+                    display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', 
+                    fontSize: '0.95rem', fontWeight: 900, color: '#10b981'
+                  }}>
+                    <span>✅ تم الخصم:</span>
+                    <span>- {cartPricing.couponDiscount?.toLocaleString()} ر.س</span>
                   </div>
                 )}
               </div>
@@ -750,7 +730,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Space for fixed bottom button */}
-              <div style={{ height: '90px' }}></div>
+              <div style={{ height: '140px' }}></div>
               
               {/* 5. زر الدفع الثابت */}
               <div style={{
@@ -758,6 +738,7 @@ export default function CheckoutPage() {
                 padding: '0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom))',
                 background: 'var(--surface)',
                 borderTop: '1px solid var(--border)',
+                zIndex: 99999, // Super high z-index to stay above everything
                 zIndex: 999,
                 boxShadow: '0 -4px 15px rgba(0,0,0,0.05)',
               }}>
