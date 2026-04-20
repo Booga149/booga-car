@@ -180,7 +180,7 @@ export default function AccessoriesPage() {
          </div>
       </section>
 
-      <WhatsAppHub />
+      {/* removed duplicate whatsapp hub */}
 
       <style jsx>{`
         @keyframes bounce {

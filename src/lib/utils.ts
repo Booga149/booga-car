@@ -98,26 +98,14 @@ export async function logSecurityEvent(supabase: any, {
   account: string 
 }) {
   try {
-    let ip = 'غير معروف';
-    let location = 'غير معروف';
-    
-    try {
-      const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
-      const data = await res.json();
-      if (data.ip) {
-        ip = data.ip;
-        location = `${data.city || ''}, ${data.country_name || ''}`;
-      }
-    } catch {
-      // IP lookup failed silently - not critical
-    }
-
-    await supabase.from('admin_notifications').insert({
+    // Fire and forget - don't await anything that could block login
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A';
+    supabase.from('admin_notifications').insert({
       type,
       title,
-      message: `الحساب: ${account} | الـ IP: ${ip} | الموقع: ${location} | الجهاز: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}`
-    }).catch(() => {});
+      message: `الحساب: ${account} | الجهاز: ${userAgent}`
+    }).then().catch(() => {});
   } catch {
-    // Entire function is non-critical - never crash the page
+    // Silent fail
   }
 }

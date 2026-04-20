@@ -340,7 +340,7 @@ export default function Home() {
           </section>
 
           <KSATrustBar />
-          <WhatsAppHub />
+        {/* removed duplicate whatsapp hub */}
       </div>
 
       <style jsx>{`

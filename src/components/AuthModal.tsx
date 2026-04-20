@@ -449,7 +449,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
           
           {/* Content */}
           <div style={{ 
-            position: 'relative', zIndex: 10, padding: '3rem 3rem', 
+            position: 'relative', zIndex: 10, padding: '3rem 2rem', 
             display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center'
           }}>
             {/* Premium Badge */}
@@ -459,18 +459,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               background: 'linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08))', 
               border: '1px solid rgba(255,215,0,0.2)', 
               borderRadius: '100px', 
-              color: '#FFD700', fontSize: '0.78rem', fontWeight: 800, 
+              color: '#FFD700', fontSize: '0.75rem', fontWeight: 800, 
               width: 'fit-content', marginBottom: '2rem',
               animation: 'fadeInUp 0.6s ease 0.2s both',
               backdropFilter: 'blur(10px)',
             }}>
-              <Crown size={14} /> المنصة الأولى للسيارات في المملكة
+              <Crown size={14} /> المنصة الأولى للسيارات
             </div>
             
             {/* Title */}
             <h2 style={{ 
-              fontSize: '2.8rem', margin: '0 0 1rem', fontWeight: 950, lineHeight: 1.08,
-              color: '#1a1a1a', letterSpacing: '-1px',
+              fontSize: 'clamp(2rem, 3.5vw, 2.6rem)', margin: '0 0 1rem', fontWeight: 950, lineHeight: 1.3,
+              color: '#1a1a1a', letterSpacing: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word',
               animation: 'fadeInUp 0.6s ease 0.3s both'
             }}>
               ادخل عالم
@@ -483,12 +483,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             </h2>
             
             <p style={{ 
-              color: 'rgba(0,0,0,0.5)', fontSize: '1rem', lineHeight: 1.7, 
-              marginBottom: '2.5rem', fontWeight: 500, maxWidth: '380px',
+              color: 'rgba(0,0,0,0.5)', fontSize: '0.95rem', lineHeight: 1.6, 
+              marginBottom: '2.5rem', fontWeight: 600, maxWidth: '100%', wordBreak: 'break-word',
               animation: 'fadeInUp 0.6s ease 0.4s both'
             }}>
-              أكبر متجر إلكتروني لقطع غيار السيارات في المملكة العربية السعودية.
-              تسوق بثقة واستمتع بتجربة فريدة من نوعها.
+              أكبر متجر إلكتروني لقطع غيار السيارات في المملكة.
+              تسوق بثقة واستمتع بتجربة فريدة.
             </p>
             
             {/* Speedometer Visual */}

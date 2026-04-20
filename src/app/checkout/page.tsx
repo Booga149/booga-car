@@ -611,9 +611,20 @@ export default function CheckoutPage() {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input 
                     type="text" 
-                    placeholder="لديك كود خصم؟" 
+                    placeholder="اضغط مرتين للصق الكود" 
                     value={discountCode} 
                     onChange={e => setDiscountCode(e.target.value)} 
+                    onDoubleClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        if (text) {
+                          setDiscountCode(text.toUpperCase());
+                          setTimeout(() => applyDiscount(), 100);
+                        }
+                      } catch (err) {
+                        // Handle browsers that block automatic clipboard reading
+                      }
+                    }}
                     onPaste={e => {
                       const clipboardData = e.clipboardData;
                       if (!clipboardData) return;
