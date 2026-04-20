@@ -1,10 +1,16 @@
 "use client";
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { MessageCircle, X, Check, Headset, ShieldCheck } from 'lucide-react';
 import { siteConfig } from '@/lib/siteConfig';
 
 export default function WhatsAppHub() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/checkout') || pathname?.startsWith('/cart')) {
+    return null;
+  }
 
   return (
     <div className="desktop-only" style={{ position: 'fixed', bottom: '2.5rem', right: '2.5rem', zIndex: 1000 }}>

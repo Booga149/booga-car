@@ -121,7 +121,7 @@ export default function Home() {
           </div>
         )}
 
-        {showWelcome && <WelcomeOffer />}
+        {/* Welcome offer removed */}
         <Hero />
 
         {/* ═══ VEHICLE SEARCH ═══ */}

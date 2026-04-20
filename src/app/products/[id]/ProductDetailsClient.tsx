@@ -257,16 +257,7 @@ export default function ProductDetailsClient({ id }: { id: string }) {
                </div>
             </div>
 
-            {/* Social Proof & Urgency Box */}
-            <div className="product-detail-urgency" style={{ background: 'linear-gradient(90deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.02))', borderRight: '4px solid #e63946', padding: '1rem 1.5rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ff4d4d', fontWeight: 'bold', fontSize: '0.95rem' }}>
-                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff4d4d', animation: 'pulse 1.5s infinite', flexShrink: 0 }}></div>
-                 {Math.floor(Math.random() * 8) + 3} أشخاص يشاهدون هذا المنتج الآن! <Flame size={18} />
-               </div>
-               <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <ShoppingCart size={18} /> تم شراء هذا المنتج {Math.floor(Math.random() * 40) + 12} مرة هذا الأسبوع.
-               </div>
-            </div>
+            {/* Removed Urgency Box for cleaner aesthetic */}
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#FFD700', fontSize: '1.2rem' }}>

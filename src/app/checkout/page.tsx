@@ -17,9 +17,7 @@ export default function CheckoutPage() {
   const [upsellAdded, setUpsellAdded] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [checkoutState, setCheckoutState] = useState<'idle'|'failed'>('idle');
-  const [showExitModal, setShowExitModal] = useState(false);
   const [sessionId, setSessionId] = useState('');
-  const [croVersion, setCroVersion] = useState<'v1' | 'v2'>('v1');
 
   const logEvent = (type: string, meta: any = {}) => {
     if (!sessionId) return;
@@ -29,13 +27,12 @@ export default function CheckoutPage() {
         session_id: sessionId, event_type: type,
         payment_method: meta.method || null, order_total: meta.total || null, 
         error_message: meta.error || null, order_id: meta.orderId || null,
-        metadata: { ...meta, version: croVersion }
+        metadata: { ...meta, version: 'v1' }
       })
     }).catch(()=>{});
   };
 
   useEffect(() => {
-    // Generate or fetch session logic
     let sid = localStorage.getItem('booga_checkout_session');
     if (!sid) {
       sid = crypto.randomUUID();
@@ -43,13 +40,6 @@ export default function CheckoutPage() {
     }
     setSessionId(sid);
 
-    // Feature Flag: 30% get V2 (Aggressive CRO) 
-    let cv = localStorage.getItem('booga_cro_version');
-    if (!cv) {
-      cv = Math.random() < 0.30 ? 'v2' : 'v1';
-      localStorage.setItem('booga_cro_version', cv);
-    }
-    setCroVersion(cv as 'v1' | 'v2');
     try {
       const saved = localStorage.getItem('booga_checkout_data');
       if (saved) {
@@ -69,34 +59,10 @@ export default function CheckoutPage() {
       // Inline fetch for mount since logEvent depends on state which might not be set yet
       fetch('/api/analytics', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sid, event_type: 'started', metadata: { items: cartItems.length, value: cartTotal, version: cv } })
+        body: JSON.stringify({ session_id: sid, event_type: 'started', metadata: { items: cartItems.length, value: cartTotal, version: 'v1' } })
       }).catch(()=>{});
-      
-      // Exit Intent Behavior (Only on V2)
-      if (cv === 'v2') {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-          if (cartItems.length > 0 && !successOrderId) {
-            e.preventDefault();
-            e.returnValue = ''; // Required for generic browser warning
-          }
-        };
-        
-        const handleMouseLeave = (e: MouseEvent) => {
-          if (e.clientY <= 0 && cartItems.length > 0 && !successOrderId && !showExitModal) {
-            setShowExitModal(true);
-          }
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        document.addEventListener('mouseleave', handleMouseLeave);
-        
-        return () => {
-          window.removeEventListener('beforeunload', handleBeforeUnload);
-          document.removeEventListener('mouseleave', handleMouseLeave);
-        };
-      }
     }
-  }, [cartItems.length, successOrderId, showExitModal]);
+  }, [cartItems.length, successOrderId]);
 
   const updateFormData = (updates: any) => {
     const newForm = { ...formData, ...updates };
@@ -269,7 +235,7 @@ export default function CheckoutPage() {
           },
           paymentMethod: formData.paymentMethod,
           userId: userId || null,
-          cro_version: croVersion,
+          cro_version: 'v1',
         }),
       });
 
@@ -331,8 +297,6 @@ export default function CheckoutPage() {
     }
   };
 
-  const closeExitModal = () => setShowExitModal(false);
-
   if (successOrderId) {
     return (
       <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
@@ -389,34 +353,6 @@ export default function CheckoutPage() {
 
   return (
     <>
-      {/* Desktop Exit Intent Modal */}
-      {showExitModal && !successOrderId && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-          background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'fadeIn 0.3s ease'
-        }}>
-          <div style={{
-            background: 'var(--surface)', padding: '2rem', borderRadius: '24px', maxWidth: '400px', width: '90%',
-            textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚗</div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '0.8rem' }}>سيارتك تستحق الأفضل!</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1rem' }}>
-              لقد تركت منتجات رائعة في السلة. هل أنت متأكد من رغبتك في المغادرة قبل إتمام الطلب؟
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <button type="button" onClick={closeExitModal} style={{
-                padding: '1rem', background: 'var(--primary)', color: 'white', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '1.05rem'
-              }}>أكمل طلبي الآن</button>
-              <a href="/" style={{
-                padding: '1rem', background: 'transparent', color: 'var(--text-secondary)', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, textDecoration: 'none'
-              }}>المغادرة</a>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
         <Navbar />
         
@@ -429,18 +365,18 @@ export default function CheckoutPage() {
             marginBottom: '2rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 800
           }}>
             <span style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{width:'20px',height:'20px',borderRadius:'50%',background:'var(--primary)',color:'white',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>1</div>
+              <span style={{width:'20px',height:'20px',borderRadius:'50%',background:'var(--primary)',color:'white',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>1</span>
               السلة
             </span>
             <span style={{flex: 1, maxWidth: '40px', height: '2px', background: 'var(--primary)', opacity: 0.3}}></span>
             <span style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{width:'20px',height:'20px',borderRadius:'50%',border:'2px solid var(--primary)',color:'var(--primary)',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>2</div>
-              الدفع
+              <span style={{width:'20px',height:'20px',borderRadius:'50%',border:'2px solid var(--primary)',color:'var(--primary)',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>2</span>
+              مراجعة الطلب
             </span>
             <span style={{flex: 1, maxWidth: '40px', height: '2px', background: 'var(--border)'}}></span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.6 }}>
-              <div style={{width:'20px',height:'20px',borderRadius:'50%',border:'2px solid var(--border)',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>3</div>
-              التأكيد
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.5 }}>
+              <span style={{width:'20px',height:'20px',borderRadius:'50%',border:'2px solid var(--border)',display:'flex',justifyContent:'center',alignItems:'center',fontSize:'10px'}}>3</span>
+              إتمام الدفع
             </span>
           </div>
         )}
@@ -495,18 +431,7 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                   
-                  {upsellAdded && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✨ معطر سيارة فاخر</div>
-                      <div style={{ fontWeight: 900, color: 'var(--text-primary)' }}>25 ر.س</div>
-                    </div>
-                  )}
-
-                  {croVersion === 'v2' && (
-                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.8rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 800, color: '#d97706', textAlign: 'center', marginTop: '0.5rem' }}>
-                      ⏳ كميات محدودة - الرجاء إتمام الطلب لتأكيد الحجز
-                    </div>
-                  )}
+                  {/* Marketing text and Upsell completely removed here */}
                 </div>
               </details>
 
@@ -605,99 +530,52 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* 3. الكوبون (تصميم مبسط) */}
-              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '16px', border: '1px dashed var(--border-strong)', background: 'var(--background)' }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input 
-                    type="text" 
-                    placeholder="اضغط مرتين للصق الكود" 
-                    value={discountCode} 
-                    onChange={e => setDiscountCode(e.target.value)} 
-                    onDoubleClick={async () => {
-                      try {
-                        const text = await navigator.clipboard.readText();
-                        if (text) {
-                          setDiscountCode(text.toUpperCase());
-                          setTimeout(() => applyDiscount(), 100);
-                        }
-                      } catch (err) {
-                        // Handle browsers that block automatic clipboard reading
-                      }
-                    }}
-                    onPaste={e => {
-                      const clipboardData = e.clipboardData;
-                      if (!clipboardData) return;
-                      const pastedText = clipboardData.getData('text').toUpperCase();
-                      setDiscountCode(pastedText);
-                      setTimeout(() => applyDiscount(), 100);
-                    }}
-                    style={{
-                      flex: 1, padding: '1rem', background: 'var(--surface)',
-                      border: '1px solid var(--border)', borderRadius: '12px', 
-                      color: 'var(--text-primary)', outline: 'none', fontWeight: 800, fontSize: '1rem', 
-                      textTransform: 'uppercase'
-                    }} 
-                  />
-                  <button type="button" onClick={() => applyDiscount()} style={{
-                      padding: '0 1.5rem', background: 'var(--primary)', color: 'white',
-                      border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '1rem'
-                    }}>
-                    تطبيق
-                  </button>
-                </div>
-                {!appliedDiscount && (
-                  <button type="button" onClick={() => { setDiscountCode('SAUDI15'); setTimeout(() => applyDiscount(), 100); }} style={{
-                    background: 'none', border: 'none', color: '#d97706', fontSize: '0.85rem', fontWeight: 700, padding: '0.4rem 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem'
-                  }}>
-                    🎁 خصم 15% - استخدم كود: SAUDI15
-                  </button>
+              {/* 3. الكوبون (تصميم مبسط جداً) */}
+              <div className="checkout-card" style={{ padding: '1rem 1.5rem', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: 'var(--card-shadow)' }}>
+                <button type="button" onClick={() => setShowCoupon(!showCoupon)} style={{
+                  background: 'none', border: 'none', width: '100%', textAlign: 'right', color: 'var(--primary)',
+                  fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 0
+                }}>
+                  <span>هل لديك كود خصم؟</span>
+                  <span>{showCoupon ? '−' : '+'}</span>
+                </button>
+                
+                {showCoupon && (
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', animation: 'fadeIn 0.2s ease' }}>
+                    <input 
+                      type="text" 
+                      placeholder="أدخل الكود هنا" 
+                      value={discountCode} 
+                      onChange={e => setDiscountCode(e.target.value)} 
+                      style={{
+                        flex: 1, padding: '0.8rem 1rem', background: 'var(--background)',
+                        border: '1px solid var(--border)', borderRadius: '10px', 
+                        color: 'var(--text-primary)', outline: 'none', fontWeight: 800, fontSize: '0.9rem', 
+                        textTransform: 'uppercase'
+                      }} 
+                    />
+                    <button type="button" onClick={() => applyDiscount()} style={{
+                        padding: '0 1.2rem', background: 'var(--primary)', color: 'white',
+                        border: 'none', borderRadius: '10px', fontWeight: 900, cursor: 'pointer', fontSize: '0.9rem'
+                      }}>
+                      تطبيق
+                    </button>
+                  </div>
                 )}
                 
                 {discountMsg && (
-                  <div style={{ 
-                    marginTop: '0.5rem', fontSize: '0.85rem', fontWeight: 800,
-                    color: discountStatus === 'success' ? '#10b981' : '#ef4444'
-                  }}>
+                  <div style={{ marginTop: '0.6rem', fontSize: '0.85rem', fontWeight: 800, color: discountStatus === 'success' ? '#10b981' : '#ef4444' }}>
                     {discountMsg}
                   </div>
                 )}
+                
                 {appliedDiscount && cartPricing.couponDiscount > 0 && (
-                  <div style={{ 
-                    display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', 
-                    fontSize: '0.95rem', fontWeight: 900, color: '#10b981'
-                  }}>
-                    <span>✅ تم الخصم:</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.6rem', fontSize: '0.9rem', fontWeight: 900, color: '#10b981' }}>
+                    <span>✅ تم تطبيق الخصم:</span>
                     <span>- {cartPricing.couponDiscount?.toLocaleString()} ر.س</span>
                   </div>
                 )}
               </div>
-
-              {/* Upsell Widget (Only on V2) */}
-              {croVersion === 'v2' && (
-                <label style={{ 
-                  padding: '1.2rem', borderRadius: '16px', border: upsellAdded ? '1.5px solid var(--primary)' : '1px solid var(--border)',
-                  background: upsellAdded ? 'var(--primary-lighter)' : 'var(--surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  cursor: 'pointer', transition: 'all 0.2s', boxShadow: upsellAdded ? '0 4px 15px rgba(37,99,235,0.1)' : 'none'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ fontSize: '2rem' }}>🌿</div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-primary)' }}>أضف معطر سيارة فاخر</span>
-                        <span style={{ background: '#fef08a', color: '#854d0e', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900 }}>🔥 الأكثر مبيعاً</span>
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 800 }}>👥 يشتريه 83% من العملاء مع طلباتهم</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-primary)' }}>+25 ر.س</span>
-                    <input type="checkbox" checked={upsellAdded} onChange={(e) => {
-                      setUpsellAdded(e.target.checked);
-                      if (e.target.checked) logEvent('upsell_added');
-                    }} style={{ width: '22px', height: '22px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
-                  </div>
-                </label>
-              )}
 
               {/* 4. الإجمالي */}
               <div className="checkout-card" style={{ 
@@ -739,8 +617,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Space for fixed bottom button */}
-              <div style={{ height: '140px' }}></div>
+              {/* Space to ensure you can scroll past everything and see the bottom element unobstructed */}
+              <div style={{ height: '180px' }}></div>
               
               {/* 5. زر الدفع الثابت */}
               <div style={{
