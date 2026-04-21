@@ -18,23 +18,23 @@ export default function BecomeDealerPage() {
   const benefits = [
     {
       IconComponent: BarChart3,
-      title: "Ù„ÙˆØ­Ø© ØªØ­ÙƒÙ… Ø§Ø­ØªØ±Ø§ÙÙŠØ©",
-      desc: "Ø¥Ø¯Ø§Ø±Ø© Ù…ØªÙƒØ§Ù…Ù„Ø© Ù„Ù…Ù†ØªØ¬Ø§ØªÙƒØŒ Ù…Ø¨ÙŠØ¹Ø§ØªÙƒØŒ ÙˆØªÙ‚Ø§Ø±ÙŠØ± Ø£Ø¯Ø§Ø¡ Ù…ØªØ¬Ø±Ùƒ Ù„Ø­Ø¸Ø© Ø¨Ù„Ø­Ø¸Ø©."
+      title: "لوحة تحكم احترافية",
+      desc: "إدارة متكاملة لمنتجاتك، مبيعاتك، وتقارير أداء متجرك لحظة بلحظة."
     },
     {
       IconComponent: ShieldCheck,
-      title: "ØªÙˆØ«ÙŠÙ‚ ÙˆÙ…ØµØ¯Ø§Ù‚ÙŠØ©",
-      desc: "Ø§Ø­ØµÙ„ Ø¹Ù„Ù‰ Ø´Ø§Ø±Ø© 'ØªØ§Ø¬Ø± Ù…ÙˆØ«ÙˆÙ‚' Ù„Ø±ÙØ¹ Ù…Ø¨ÙŠØ¹Ø§ØªÙƒ ÙˆØ¨Ù†Ø§Ø¡ Ø«Ù‚Ø© Ù‚ÙˆÙŠØ© Ù…Ø¹ Ø¹Ù…Ù„Ø§Ø¦Ùƒ."
+      title: "توثيق ومصداقية",
+      desc: "احصل على شارة 'تاجر موثوق' لرفع مبيعاتك وبناء ثقة قوية مع عملائك."
     },
     {
       IconComponent: Rocket,
-      title: "Ø§Ù†ØªØ´Ø§Ø± ÙˆØ§Ø³Ø¹",
-      desc: "Ø§Ø¹Ø±Ø¶ Ù‚Ø·Ø¹Ùƒ Ù„Ù…Ù„Ø§ÙŠÙŠÙ† Ø§Ù„Ø¨Ø§Ø­Ø«ÙŠÙ† Ø¹Ù† Ù‚Ø·Ø¹ Ø§Ù„ØºÙŠØ§Ø± ÙÙŠ Ø§Ù„Ù…Ù…Ù„ÙƒØ© ÙˆØ§Ù„Ø®Ù„ÙŠØ¬."
+      title: "انتشار واسع",
+      desc: "اعرض قطعك لملايين الباحثين عن قطع الغيار في المملكة والخليج."
     },
     {
       IconComponent: Target,
-      title: "Ø¹Ù…ÙˆÙ„Ø§Øª Ù…Ù†Ø§ÙØ³Ø©",
-      desc: "Ù†Ø­Ù† Ù†Ù‡ØªÙ… Ø¨Ù†Ù…Ùˆ ØªØ¬Ø§Ø±ØªÙƒØŒ Ù„Ø°Ø§ Ù†ÙˆÙØ± Ù„Ùƒ Ø£ÙØ¶Ù„ Ù‡ÙŠÙƒÙ„ Ø¹Ù…ÙˆÙ„Ø§Øª ÙÙŠ Ø§Ù„Ø³ÙˆÙ‚."
+      title: "عمولات منافسة",
+      desc: "نحن نهتم بنمو تجارتك، لذا نوفر لك أفضل هيكل عمولات في السوق."
     }
   ];
 
@@ -57,21 +57,21 @@ export default function BecomeDealerPage() {
             padding: '0.5rem 1.2rem', borderRadius: '40px', fontSize: '0.9rem',
             fontWeight: 800, marginBottom: '2rem', border: '1px solid rgba(244, 63, 94, 0.2)'
           }}>
-            <Zap size={16} fill="var(--primary)" /> Ø¨ÙˆØ¬Ø§ Ù„Ù„Ø£Ø¹Ù…Ø§Ù„ - BOOGA FOR BUSINESS
+            <Zap size={16} fill="var(--primary)" /> بوجا للأعمال - BOOGA FOR BUSINESS
           </div>
           
           <h1 style={{ 
             fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, lineHeight: 1.1,
             letterSpacing: '-2px', marginBottom: '1.5rem', color: 'var(--text-primary)'
           }}>
-            Ø§Ù†Ù‚Ù„ ØªØ¬Ø§Ø±ØªÙƒ Ù„Ù…Ø³ØªÙˆÙ‰ <span style={{ color: 'var(--primary)', textShadow: '0 0 30px rgba(244, 63, 94, 0.3)' }}>Ø§Ù„Ø§Ø­ØªØ±Ø§Ù</span>
+            انقل تجارتك لمستوى <span style={{ color: 'var(--primary)', textShadow: '0 0 30px rgba(244, 63, 94, 0.3)' }}>الاحتراف</span>
           </h1>
           
           <p style={{ 
             fontSize: '1.25rem', color: 'var(--text-secondary)', lineHeight: 1.8,
             maxWidth: '700px', margin: '0 auto 3rem', fontWeight: 600
           }}>
-            Ø§Ù„Ù…Ù†ØµØ© Ø§Ù„Ø£ÙˆÙ„Ù‰ Ø§Ù„Ù…Ø®ØµØµØ© Ù„Ù…Ø³Ø§Ø¹Ø¯Ø© ØªØ¬Ø§Ø± Ù‚Ø·Ø¹ Ø§Ù„ØºÙŠØ§Ø± ÙÙŠ Ø§Ù„Ù†Ù…Ùˆ ÙˆØ§Ù„Ø§Ù†ØªØ´Ø§Ø± Ø§Ù„Ø±Ù‚Ù…ÙŠ. Ø§Ù†Ø¶Ù… Ù„Ø£ÙƒØ¨Ø± ØªØ¬Ù…Ø¹ Ù„Ù„Ù…Ø­ØªØ±ÙÙŠÙ† ÙÙŠ Ø§Ù„Ù…Ù…Ù„ÙƒØ©.
+            المنصة الأولى المخصصة لمساعدة تجار قطع الغيار في النمو والانتشار الرقمي. انضم لأكبر تجمع للمحترفين في المملكة.
           </p>
           
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -81,7 +81,7 @@ export default function BecomeDealerPage() {
               boxShadow: '0 10px 40px rgba(244, 63, 94, 0.4)', transition: 'all 0.3s ease',
               display: 'flex', alignItems: 'center', gap: '0.8rem'
             }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
-              Ø§Ø¨Ø¯Ø£ Ø§Ù„Ø¢Ù† ÙƒØªØ§Ø¬Ø± <ChevronLeft size={24} />
+              ابدأ الآن كتاجر <ChevronLeft size={24} />
             </Link>
             
             <a href="#benefits" style={{ 
@@ -89,7 +89,7 @@ export default function BecomeDealerPage() {
               borderRadius: '16px', fontWeight: 800, fontSize: '1.2rem', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'all 0.3s ease'
             }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface-hover)'} onMouseOut={e => e.currentTarget.style.background = 'var(--surface)'}>
-              Ø§ÙƒØªØ´Ù Ø§Ù„Ù…Ø²Ø§ÙŠØ§
+              اكتشف المزايا
             </a>
           </div>
         </div>
@@ -101,8 +101,8 @@ export default function BecomeDealerPage() {
       {/* Benefits Grid */}
       <section id="benefits" style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-          <h2 style={{ fontSize: '2.8rem', fontWeight: 900, marginBottom: '1rem' }}>Ù„Ù…Ø§Ø°Ø§ ØªØ®ØªØ§Ø± Ø¨ÙˆØ¬Ø§ Ù„Ù„Ø£Ø¹Ù…Ø§Ù„ØŸ</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: 600 }}>Ù†Ù‚Ø¯Ù… Ù„Ùƒ Ø§Ù„Ø£Ø¯ÙˆØ§Øª Ø§Ù„Ù„Ø§Ø²Ù…Ø© Ù„Ù„Ø³ÙŠØ·Ø±Ø© Ø¹Ù„Ù‰ Ø³ÙˆÙ‚ Ù‚Ø·Ø¹ Ø§Ù„ØºÙŠØ§Ø± Ø§Ù„Ø±Ù‚Ù…ÙŠ.</p>
+          <h2 style={{ fontSize: '2.8rem', fontWeight: 900, marginBottom: '1rem' }}>لماذا تختار بوجا للأعمال؟</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: 600 }}>نقدم لك الأدوات اللازمة للسيطرة على سوق قطع الغيار الرقمي.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem' }}>
@@ -131,12 +131,12 @@ export default function BecomeDealerPage() {
       <section style={{ padding: '6rem 2rem', background: 'var(--surface)', position: 'relative' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '5rem', alignItems: 'center' }}>
           <div>
-            <h2 style={{ fontSize: '2.8rem', fontWeight: 950, marginBottom: '2rem', letterSpacing: '-1px' }}>Ø«Ù‚Ø© Ø§Ù„Ø¹Ù…ÙŠÙ„ Ù‡ÙŠ <span style={{ color: 'var(--primary)' }}>Ø±Ø£Ø³ Ù…Ø§Ù„Ùƒ</span></h2>
+            <h2 style={{ fontSize: '2.8rem', fontWeight: 950, marginBottom: '2rem', letterSpacing: '-1px' }}>ثقة العميل هي <span style={{ color: 'var(--primary)' }}>رأس مالك</span></h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {[
-                { title: "Ø´Ø§Ø±Ø© Ø§Ù„ØªÙˆØ«ÙŠÙ‚ Ø§Ù„Ø°Ù‡Ø¨ÙŠØ©", desc: "ØªØ¸Ù‡Ø± Ø¨Ø¬Ø§Ù†Ø¨ Ø§Ø³Ù… Ù…Ø­Ù„Ùƒ ÙÙŠ Ø§Ù„Ø¨Ø­Ø« Ù„ØªØ¹Ø·ÙŠ Ø§Ù„Ø¹Ù…ÙŠÙ„ Ø¶Ù…Ø§Ù† Ø§Ù„Ø¬ÙˆØ¯Ø©." },
-                { title: "Ù†Ø¸Ø§Ù… Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ù…ÙˆØ«ÙˆÙ‚", desc: "Ø§Ø¬Ù…Ø¹ ØªÙ‚ÙŠÙŠÙ…Ø§Øª Ø¹Ù…Ù„Ø§Ø¦Ùƒ ÙˆØ§Ø¨Ù†Ù Ø³Ù…Ø¹Ø© ØªØ¬Ø§Ø±ÙŠØ© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ© Ù‚ÙˆÙŠØ©." },
-                { title: "Ø®ÙŠØ§Ø±Ø§Øª Ø¯ÙØ¹ Ù…ØªÙ†ÙˆØ¹Ø©", desc: "Ù†Ø¯Ø¹Ù… ÙˆÙ…Ø¯Ù‰ØŒ ÙÙŠØ²Ø§ØŒ ÙˆÙ…Ø§Ø³ØªØ±ÙƒØ§Ø±Ø¯ Ù„Ø¶Ù…Ø§Ù† Ø³Ù‡ÙˆÙ„Ø© Ø§Ù„Ø´Ø±Ø§Ø¡." }
+                { title: "شارة التوثيق الذهبية", desc: "تظهر بجانب اسم محلك في البحث لتعطي العميل ضمان الجودة." },
+                { title: "نظام التقييم الموثوق", desc: "اجمع تقييمات عملائك وابنِ سمعة تجارية إلكترونية قوية." },
+                { title: "خيارات دفع متنوعة", desc: "ندعم مدى، فيزا، وماستركارد لضمان سهولة الشراء." }
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', gap: '1.2rem' }}>
                   <CheckCircle2 size={24} color="var(--primary)" style={{ flexShrink: 0 }} />
@@ -168,9 +168,9 @@ export default function BecomeDealerPage() {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981' }}></div>
-                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Ù…ØªØ¬Ø± Ù‚Ø·Ø¹ Ø§Ù„ØºÙŠØ§Ø± Ø§Ù„Ù…Ø¹ØªÙ…Ø¯</span>
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>متجر قطع الغيار المعتمد</span>
                   </div>
-                  <div style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Ø³Ø¬Ù„ Ø§Ù„Ø¢Ù† ÙˆØ§ÙØªØ­ ÙØ±Ø¹Ùƒ Ø§Ù„Ø±Ù‚Ù…ÙŠ Ø§Ù„Ø£ÙˆÙ„.</div>
+                  <div style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>سجل الآن وافتح فرعك الرقمي الأول.</div>
                 </div>
               </div>
             </div>
@@ -183,15 +183,15 @@ export default function BecomeDealerPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
           <div>
             <div style={{ fontSize: '3.5rem', fontWeight: 950, color: 'var(--primary)' }}>+500</div>
-            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>ØªØ§Ø¬Ø± Ù…Ø³Ø¬Ù„ ÙÙŠ Ø§Ù„Ù…Ù…Ù„ÙƒØ©</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>تاجر مسجل في المملكة</div>
           </div>
           <div>
             <div style={{ fontSize: '3.5rem', fontWeight: 950, color: 'var(--primary)' }}>100K</div>
-            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>Ø²Ø§Ø¦Ø± Ø´Ù‡Ø±ÙŠ Ù†Ø´Ø·</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>زائر شهري نشط</div>
           </div>
           <div>
             <div style={{ fontSize: '3.5rem', fontWeight: 950, color: 'var(--primary)' }}>%98</div>
-            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>Ø±Ø¶Ø§ Ø§Ù„ØªØ¬Ø§Ø±</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>رضا التجار</div>
           </div>
         </div>
       </section>
@@ -208,9 +208,9 @@ export default function BecomeDealerPage() {
           <Users size={120} style={{ 
             position: 'absolute', top: '-20px', left: '-20px', opacity: 0.03, color: 'var(--primary)' 
           }} />
-          <h2 style={{ fontSize: '3rem', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-1px' }}>Ø¬Ø§Ù‡Ø² Ù„Ù„ØªÙˆØ³Ø¹ Ù…Ø¹Ù†Ø§ØŸ</h2>
+          <h2 style={{ fontSize: '3rem', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-1px' }}>جاهز للتوسع معنا؟</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '3rem', fontWeight: 600 }}>
-            Ù„Ø§ ØªØ¶ÙŠØ¹ Ø§Ù„ÙˆÙ‚ØªØŒ Ø¢Ù„Ø§Ù Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ ÙŠØ¨Ø­Ø«ÙˆÙ† Ø¹Ù† Ù‚Ø·Ø¹Ùƒ Ø§Ù„Ø¢Ù†. Ø§Ù†Ø¶Ù… Ù„Ø¹Ø§Ø¦Ù„Ø© Ø¨ÙˆØ¬Ø§ ÙƒØ§Ø± Ù„Ù„Ø£Ø¹Ù…Ø§Ù„ Ø§Ù„ÙŠÙˆÙ….
+            لا تضيع الوقت، آلاف العملاء يبحثون عن قطعك الآن. انضم لعائلة بوجا كار للأعمال اليوم.
           </p>
           <Link href="/become-dealer/form" style={{ 
             background: 'var(--primary)', color: 'white', padding: '1.5rem 4rem',
@@ -218,7 +218,7 @@ export default function BecomeDealerPage() {
             boxShadow: '0 15px 45px rgba(244, 63, 94, 0.4)', transition: 'all 0.3s ease',
             display: 'inline-flex', alignItems: 'center', gap: '1rem'
           }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
-            Ø³Ø¬Ù„ ÙƒØªØ§Ø¬Ø± Ø§Ù„Ø¢Ù†
+            سجل كتاجر الآن
           </Link>
         </div>
       </section>
