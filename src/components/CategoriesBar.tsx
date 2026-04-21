@@ -85,7 +85,6 @@ function CategoriesBarInner() {
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
       padding: '0',
-      position: 'sticky',
       zIndex: 90,
       boxShadow: 'var(--card-shadow)',
     }}>

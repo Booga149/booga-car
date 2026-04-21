@@ -179,7 +179,7 @@ function ProductsPageContent() {
       <Navbar />
       <CategoriesBar />
       
-      <div className="products-page-container" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '1.5rem 2rem 5rem', flex: 1 }}>
+      <div className="products-page-container" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '0.5rem 2rem 5rem', flex: 1 }}>
         
         {/* Fitment & Global Banner */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
