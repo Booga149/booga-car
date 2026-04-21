@@ -61,6 +61,7 @@ export default function Navbar() {
     { href: '/accessories', label: 'أكسسوارات' },
     { href: '/track-order', label: 'تتبع الطلبات' },
     { href: '/garage', label: 'كراجي' },
+    { href: '/price-request', label: 'سعّرلي' },
   ];
 
   return (
