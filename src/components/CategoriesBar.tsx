@@ -34,22 +34,9 @@ function CategoriesBarInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category') || '';
-  const [navHeight, setNavHeight] = useState(73);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-
-  useEffect(() => {
-    const measure = () => {
-      const navbar = document.querySelector('header');
-      if (navbar) setNavHeight(navbar.offsetHeight);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    const navbar = document.querySelector('header');
-    if (navbar) ro.observe(navbar);
-    return () => ro.disconnect();
-  }, []);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -93,13 +80,12 @@ function CategoriesBarInner() {
   });
 
   return (
-    <section style={{
+    <section className="categories-sticky" style={{
       background: 'var(--surface)',
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
       padding: '0',
       position: 'sticky',
-      top: `${navHeight}px`,
       zIndex: 90,
       boxShadow: 'var(--card-shadow)',
     }}>

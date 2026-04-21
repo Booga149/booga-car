@@ -826,3 +826,23 @@ a {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+/* ═══ Sticky CategoriesBar positioning ═══ */
+.categories-sticky {
+  top: 57px;
+}
+
+/* ═══ Page top padding to clear fixed navbar ═══ */
+.page-top-padding {
+  padding-top: 57px;
+}
+
+@media (max-width: 768px) {
+  .categories-sticky {
+    top: 49px;
+  }
+  .page-top-padding {
+    padding-top: 49px;
+  }
+}
+
