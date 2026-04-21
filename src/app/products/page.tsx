@@ -175,7 +175,7 @@ function ProductsPageContent() {
   }, [products, filters, sortBy, fitment, selectedCategories, multiSearch, position, distanceRange]);
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)', paddingTop: '73px' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)',  }}>
       <Navbar />
       <CategoriesBar />
       
