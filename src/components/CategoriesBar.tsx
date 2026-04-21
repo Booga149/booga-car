@@ -112,8 +112,8 @@ function CategoriesBarInner() {
                 onClick={() => handleCategoryClick(cat.name)}
                 className="cat-item"
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.7rem 1rem', minWidth: '95px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                  padding: '1rem 1.4rem', minWidth: '100px',
                   textDecoration: 'none', 
                   color: isActive ? '#e11d48' : 'var(--text-secondary)',
                   fontSize: '0.78rem', fontWeight: 700, textAlign: 'center',
