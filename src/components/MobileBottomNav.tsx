@@ -15,8 +15,8 @@ import { useAuth } from '@/context/AuthContext';
 const USER_NAV: any[] = [
   { href: '/', label: 'الرئيسية', icon: Home },
   { href: '/products', label: 'المنتجات', icon: ShoppingBag },
+  { href: '/price-request', label: 'سعّرلي', icon: Tag, isHighlight: true },
   { href: '#cart', label: 'السلة', icon: ShoppingCart, isCart: true },
-  { href: '/profile', label: 'حسابي', icon: User },
   { href: '#more', label: 'المزيد', icon: Menu, isMore: true },
 ];
 
@@ -45,6 +45,7 @@ const MORE_LINKS_USER = [
     { href: '/request-part', label: 'اطلب قطعتك', icon: Search, emoji: '🔍', isNew: true },
   ]},
   { section: 'خدماتك', items: [
+    { href: '/profile', label: 'حسابي', icon: User, emoji: '👤' },
     { href: '/garage', label: 'كراجي', icon: Car, emoji: '🚗' },
     { href: '/track-order', label: 'تتبع الشحنة', icon: Truck, emoji: '📦' },
     { href: '/wishlist', label: 'المفضلة', icon: Heart, emoji: '❤️' },
@@ -359,6 +360,47 @@ export default function MobileBottomNav() {
                 }}>
                   {item.label}
                 </span>
+              </Link>
+            );
+          }
+
+          // Highlight button (سعّرلي)
+          if (item.isHighlight) {
+            const hlActive = pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                style={{
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '0.15rem',
+                  textDecoration: 'none',
+                  padding: '0.3rem 0.6rem',
+                }}
+              >
+                <div style={{
+                  background: hlActive ? 'var(--primary)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                  borderRadius: '10px',
+                  width: '28px', height: '28px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
+                }}>
+                  <Icon size={16} color="white" strokeWidth={2} />
+                </div>
+                <span style={{
+                  fontSize: '0.62rem', fontWeight: 800,
+                  color: hlActive ? 'var(--primary)' : '#2563eb',
+                }}>
+                  {item.label}
+                </span>
+                {hlActive && (
+                  <div style={{
+                    width: '4px', height: '4px',
+                    borderRadius: '50%', background: 'var(--primary)',
+                    marginTop: '-0.05rem',
+                    boxShadow: '0 0 6px rgba(37,99,235,0.6)',
+                  }} />
+                )}
               </Link>
             );
           }
