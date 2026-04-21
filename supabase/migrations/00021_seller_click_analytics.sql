@@ -32,7 +32,7 @@ CREATE POLICY "Sellers can read own analytics"
   );
 
 -- Handy view: seller engagement summary
-CREATE OR REPLACE VIEW seller_engagement_ranking AS
+CREATE OR REPLACE VIEW seller_engagement_ranking WITH (security_invoker = true) AS
 SELECT
   seller_id,
   COUNT(*) FILTER (WHERE click_type = 'call') AS total_calls,
