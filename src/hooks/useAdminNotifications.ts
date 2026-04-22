@@ -34,9 +34,8 @@ export function useAdminNotifications() {
         const { data, error } = await supabase
           .from('admin_notifications')
           .select('*')
-          .eq('is_read', false)
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(20);
         if (data) setNotifications(data);
       } catch (e) {
         console.warn("Notifications table not ready.");
@@ -69,9 +68,16 @@ export function useAdminNotifications() {
   }, []);
 
   const markAsRead = async (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     await supabase.from('admin_notifications').update({ is_read: true }).eq('id', id);
   };
 
-  return { notifications, newToast, markAsRead, setNewToast };
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
+    if (unreadIds.length === 0) return;
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    await supabase.from('admin_notifications').update({ is_read: true }).in('id', unreadIds);
+  };
+
+  return { notifications, newToast, markAsRead, markAllAsRead, setNewToast };
 }

@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [showDropdown, setShowDropdown] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
-  const { notifications, markAsRead } = useAdminNotifications();
+  const { notifications, markAsRead, markAllAsRead } = useAdminNotifications();
 
   // Log unauthorized access attempt once if auth is resolved and user is not admin
   useEffect(() => {
@@ -199,15 +199,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               background: adminColors.surfaceHover, borderRadius: '10px', border: `1px solid ${adminColors.border}`,
               transition: 'all 0.2s',
             }}>
-              <Bell size={20} color={notifications.length > 0 ? adminColors.primary : adminColors.textTertiary} />
-              {notifications.length > 0 && (
+              <Bell size={20} color={notifications.filter(n => !n.is_read).length > 0 ? adminColors.primary : adminColors.textTertiary} />
+              {notifications.filter(n => !n.is_read).length > 0 && (
                 <span style={{
                   position: 'absolute', top: -4, right: -4, background: adminColors.error,
                   color: 'white', borderRadius: '50%', width: '20px', height: '20px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.7rem', fontWeight: 800,
                 }}>
-                  {notifications.length}
+                  {notifications.filter(n => !n.is_read).length}
                 </span>
               )}
             </div>
@@ -215,31 +215,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           
           {showDropdown && (
             <div style={{
-              position: 'absolute', top: '5rem', left: '2rem', width: '340px',
+              position: 'absolute', top: '5rem', left: '2rem', width: '380px',
               background: adminColors.surface, border: `1px solid ${adminColors.borderStrong}`,
               borderRadius: '16px', zIndex: 50, padding: '1rem',
               boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${adminColors.border}`, paddingBottom: '0.8rem', marginBottom: '0.8rem' }}>
-                <h3 style={{ margin: 0, fontSize: '0.95rem', color: adminColors.textPrimary, fontWeight: 700 }}>الإشعارات</h3>
-                <span style={{ fontSize: '0.75rem', color: adminColors.primary, cursor: 'pointer', fontWeight: 600 }}
-                  onClick={() => { notifications.forEach(n => markAsRead(n.id)); setShowDropdown(false); }}>
-                  تنظيف الكل
-                </span>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', color: adminColors.textPrimary, fontWeight: 700 }}>الإشعارات ({notifications.filter(n => !n.is_read).length} جديد)</h3>
+                {notifications.filter(n => !n.is_read).length > 0 && (
+                  <span style={{ fontSize: '0.75rem', color: adminColors.primary, cursor: 'pointer', fontWeight: 600 }}
+                    onClick={() => { markAllAsRead(); }}>
+                    قراءة الكل ✓
+                  </span>
+                )}
               </div>
               {notifications.length === 0 ? (
                 <div style={{ textAlign: 'center', color: adminColors.textTertiary, padding: '2rem', fontWeight: 600 }}>
-                  لا توجد إشعارات جديدة
+                  لا توجد إشعارات
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '350px', overflowY: 'auto' }}>
                   {notifications.map(n => (
-                    <div key={n.id} onClick={() => markAsRead(n.id)} style={{
-                      padding: '0.8rem', background: adminColors.primaryLighter, borderRadius: '10px',
-                      cursor: 'pointer', transition: 'all 0.2s', borderRight: `3px solid ${adminColors.primary}`,
+                    <div key={n.id} onClick={() => { if (!n.is_read) markAsRead(n.id); }} style={{
+                      padding: '0.8rem', 
+                      background: n.is_read ? 'transparent' : adminColors.primaryLighter, 
+                      borderRadius: '10px',
+                      cursor: 'pointer', transition: 'all 0.2s', 
+                      borderRight: `3px solid ${n.is_read ? adminColors.border : adminColors.primary}`,
+                      opacity: n.is_read ? 0.6 : 1,
                     }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.3rem', color: adminColors.textPrimary }}>{n.title}</div>
-                      <div style={{ color: adminColors.textSecondary, fontSize: '0.78rem' }}>{n.message}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: n.is_read ? 600 : 700, fontSize: '0.85rem', marginBottom: '0.3rem', color: adminColors.textPrimary }}>{n.title}</div>
+                        {!n.is_read && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: adminColors.primary, flexShrink: 0 }} />}
+                      </div>
+                      <div style={{ color: adminColors.textSecondary, fontSize: '0.78rem', lineHeight: 1.5 }}>{n.message}</div>
+                      <div style={{ color: adminColors.textTertiary, fontSize: '0.68rem', marginTop: '0.4rem' }}>
+                        {new Date(n.created_at).toLocaleDateString('ar-SA')} • {new Date(n.created_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
                   ))}
                 </div>
