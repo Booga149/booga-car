@@ -1,9 +1,11 @@
 /**
- * Centralized Email Sender — Brevo (free: 300 emails/day)
+ * Centralized Email Sender — Gmail SMTP via Nodemailer
  * 
- * No custom domain required. Sends from your verified Gmail.
- * Docs: https://developers.brevo.com/reference/sendtransacemail
+ * Free: 500 emails/day. No custom domain needed.
+ * Uses Google App Password for authentication.
  */
+
+import nodemailer from 'nodemailer';
 
 interface SendEmailParams {
   to: string;
@@ -18,41 +20,42 @@ interface SendEmailResult {
   error?: string;
 }
 
+// Create reusable transporter
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false, // true for 465, false for 587
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
+
 export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
-  const BREVO_API_KEY = process.env.BREVO_API_KEY;
-  const SENDER_EMAIL = process.env.SENDER_EMAIL || 'mrmrx2824@gmail.com';
+  const SMTP_USER = process.env.SMTP_USER;
+  const SMTP_PASS = process.env.SMTP_PASS;
+  const SENDER_EMAIL = process.env.SENDER_EMAIL || SMTP_USER;
   const senderName = params.senderName || 'بوجا كار';
 
-  if (!BREVO_API_KEY) {
-    console.warn('[Email] BREVO_API_KEY not configured');
-    return { sent: false, error: 'BREVO_API_KEY not configured' };
+  if (!SMTP_USER || !SMTP_PASS) {
+    console.warn('[Email] SMTP credentials not configured');
+    return { sent: false, error: 'SMTP credentials not configured' };
   }
 
   try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: senderName, email: SENDER_EMAIL },
-        to: [{ email: params.to }],
-        subject: params.subject,
-        htmlContent: params.html,
-      }),
+    const transporter = getTransporter();
+
+    const info = await transporter.sendMail({
+      from: `"${senderName}" <${SENDER_EMAIL}>`,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
     });
 
-    const result = await res.json();
-
-    if (res.ok) {
-      console.log('[Email] Sent successfully to', params.to, result);
-      return { sent: true, messageId: result.messageId };
-    } else {
-      console.error('[Email] Brevo error:', result);
-      return { sent: false, error: result.message || 'Brevo API error' };
-    }
+    console.log('[Email] Sent successfully to', params.to, 'MessageID:', info.messageId);
+    return { sent: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('[Email] Send failed:', error);
     return { sent: false, error: error.message };
