@@ -92,14 +92,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (u) {
         await fetchProfile(u.id);
 
-        // Send welcome email for brand new users (created within last 5 minutes)
-        if (_event === 'SIGNED_IN' && u.created_at) {
-          const createdAt = new Date(u.created_at).getTime();
-          const now = Date.now();
-          const isNewUser = (now - createdAt) < 300000; // 5 minutes
+        // Send welcome email (once per user, tracked via localStorage)
+        if (_event === 'SIGNED_IN') {
           const welcomeSentKey = `booga_welcome_sent_${u.id}`;
 
-          if (isNewUser && !localStorage.getItem(welcomeSentKey)) {
+          if (!localStorage.getItem(welcomeSentKey)) {
             localStorage.setItem(welcomeSentKey, '1');
             try {
               const res = await fetch('/api/email/welcome', {
