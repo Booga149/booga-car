@@ -91,30 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(u);
       if (u) {
         await fetchProfile(u.id);
-
-        // Send welcome email (once per user, tracked via localStorage)
-        if (_event === 'SIGNED_IN') {
-          const welcomeSentKey = `booga_welcome_sent_${u.id}`;
-
-          if (!localStorage.getItem(welcomeSentKey)) {
-            localStorage.setItem(welcomeSentKey, '1');
-            try {
-              const res = await fetch('/api/email/welcome', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  userId: u.id,
-                  email: u.email,
-                  name: u.user_metadata?.full_name || u.email?.split('@')[0],
-                }),
-              });
-              const data = await res.json();
-              console.log('[Welcome Email]', data);
-            } catch (err) {
-              console.error('[Welcome Email Error]', err);
-            }
-          }
-        }
+        // Welcome email is now sent server-side from /api/auth/signup
       } else {
         setProfile(null);
       }

@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { welcomeEmail } from '@/lib/emailTemplates';
+import { sendEmail } from '@/lib/emailSender';
 
 // This endpoint allows signup with auto-confirmation
 // Uses the service role key to bypass email confirmation
@@ -43,6 +45,29 @@ export async function POST(request: Request) {
         );
       }
       return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    // ✅ Send welcome email directly here (server-side, guaranteed correct email)
+    const customerName = full_name || email.split('@')[0] || 'عميلنا العزيز';
+    try {
+      const emailContent = welcomeEmail({ customerName, customerEmail: email });
+      const emailResult = await sendEmail({
+        to: email, // The actual new user's email — 100% correct
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      console.log(`[Signup] Welcome email to ${email}:`, emailResult.sent ? '✅ Sent' : `❌ ${emailResult.error}`);
+
+      // Notify admin
+      await supabaseAdmin.from('admin_notifications').insert({
+        type: 'NEW_USER',
+        title: '👤 مستخدم جديد',
+        message: emailResult.sent
+          ? `تسجيل جديد: ${customerName} (${email}) — تم إرسال إيميل الترحيب ✅`
+          : `تسجيل جديد: ${customerName} (${email}) — فشل إرسال الترحيب: ${emailResult.error}`,
+      });
+    } catch (emailErr) {
+      console.error('[Signup] Welcome email error:', emailErr);
     }
 
     return NextResponse.json({ 
