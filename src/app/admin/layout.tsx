@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { logSecurityEvent } from '@/lib/utils';
 import { useAdminNotifications } from '@/hooks/useAdminNotifications';
@@ -48,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { href: '/admin', icon: <BarChart2 size={20} />, label: 'لوحة التحكم' },
+    { href: '/admin/orders', icon: <ShoppingCart size={20} />, label: 'الطلبات' },
     { href: '/admin/products', icon: <Package size={20} />, label: 'المنتجات' },
     { href: '/admin/users', icon: <Users size={20} />, label: 'المستخدمين' },
     { href: '/admin/import', icon: <Upload size={20} />, label: 'استيراد المنتجات' },
@@ -107,7 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
-              <a 
+              <Link 
                 key={item.href}
                 href={item.href} 
                 style={{ 
@@ -123,20 +125,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</div>
                 {sidebarOpen && <span>{item.label}</span>}
-              </a>
+              </Link>
             );
           })}
           
           <div style={{ height: '1px', background: adminColors.border, margin: '1rem 0' }} />
           
-          <a href="/" style={{
+          <Link href="/" style={{
             padding: '0.8rem', borderRadius: '10px', color: adminColors.textSecondary,
             textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center',
             justifyContent: 'center', gap: '0.5rem', transition: 'all 0.2s',
             border: `1px solid ${adminColors.border}`, fontSize: '0.85rem',
           }}>
             <Globe size={16} /> {sidebarOpen ? 'الموقع الرئيسي' : ''}
-          </a>
+          </Link>
         </nav>
 
         {/* Admin user badge at bottom */}

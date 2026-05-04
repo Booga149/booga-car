@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Search, Shield, Zap, Globe, ArrowDown } from 'lucide-react';
 import SmartSearch from './SmartSearch';
@@ -129,11 +130,13 @@ export default function Hero() {
                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              <img 
+              <Image 
                 src={item.img} 
                 alt={item.name}
+                fill
+                sizes="(max-width: 640px) 50vw, 200px"
                 style={{ 
-                  width: '100%', height: '100%', objectFit: 'cover',
+                  objectFit: 'cover',
                   transition: 'transform 0.6s ease',
                 }}
               />

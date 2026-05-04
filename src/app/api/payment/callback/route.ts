@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MoyasarClient } from '@/lib/moyasar';
+import { getCheckoutSession, isStripeConfigured } from '@/lib/stripe';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const dynamic = 'force-dynamic';
@@ -7,92 +7,89 @@ export const dynamic = 'force-dynamic';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://booga-car.vercel.app';
 
 /**
- * Moyasar redirects here after payment completion (3D Secure, etc.)
+ * Stripe redirects here after payment completion
+ * URL: /api/payment/callback?session_id=xxx&order_id=xxx
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('order_id');
-  const paymentId = searchParams.get('id');
-  const status = searchParams.get('status');
+  const errorParam = searchParams.get('error');
 
-  if (!orderId) {
-    return NextResponse.redirect(`${SITE_URL}/checkout?error=missing_order`);
+  // Handle cancel/error redirects
+  if (errorParam || (!sessionId && !orderId)) {
+    return NextResponse.redirect(`${SITE_URL}/checkout?error=${errorParam || 'missing_data'}`);
   }
 
   const supabase = getSupabaseAdmin();
 
   try {
-    // If Moyasar payment ID exists, verify with API
-    if (paymentId) {
-      const moyasar = new MoyasarClient();
-      if (moyasar.isConfigured()) {
-        const payment = await moyasar.getPayment(paymentId);
+    // ─── Stripe Checkout Session Verification ───
+    if (sessionId && isStripeConfigured()) {
+      const session = await getCheckoutSession(sessionId);
+      const stripeOrderId = session.metadata?.order_id || orderId;
 
-        if (payment.status === 'paid') {
-          // ✅ Payment successful
-          let updatePayload: any = {
-            payment_status: 'paid',
-            payment_id: paymentId,
-            status: 'تم التأكيد',
-          };
-          let { error: updateError } = await supabase.from('orders').update(updatePayload).eq('id', orderId);
-          if (updateError && updateError.message && updateError.message.includes('payment_status')) {
-            delete updatePayload.payment_status;
-            delete updatePayload.payment_id;
-            await supabase.from('orders').update(updatePayload).eq('id', orderId);
-          }
+      if (!stripeOrderId) {
+        return NextResponse.redirect(`${SITE_URL}/checkout?error=missing_order`);
+      }
 
-          // Send confirmation email
-          try {
-            await fetch(`${SITE_URL}/api/email/order-confirmation`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderId, paymentId }),
-            });
-          } catch {}
+      if (session.payment_status === 'paid') {
+        // ✅ Payment successful
+        const paymentIntent = session.payment_intent as any;
+        const paymentId = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
 
-          // Notify admin
-          try {
-            await supabase.from('admin_notifications').insert({
-              type: 'PAYMENT_SUCCESS',
-              title: '💳 دفعة ناجحة',
-              message: `تم استلام دفعة بقيمة ${(payment.amount / 100).toFixed(2)} ر.س للطلب #${orderId.slice(0, 8)}`,
-            });
-          } catch {}
-
-          return NextResponse.redirect(`${SITE_URL}/checkout/success?id=${orderId}&paid=true`);
-        } else {
-          // ❌ Payment failed
-          let failedPayload: any = { payment_status: 'failed' };
-          let { error: fError } = await supabase.from('orders').update(failedPayload).eq('id', orderId);
-          if (fError && fError.message && fError.message.includes('payment_status')) {
-            // Remove the key, do nothing basically but it won't crash
-            delete failedPayload.payment_status;
-          }
-
-          return NextResponse.redirect(`${SITE_URL}/checkout?error=payment_failed&order_id=${orderId}`);
+        let updatePayload: any = {
+          payment_status: 'paid',
+          payment_id: paymentId || sessionId,
+          status: 'تم التأكيد',
+        };
+        let { error: updateError } = await supabase.from('orders').update(updatePayload).eq('id', stripeOrderId);
+        if (updateError && updateError.message && updateError.message.includes('payment_status')) {
+          delete updatePayload.payment_status;
+          delete updatePayload.payment_id;
+          await supabase.from('orders').update(updatePayload).eq('id', stripeOrderId);
         }
+
+        // Send confirmation email
+        try {
+          await fetch(`${SITE_URL}/api/email/order-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: stripeOrderId, paymentId }),
+          });
+        } catch {}
+
+        // Notify admin
+        try {
+          await supabase.from('admin_notifications').insert({
+            type: 'PAYMENT_SUCCESS',
+            title: '💳 دفعة ناجحة عبر Stripe',
+            message: `تم استلام دفعة بقيمة ${(session.amount_total! / 100).toFixed(2)} ر.س للطلب #${stripeOrderId.slice(0, 8)}`,
+          });
+        } catch {}
+
+        // Redirect to checkout success (the existing checkout page handles success via orderId)
+        return NextResponse.redirect(`${SITE_URL}/checkout?paid=true&order_id=${stripeOrderId}`);
+      } else {
+        // ❌ Payment not completed
+        let failedPayload: any = { payment_status: 'failed' };
+        let { error: fError } = await supabase.from('orders').update(failedPayload).eq('id', stripeOrderId);
+        if (fError && fError.message && fError.message.includes('payment_status')) {
+          delete failedPayload.payment_status;
+        }
+
+        return NextResponse.redirect(`${SITE_URL}/checkout?error=payment_failed&order_id=${stripeOrderId}`);
       }
     }
 
-    // Fallback: redirect based on status param
-    if (status === 'paid') {
-      let fPay: any = {
-        payment_status: 'paid',
-        status: 'تم التأكيد',
-      };
-      let { error: fErr } = await supabase.from('orders').update(fPay).eq('id', orderId);
-      if (fErr && fErr.message && fErr.message.includes('payment_status')) {
-        delete fPay.payment_status;
-        await supabase.from('orders').update(fPay).eq('id', orderId);
-      }
-
-      return NextResponse.redirect(`${SITE_URL}/checkout/success?id=${orderId}`);
+    // Fallback: No session ID, try orderId-based redirect
+    if (orderId) {
+      return NextResponse.redirect(`${SITE_URL}/checkout?error=payment_unknown&order_id=${orderId}`);
     }
 
-    return NextResponse.redirect(`${SITE_URL}/checkout?error=payment_unknown&order_id=${orderId}`);
+    return NextResponse.redirect(`${SITE_URL}/checkout?error=callback_error`);
   } catch (error: any) {
-    console.error('[Payment Callback Error]', error);
+    console.error('[Stripe Callback Error]', error);
     return NextResponse.redirect(`${SITE_URL}/checkout?error=callback_error`);
   }
 }

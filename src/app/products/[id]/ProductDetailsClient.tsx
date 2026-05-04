@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/context/CartContext';
@@ -218,8 +219,8 @@ export default function ProductDetailsClient({ id }: { id: string }) {
         <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start', marginBottom: '6rem' }}>
           
           {/* Main Image Gallery */}
-          <div className="product-detail-image" style={{ background: 'var(--surface-hover)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '500px' }}>
-            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', maxHeight: '450px', objectFit: 'contain', mixBlendMode: 'screen', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))' }} />
+          <div className="product-detail-image" style={{ background: 'var(--surface-hover)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '500px', position: 'relative' }}>
+            <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'contain', mixBlendMode: 'screen', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))' }} priority />
           </div>
 
           {/* Product Info */}

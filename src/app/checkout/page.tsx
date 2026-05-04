@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import PaymentModal, { CardData } from '@/components/PaymentModal';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import { supabase } from '@/lib/supabase';
@@ -18,6 +19,8 @@ export default function CheckoutPage() {
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [checkoutState, setCheckoutState] = useState<'idle'|'failed'>('idle');
   const [sessionId, setSessionId] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingCardData, setPendingCardData] = useState<CardData | undefined>(undefined);
 
   const logEvent = (type: string, meta: any = {}) => {
     if (!sessionId) return;
@@ -54,9 +57,21 @@ export default function CheckoutPage() {
       }
     } catch {}
 
+    // Handle Stripe redirect back with paid=true
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paid = params.get('paid');
+      const returnOrderId = params.get('order_id');
+      if (paid === 'true' && returnOrderId) {
+        setSuccessOrderId(returnOrderId);
+        clearCart();
+        // Clean up URL
+        window.history.replaceState({}, '', '/checkout');
+      }
+    }
+
     // Analytics: Checkout Started
     if (cartItems.length > 0 && sid) {
-      // Inline fetch for mount since logEvent depends on state which might not be set yet
       fetch('/api/analytics', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sid, event_type: 'started', metadata: { items: cartItems.length, value: cartTotal, version: 'v1' } })
@@ -134,6 +149,7 @@ export default function CheckoutPage() {
   const discountAmount = cartPricing.couponDiscount;
   const finalTotal = cartPricing.finalTotal + (upsellAdded ? 25 : 0);
 
+  // ─── STEP 1: Form validation → route to correct payment flow ───
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cartItems.length === 0) return;
@@ -154,8 +170,34 @@ export default function CheckoutPage() {
       logEvent('payment_failed', { error: 'Validation', details: errors });
       return;
     }
-    
+
     logEvent('payment_clicked', { method: formData.paymentMethod, total: finalTotal });
+
+    // COD: proceed directly
+    if (formData.paymentMethod === 'الدفع عند الاستلام') {
+      await processOrder();
+      return;
+    }
+
+    // ALL electronic payments: go to Stripe
+    if (['مدى', 'فيزا / ماستركارد', 'Apple Pay', 'STC Pay', 'تابي (Tabby)', 'تمارا (Tamara)'].includes(formData.paymentMethod)) {
+      await processOrder();
+      return;
+    }
+
+    // Fallback: unknown method — block
+    addToast('طريقة الدفع غير مدعومة حالياً', 'error');
+  };
+
+  // ─── STEP 2: Payment modal → confirm → process order ───
+  const handlePaymentConfirm = async (cardData?: CardData) => {
+    setPendingCardData(cardData);
+    logEvent('payment_clicked', { method: formData.paymentMethod, total: finalTotal });
+    await processOrder(cardData);
+  };
+
+  // ─── STEP 3: Core order processing logic ───
+  const processOrder = async (cardData?: CardData) => {
     setLoading(true);
     setCheckoutState('idle');
     try {
@@ -178,25 +220,21 @@ export default function CheckoutPage() {
         });
         const validation = await validationRes.json();
         if (!validationRes.ok || !validation.valid) {
-          // Stock or price error — BLOCK the order
           addToast(validation.error || 'فشل التحقق من الطلب', 'error');
           setLoading(false);
           return;
         }
-        // Use server-validated total (ignore frontend calculation)
         const serverTotal = roundPrice(validation.order.final_total);
         if (Math.abs(serverTotal - finalTotal) > 1) {
           console.warn('Price mismatch detected:', { frontend: finalTotal, server: serverTotal });
         }
       } catch (valErr: any) {
-        // If validation API is completely unavailable, continue with frontend prices
         console.warn('Server validation unavailable, using frontend prices:', valErr.message);
       }
 
       // ─── STEP 0.5: Reserve Stock (15 min hold) ───
       const reservationIds: string[] = [];
       try {
-        // Release expired reservations first
         try { await supabase.rpc('release_expired_reservations'); } catch {}
         
         for (const item of cartItems) {
@@ -206,7 +244,6 @@ export default function CheckoutPage() {
             p_user_id: userId,
           });
           if (resErr) {
-            // Release all previous reservations on failure
             for (const rid of reservationIds) {
               try { await supabase.from('stock_reservations').update({ status: 'expired' }).eq('id', rid); } catch {}
             }
@@ -252,33 +289,58 @@ export default function CheckoutPage() {
         logEvent('payment_retried', { orderId: currentOrderId });
       }
 
-      // Handle Payment Processing from Frontend
-      try {
+      // ═══════════════════════════════════════════════════════════════
+      // PAYMENT ROUTING — ZERO TOLERANCE FOR LEAKS
+      // ═══════════════════════════════════════════════════════════════
+      const isCOD = formData.paymentMethod === 'الدفع عند الاستلام';
+
+      // Build payment request body (shared)
+      const paymentBody = {
+        orderId: currentOrderId,
+        amount: finalOrderTotal,
+        paymentMethod: formData.paymentMethod,
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        items: cartItems.map(item => ({
+          id: item.id, name: item.name, quantity: item.quantity, price: item.price,
+        })),
+      };
+
+      if (!isCOD) {
+        // ═══ NON-COD: MUST redirect to payment gateway — NO exceptions ═══
         const payRes = await fetch('/api/payment/process', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: currentOrderId,
-            amount: finalOrderTotal,
-            paymentMethod: formData.paymentMethod,
-            customerName: formData.name,
-            customerPhone: formData.phone
-          }),
+          body: JSON.stringify(paymentBody),
         });
         const payResult = await payRes.json();
-        
-        // Handle Payment Gateways Redirects (Moyasar 3D secure, STC Pay)
+
+        // STRICT CHECK: Must have a redirect URL
         if (payResult?.redirectUrl) {
           window.location.href = payResult.redirectUrl;
-          return;
+          return; // ← User goes to Stripe/payment gateway
         }
-      } catch (payErr) {
-        console.warn('Payment process warning, fallback to manual confirmation:', payErr);
+
+        // NO redirect = BLOCK. Never confirm without payment.
+        throw new Error(
+          payResult?.error || payResult?.note ||
+          'فشل في تحويلك لصفحة الدفع الآمنة — يرجى المحاولة مرة أخرى أو اختيار طريقة دفع مختلفة'
+        );
       }
+
+      // ═══ COD ONLY: Direct confirmation (no payment needed) ═══
+      try {
+        await fetch('/api/payment/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentBody),
+        });
+      } catch {}
 
       logEvent('success', { orderId: currentOrderId });
       setSuccessOrderId(currentOrderId);
-      setPendingOrderId(null); // Clear pending state on success
+      setShowPaymentModal(false);
+      setPendingOrderId(null);
       clearCart();
 
     } catch (err: any) {
@@ -639,6 +701,34 @@ export default function CheckoutPage() {
                 boxShadow: '0 -4px 15px rgba(0,0,0,0.05)',
               }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  {/* Coupon Code — Visible & Copyable */}
+                  {!appliedDiscount && (
+                    <div 
+                      onClick={() => {
+                        setDiscountCode('SAUDI15');
+                        setShowCoupon(true);
+                        navigator.clipboard.writeText('SAUDI15').catch(() => {});
+                        addToast('✅ تم نسخ كود الخصم SAUDI15 — الصقه في خانة الكوبون', 'success');
+                      }}
+                      style={{
+                        flexShrink: 0,
+                        padding: '0.4rem 0.7rem',
+                        background: 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.1))',
+                        border: '1.5px dashed #f59e0b',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.1rem',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.6rem', color: '#92400e', fontWeight: 800 }}>كود خصم 🎁</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#d97706', fontFamily: 'monospace', letterSpacing: '1px', userSelect: 'all' }}>SAUDI15</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700 }}>المجموع</span>
                     <span style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1 }}>{finalTotal?.toLocaleString()} <span style={{fontSize:'0.8rem'}}>ر.س</span></span>
@@ -709,6 +799,18 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
+
+      {/* ─── Payment Method Popup Modals ─── */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        paymentMethod={formData.paymentMethod}
+        amount={finalTotal}
+        customerName={formData.name}
+        customerPhone={formData.phone}
+        onConfirm={handlePaymentConfirm}
+        onClose={() => setShowPaymentModal(false)}
+        loading={loading}
+      />
     </main>
     </>
   );

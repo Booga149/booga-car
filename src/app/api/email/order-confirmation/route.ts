@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { orderConfirmationEmail, OrderEmailData } from '@/lib/emailTemplates';
+import { sendEmail } from '@/lib/emailSender';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Send order confirmation email
- * Supports: Resend API (recommended for production)
+ * Supports: Brevo API (free: 300 emails/day, no custom domain needed)
  * 
  * SETUP:
- * 1. Sign up at https://resend.com (free: 100 emails/day)
- * 2. Verify your domain or use onboarding@resend.dev for testing
- * 3. Add RESEND_API_KEY to Vercel environment variables
- * 4. (Optional) Add SENDER_EMAIL (e.g., orders@booga-car.com)
+ * 1. Sign up at https://brevo.com (free tier)
+ * 2. Add BREVO_API_KEY to Vercel environment variables
+ * 3. Add SENDER_EMAIL (your verified email)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -95,60 +95,38 @@ export async function POST(req: NextRequest) {
 
     const emailContent = orderConfirmationEmail(emailData);
 
-    // ─── SEND via Resend ───
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
-
-    if (RESEND_API_KEY) {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `بوجا كار <${SENDER_EMAIL}>`,
-          to: [customerEmail],
-          subject: emailContent.subject,
-          html: emailContent.html,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        // Log success
-        try {
-          await supabase.from('admin_notifications').insert({
-            type: 'EMAIL_SENT',
-            title: '📧 إيميل تأكيد',
-            message: `تم إرسال إيميل تأكيد الطلب #${orderId.slice(0, 8)} إلى ${customerEmail}`,
-          });
-        } catch {}
-
-        return NextResponse.json({ sent: true, emailId: result.id });
-      } else {
-        console.error('[Resend Error]', result);
-        return NextResponse.json({ sent: false, error: result.message }, { status: 500 });
-      }
-    }
-
-    // ─── No email provider configured ───
-    // Log that email would have been sent
-    try {
-      await supabase.from('admin_notifications').insert({
-        type: 'EMAIL_QUEUED',
-        title: '📧 إيميل معلّق',
-        message: `تأكيد الطلب #${orderId.slice(0, 8)} لم يُرسل — مطلوب إعداد RESEND_API_KEY. العميل: ${customerEmail}`,
-      });
-    } catch {}
-
-    return NextResponse.json({ 
-      sent: false, 
-      reason: 'Email provider not configured. Add RESEND_API_KEY to environment.',
-      wouldSendTo: customerEmail,
+    // ─── SEND via Brevo ───
+    const result = await sendEmail({
+      to: customerEmail,
       subject: emailContent.subject,
+      html: emailContent.html,
     });
+
+    if (result.sent) {
+      // Log success
+      try {
+        await supabase.from('admin_notifications').insert({
+          type: 'EMAIL_SENT',
+          title: '📧 إيميل تأكيد',
+          message: `تم إرسال إيميل تأكيد الطلب #${orderId.slice(0, 8)} إلى ${customerEmail}`,
+        });
+      } catch {}
+
+      return NextResponse.json({ sent: true, messageId: result.messageId });
+    } else {
+      console.error('[Email Error]', result.error);
+      
+      // Log failure
+      try {
+        await supabase.from('admin_notifications').insert({
+          type: 'EMAIL_QUEUED',
+          title: '📧 إيميل معلّق',
+          message: `تأكيد الطلب #${orderId.slice(0, 8)} لم يُرسل — ${result.error}. العميل: ${customerEmail}`,
+        });
+      } catch {}
+
+      return NextResponse.json({ sent: false, error: result.error }, { status: 500 });
+    }
 
   } catch (error: any) {
     console.error('[Email Error]', error);

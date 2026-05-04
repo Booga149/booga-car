@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
-import { supabase } from '@/lib/supabase';
 import { FileText, Printer, ArrowRight, ShieldCheck, Phone, MapPin, Building2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
@@ -25,12 +24,15 @@ function InvoiceContent() {
   useEffect(() => {
     if (!orderId) { setLoading(false); return; }
     async function fetchOrder() {
-      const { data } = await supabase
-        .from('orders')
-        .select('*, order_items(*, product:products(name, sku))')
-        .eq('id', orderId)
-        .single();
-      if (data) setOrder(data as any);
+      try {
+        const res = await fetch(`/api/invoice?id=${orderId}`);
+        const result = await res.json();
+        if (res.ok && result.order) {
+          setOrder(result.order as any);
+        }
+      } catch (err) {
+        console.error('Failed to fetch invoice:', err);
+      }
       setLoading(false);
     }
     fetchOrder();

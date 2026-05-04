@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
@@ -110,14 +111,13 @@ export default function ProductCard({
           overflow: 'hidden',
         }}>
           {!imgError && image ? (
-            <img
+            <Image
               src={image}
               alt={name}
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               onError={() => setImgError(true)}
               style={{
-                width: '100%',
-                height: '100%',
                 objectFit: 'cover',
                 transition: 'transform 0.6s ease',
                 transform: isHovered ? 'scale(1.1)' : 'scale(1)',

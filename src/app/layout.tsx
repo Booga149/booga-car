@@ -175,11 +175,32 @@ export default function RootLayout({
             <WishlistProvider>
               <ProductsProvider>
                 <CartProvider>
-                  {/* Marketing Tracking Scripts (Conversion Funnels) */}
+                  {/* Google Analytics 4 */}
+                  {process.env.NEXT_PUBLIC_GA_ID && (
+                    <>
+                      <Script
+                        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+                        strategy="afterInteractive"
+                      />
+                      <Script id="google-analytics" strategy="afterInteractive">
+                        {`
+                          window.dataLayer = window.dataLayer || [];
+                          function gtag(){dataLayer.push(arguments);}
+                          gtag('js', new Date());
+                          gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                            page_path: window.location.pathname,
+                            send_page_view: true,
+                          });
+                        `}
+                      </Script>
+                    </>
+                  )}
+
+                  {/* Marketing & Tracking Systems Init */}
                   <Script id="marketing-init" strategy="afterInteractive">
                     {`
                       window.dataLayer = window.dataLayer || [];
-                      console.log("🟢 [Marketing Systems Active] Google Analytics, Hotjar Heatmaps, and Meta Pixel Conversion Tracking are initialized.");
+                      ${process.env.NEXT_PUBLIC_GA_ID ? '' : 'console.log("📊 [Analytics] لتفعيل Google Analytics، أضف NEXT_PUBLIC_GA_ID في .env.local");'}
                     `}
                   </Script>
                   

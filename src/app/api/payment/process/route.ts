@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MoyasarClient, sarToHalalas, mapPaymentSource } from '@/lib/moyasar';
+import { isStripeConfigured, createCheckoutSession, mapPaymentMethod } from '@/lib/stripe';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const dynamic = 'force-dynamic';
@@ -9,16 +9,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://booga-car.vercel.a
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { orderId, amount, paymentMethod, customerName, customerPhone } = body;
+    const { orderId, amount, paymentMethod, customerName, customerPhone, items } = body;
 
     if (!orderId || !amount || !paymentMethod) {
       return NextResponse.json({ error: 'بيانات الدفع ناقصة' }, { status: 400 });
     }
 
-    const sourceType = mapPaymentSource(paymentMethod);
+    const methodType = mapPaymentMethod(paymentMethod);
 
     // ─── COD: No payment processing needed ───
-    if (sourceType === 'cod') {
+    if (methodType === 'cod') {
       const supabase = getSupabaseAdmin();
       let cPay: any = {
         payment_method: 'الدفع عند الاستلام',
@@ -46,87 +46,57 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ─── Tabby/Tamara: Redirect-based (placeholder for future integration) ───
-    if (sourceType === 'tabby' || sourceType === 'tamara') {
+    // ─── Tabby/Tamara: Route through Stripe until native integration ───
+    // (Will work as regular card payment for now)
+
+    // ─── Stripe: Credit Card, Mada, Apple Pay ───
+    if (!isStripeConfigured()) {
+      // Stripe NOT configured = Cannot process card payment
       return NextResponse.json({
-        success: true,
-        method: sourceType,
-        message: `سيتم تحويلك لإتمام الدفع عبر ${sourceType === 'tabby' ? 'تابي' : 'تمارا'}`,
-        redirectUrl: null, // Will be set when Tabby/Tamara SDK integrated
-        note: 'هذه الخدمة قيد التفعيل — يرجى اختيار طريقة دفع أخرى حالياً',
-      });
+        error: 'بوابة الدفع الإلكتروني غير متاحة حالياً — يرجى اختيار الدفع عند الاستلام أو المحاولة لاحقاً',
+        note: 'STRIPE_SECRET_KEY not configured',
+      }, { status: 503 });
     }
 
-    // ─── Moyasar: Credit Card, Mada, STC Pay, Apple Pay ───
-    const moyasar = new MoyasarClient();
-    
-    if (!moyasar.isConfigured()) {
-      // Fallback: Save order as pending payment
-      const supabase = getSupabaseAdmin();
-      let pPay: any = {
-        payment_method: paymentMethod,
-        payment_status: 'pending_configuration',
-      };
-      let { error: pErr } = await supabase.from('orders').update(pPay).eq('id', orderId);
-      if (pErr && pErr.message && pErr.message.includes('payment_status')) {
-        delete pPay.payment_status;
-        await supabase.from('orders').update(pPay).eq('id', orderId);
-      }
+    // ─── Create Stripe Checkout Session ───
+    // Prepare line items from cart
+    const lineItems = items?.length > 0 
+      ? items.map((item: any) => ({
+          name: item.name || `منتج #${item.id?.slice(0, 6) || ''}`,
+          quantity: item.quantity || 1,
+          price: item.price || 0,
+        }))
+      : [{ name: `طلب Booga Car #${orderId.slice(0, 8)}`, quantity: 1, price: amount }];
 
-      // Still send confirmation email
-      try {
-        await fetch(`${SITE_URL}/api/email/order-confirmation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId }),
-        });
-      } catch {}
-
-      return NextResponse.json({
-        success: true,
-        method: sourceType,
-        message: 'تم تسجيل الطلب — سيتم التواصل معك لإتمام الدفع',
-        note: 'بوابة الدفع قيد الإعداد',
-      });
-    }
-
-    // Create Moyasar payment
-    const payment = await moyasar.createPayment({
-      amount: sarToHalalas(amount),
-      description: `طلب بوجا كار #${orderId.slice(0, 8)}`,
-      callbackUrl: `${SITE_URL}/api/payment/callback?order_id=${orderId}`,
-      source: {
-        type: sourceType as any,
-        ...(sourceType === 'stcpay' && customerPhone ? { mobile: customerPhone } : {}),
-        ...(body.cardData || {}),
-      },
-      metadata: {
-        order_id: orderId,
-        customer_name: customerName || '',
-        customer_phone: customerPhone || '',
-      },
+    const session = await createCheckoutSession({
+      orderId,
+      amount,
+      customerName: customerName || 'عميل',
+      paymentMethod,
+      lineItems,
+      successUrl: `${SITE_URL}/api/payment/callback`,
+      cancelUrl: `${SITE_URL}/checkout`,
     });
 
-    // Save payment reference
+    // Save Stripe session ID to order
     const supabase = getSupabaseAdmin();
-    let mPay: any = {
+    let sPay: any = {
       payment_method: paymentMethod,
-      payment_status: payment.status,
-      payment_id: payment.id,
+      payment_status: 'initiated',
+      payment_id: session.sessionId,
     };
-    let { error: mErr } = await supabase.from('orders').update(mPay).eq('id', orderId);
-    if (mErr && mErr.message && mErr.message.includes('payment_status')) {
-      delete mPay.payment_status;
-      delete mPay.payment_id;
-      await supabase.from('orders').update(mPay).eq('id', orderId);
+    let { error: sErr } = await supabase.from('orders').update(sPay).eq('id', orderId);
+    if (sErr && sErr.message && sErr.message.includes('payment_status')) {
+      delete sPay.payment_status;
+      delete sPay.payment_id;
+      await supabase.from('orders').update(sPay).eq('id', orderId);
     }
 
     return NextResponse.json({
       success: true,
-      method: sourceType,
-      paymentId: payment.id,
-      status: payment.status,
-      redirectUrl: payment.source?.transaction_url || null,
+      method: methodType,
+      sessionId: session.sessionId,
+      redirectUrl: session.url,
     });
   } catch (error: any) {
     console.error('[Payment Error]', error);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { orderShippedEmail } from '@/lib/emailTemplates';
+import { sendEmail } from '@/lib/emailSender';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,31 +77,18 @@ export async function POST(req: NextRequest) {
       carrier: carrier || '',
     });
 
-    // Send via Resend
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+    // Send via Brevo
+    const result = await sendEmail({
+      to: customerEmail,
+      subject: emailContent.subject,
+      html: emailContent.html,
+    });
 
-    if (RESEND_API_KEY) {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `بوجا كار <${SENDER_EMAIL}>`,
-          to: [customerEmail],
-          subject: emailContent.subject,
-          html: emailContent.html,
-        }),
-      });
-
-      if (res.ok) {
-        return NextResponse.json({ sent: true });
-      }
+    if (result.sent) {
+      return NextResponse.json({ sent: true, messageId: result.messageId });
     }
 
-    return NextResponse.json({ sent: false, reason: 'No RESEND_API_KEY' });
+    return NextResponse.json({ sent: false, reason: result.error });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

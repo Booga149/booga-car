@@ -261,3 +261,88 @@ export function paymentReceivedEmail(data: { customerName: string; amount: numbe
     html: baseLayout(content, `تم استلام دفعتك بقيمة ${data.amount} ر.س`),
   };
 }
+
+/**
+ * 🎉 Welcome Email — New User Registration
+ */
+export function welcomeEmail(data: { customerName: string; customerEmail: string }): { subject: string; html: string } {
+  const content = `
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:56px;margin-bottom:1rem;">🎉</div>
+      <h2 style="margin:0;color:#1f2937;font-size:26px;font-weight:900;">
+        أهلاً بك في بوجا كار!
+      </h2>
+      <p style="margin:0.8rem 0 0;color:#6b7280;font-size:15px;line-height:1.8;">
+        مرحباً <strong style="color:#1f2937;">${data.customerName}</strong>، نور حسابك عندنا! 🚗
+      </p>
+    </div>
+
+    <!-- Features Grid -->
+    <div style="margin-bottom:2rem;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="padding:0.8rem;width:50%;vertical-align:top;">
+            <div style="background:#f8f9fa;border-radius:12px;padding:1.2rem;text-align:center;">
+              <div style="font-size:28px;margin-bottom:0.5rem;">🔍</div>
+              <h3 style="margin:0 0 0.3rem;font-size:14px;color:#1f2937;font-weight:800;">بحث ذكي</h3>
+              <p style="margin:0;font-size:12px;color:#6b7280;">ابحث بالسيارة أو رقم القطعة</p>
+            </div>
+          </td>
+          <td style="padding:0.8rem;width:50%;vertical-align:top;">
+            <div style="background:#f8f9fa;border-radius:12px;padding:1.2rem;text-align:center;">
+              <div style="font-size:28px;margin-bottom:0.5rem;">🚚</div>
+              <h3 style="margin:0 0 0.3rem;font-size:14px;color:#1f2937;font-weight:800;">شحن سريع</h3>
+              <p style="margin:0;font-size:12px;color:#6b7280;">توصيل لكل مناطق المملكة</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0.8rem;width:50%;vertical-align:top;">
+            <div style="background:#f8f9fa;border-radius:12px;padding:1.2rem;text-align:center;">
+              <div style="font-size:28px;margin-bottom:0.5rem;">✅</div>
+              <h3 style="margin:0 0 0.3rem;font-size:14px;color:#1f2937;font-weight:800;">ضمان سنة</h3>
+              <p style="margin:0;font-size:12px;color:#6b7280;">على جميع المنتجات الأصلية</p>
+            </div>
+          </td>
+          <td style="padding:0.8rem;width:50%;vertical-align:top;">
+            <div style="background:#f8f9fa;border-radius:12px;padding:1.2rem;text-align:center;">
+              <div style="font-size:28px;margin-bottom:0.5rem;">💰</div>
+              <h3 style="margin:0 0 0.3rem;font-size:14px;color:#1f2937;font-weight:800;">أسعار منافسة</h3>
+              <p style="margin:0;font-size:12px;color:#6b7280;">أفضل أسعار في السوق</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Separator -->
+    <div style="border-top:1px solid #e5e7eb;margin:1.5rem 0;"></div>
+
+    <!-- Tips -->
+    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fbbf24;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+      <h3 style="margin:0 0 0.8rem;font-size:16px;color:#92400e;font-weight:900;">💡 نصائح للبداية</h3>
+      <ul style="margin:0;padding-right:1.2rem;color:#78350f;font-size:13px;line-height:2;">
+        <li>أكمل بيانات ملفك الشخصي لتسريع عملية الشراء</li>
+        <li>استخدم البحث بالسيارة للعثور على القطع المتوافقة</li>
+        <li>أضف منتجاتك المفضلة للمفضلة لتتبع الأسعار</li>
+        <li>تابعنا على واتساب لأحدث العروض والخصومات</li>
+      </ul>
+    </div>
+
+    <!-- CTA Buttons -->
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="${SITE_URL}/products" style="display:inline-block;padding:1rem 2.5rem;background:${BRAND_COLOR};color:#ffffff;text-decoration:none;border-radius:12px;font-weight:900;font-size:16px;box-shadow:0 8px 20px rgba(225,29,72,0.3);margin-bottom:1rem;">
+        🛒 ابدأ التسوق الآن
+      </a>
+      <br />
+      <a href="${SITE_URL}/profile" style="display:inline-block;padding:0.8rem 2rem;background:#f3f4f6;color:#374151;text-decoration:none;border-radius:10px;font-weight:800;font-size:14px;margin-top:0.5rem;">
+        أكمل ملفك الشخصي →
+      </a>
+    </div>
+  `;
+
+  return {
+    subject: `🎉 أهلاً بك في بوجا كار — حسابك جاهز!`,
+    html: baseLayout(content, `مرحباً ${data.customerName}! حسابك في بوجا كار جاهز. ابدأ التسوق الآن!`),
+  };
+}
