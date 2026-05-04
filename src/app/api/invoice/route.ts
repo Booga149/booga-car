@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const { data: order, error } = await supabase
       .from('orders')
-      .select('*, order_items(*, product:products(name, sku))')
+      .select('*, order_items(*, product:products(name, part_number, image_url))')
       .eq('id', orderId)
       .single();
 

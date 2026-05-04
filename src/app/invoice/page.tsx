@@ -134,7 +134,7 @@ function InvoiceContent() {
                         {item.product?.name || item.product_name || 'قطعة غيار مجهولة'}
                       </div>
                       <div style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                        رقم القطعة: {item.product?.sku || 'غير متوفر'}
+                        رقم القطعة: {item.product?.part_number || 'غير متوفر'}
                       </div>
                     </td>
                     <td style={{ padding: '1rem 0.5rem', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.85rem' }}>{item.quantity}</td>
