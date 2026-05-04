@@ -346,3 +346,44 @@ export function welcomeEmail(data: { customerName: string; customerEmail: string
     html: baseLayout(content, `مرحباً ${data.customerName}! حسابك في بوجا كار جاهز. ابدأ التسوق الآن!`),
   };
 }
+
+/**
+ * 🔐 OTP Verification Email
+ */
+export function otpEmail(data: { code: string; email: string }): { subject: string; html: string } {
+  const content = `
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:48px;margin-bottom:1rem;">🔐</div>
+      <h2 style="margin:0;color:#1f2937;font-size:24px;font-weight:900;">
+        رمز التحقق الخاص بك
+      </h2>
+      <p style="margin:0.8rem 0 0;color:#6b7280;font-size:14px;line-height:1.6;">
+        أدخل الرمز التالي لتسجيل الدخول إلى حسابك في بوجا كار
+      </p>
+    </div>
+
+    <!-- OTP Code Display -->
+    <div style="background:linear-gradient(135deg,#f8f9fa,#e9ecef);border:2px dashed ${BRAND_COLOR};border-radius:16px;padding:2rem;margin-bottom:1.5rem;text-align:center;">
+      <div style="font-size:42px;font-weight:950;letter-spacing:16px;color:#1f2937;font-family:'Courier New',monospace;direction:ltr;">
+        ${data.code}
+      </div>
+    </div>
+
+    <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;">
+      <p style="margin:0;color:#92400e;font-size:13px;font-weight:700;line-height:1.8;">
+        ⏰ هذا الرمز صالح لمدة <strong>5 دقائق فقط</strong>
+        <br/>
+        🔒 لا تشارك هذا الرمز مع أي شخص
+      </p>
+    </div>
+
+    <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:1.5rem;">
+      إذا لم تطلب هذا الرمز، تجاهل هذه الرسالة.
+    </p>
+  `;
+
+  return {
+    subject: `🔐 رمز التحقق: ${data.code} — بوجا كار`,
+    html: baseLayout(content, `رمز التحقق الخاص بك هو ${data.code}`),
+  };
+}

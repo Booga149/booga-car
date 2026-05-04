@@ -35,10 +35,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [isEmailOtpSent, setIsEmailOtpSent] = useState(false);
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [liveUsers, setLiveUsers] = useState(247);
   const [focusedField, setFocusedField] = useState('');
@@ -157,66 +157,72 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     }
   };
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
+  // --- Email OTP: Send code ---
+  const handleSendEmailOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setAuthError('');
 
     try {
-      if (isLoginMode) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          await logSecurityEvent(supabase, {
-            type: 'AUTH_FAILURE',
-            title: 'فشل دخول (إيميل)',
-            account: email
-          });
-          // Better Arabic error messages
-          if (error.message.includes('Invalid login credentials')) {
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-          }
-          if (error.message.includes('Email not confirmed')) {
-            throw new Error('لم يتم تأكيد بريدك الإلكتروني بعد. تحقق من صندوق الوارد');
-          }
-          throw error;
-        }
-        await logSecurityEvent(supabase, {
-          type: 'AUTH_SUCCESS',
-          title: 'دخول ناجح (إيميل)',
-          account: email
-        });
-        onClose();
-        location.reload();
-      } else {
-        // Sign up via server API (auto-confirms the user)
-        const res = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, full_name: email.split('@')[0] }),
-        });
-        const result = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(result.error || 'خطأ في إنشاء الحساب');
-        }
+      const res = await fetch('/api/auth/email-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const result = await res.json();
 
-        // Auto-login after successful signup
-        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-        if (loginError) {
-          throw new Error('تم إنشاء الحساب! سجل دخول بالبريد وكلمة المرور');
-        }
-        
-        await logSecurityEvent(supabase, {
-          type: 'AUTH_SUCCESS',
-          title: 'تسجيل حساب جديد',
-          account: email
-        });
-        onClose();
-        location.reload();
-        return;
+      if (!res.ok) {
+        throw new Error(result.error || 'فشل إرسال الرمز');
       }
+
+      setIsEmailOtpSent(true);
     } catch (err: any) {
-      setAuthError(err.message || 'خطأ في المصادقة');
+      setAuthError(err.message || 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Email OTP: Verify code ---
+  const handleVerifyEmailOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setAuthError('');
+
+    try {
+      const res = await fetch('/api/auth/email-otp', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), code: emailOtpCode.trim() }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || 'الرمز غير صحيح');
+      }
+
+      // Use the token_hash to sign in via Supabase
+      if (result.token_hash) {
+        const { error: verifyErr } = await supabase.auth.verifyOtp({
+          token_hash: result.token_hash,
+          type: 'magiclink',
+        });
+        if (verifyErr) {
+          console.error('Verify OTP error:', verifyErr);
+          throw new Error('فشل في تسجيل الدخول. حاول مرة أخرى');
+        }
+      }
+
+      await logSecurityEvent(supabase, {
+        type: 'AUTH_SUCCESS',
+        title: result.isNewUser ? 'تسجيل جديد (OTP)' : 'دخول (OTP)',
+        account: email
+      });
+
+      onClose();
+      location.reload();
+    } catch (err: any) {
+      setAuthError(err.message || 'خطأ في التحقق');
     } finally {
       setLoading(false);
     }
@@ -797,79 +803,94 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             )
           ) : (
             <>
-              <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>البريد الإلكتروني</label>
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
-                    <input 
-                      type="email" required value={email} 
-                      onChange={e => setEmail(e.target.value)} 
-                      placeholder="name@example.com" 
-                      style={{ ...inputStyle('email'), paddingRight: '3rem' }}
-                      onFocus={() => setFocusedField('email')}
-                      onBlur={() => setFocusedField('')}
-                    />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>كلمة المرور</label>
-                  <div style={{ position: 'relative' }}>
-                    <Lock size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
-                    <input 
-                      type={showPassword ? "text" : "password"} required 
-                      value={password} onChange={e => setPassword(e.target.value)} 
-                      placeholder="••••••••" minLength={6} 
-                      style={{ ...inputStyle('password'), paddingRight: '3rem', paddingLeft: '3rem' }}
-                      onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField('')}
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ 
-                      position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', 
-                      background: 'transparent', border: 'none', color: 'rgba(0,0,0,0.3)', 
-                      cursor: 'pointer', display: 'flex', padding: '0.2rem',
-                    }}>
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-                {authError && (
+              {isEmailOtpSent ? (
+                <form onSubmit={handleVerifyEmailOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                   <div style={{ 
-                    color: authError.includes('✅') ? '#10b981' : '#f43f5e', 
-                    fontSize: '0.9rem', padding: '0.8rem', 
-                    background: authError.includes('✅') ? 'rgba(16,185,129,0.06)' : 'rgba(244, 63, 94, 0.06)', 
-                    borderRadius: '10px', 
-                    border: authError.includes('✅') ? '1px solid rgba(16,185,129,0.15)' : '1px solid rgba(244, 63, 94, 0.15)', 
-                    fontWeight: 700, textAlign: 'center' 
+                    textAlign: 'center', padding: '1.5rem', 
+                    background: 'rgba(255,215,0,0.04)', borderRadius: '16px',
+                    border: '1px solid rgba(255,215,0,0.1)',
                   }}>
-                    {authError}
+                    <CheckCircle2 size={32} color="#B8860B" style={{ marginBottom: '0.5rem' }} />
+                    <p style={{ fontWeight: 700, color: '#333', margin: '0.5rem 0 0', fontSize: '0.95rem' }}>
+                      تم إرسال رمز التحقق إلى
+                    </p>
+                    <p style={{ fontWeight: 900, color: '#B8860B', margin: '0.3rem 0 0', fontSize: '1.1rem', direction: 'ltr' }}>
+                      {email}
+                    </p>
                   </div>
-                )}
-                <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
-                  padding: '1.1rem', 
-                  background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
-                  fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', 
-                  transition: 'all 0.3s',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
-                  boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
-                }}>
-                  {loading ? 'جاري التحقق...' : (<>{isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب'} <ArrowRight size={18} /></>)}
-                </button>
-                {/* Toggle login/signup for email */}
-                <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
-                  <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
-                    {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
-                    <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
-                      background: 'transparent', border: 'none', color: '#B8860B', 
-                      cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
-                      textDecoration: 'underline', textUnderlineOffset: '3px',
-                    }}>
-                      {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
-                    </button>
-                  </p>
-                </div>
-              </form>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>رمز التحقق (4 أرقام)</label>
+                    <input 
+                      type="text" required placeholder="0000" 
+                      value={emailOtpCode} onChange={e => setEmailOtpCode(e.target.value.replace(/\D/g, '').slice(0, 4))} 
+                      maxLength={4}
+                      style={{ 
+                        ...inputStyle('emailOtp'),
+                        textAlign: 'center', letterSpacing: '12px', 
+                        fontSize: '1.8rem', fontWeight: 900, 
+                        color: '#B8860B',
+                      }} 
+                      onFocus={() => setFocusedField('emailOtp')}
+                      onBlur={() => setFocusedField('')}
+                      autoFocus
+                    />
+                  </div>
+                  {authError && (
+                    <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>
+                      {authError}
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading || emailOtpCode.length < 4} className="auth-submit-btn" style={{ 
+                    padding: '1.1rem', 
+                    background: emailOtpCode.length === 4 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'rgba(0,0,0,0.08)', 
+                    color: emailOtpCode.length === 4 ? '#111' : 'rgba(0,0,0,0.3)', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                    fontSize: '1rem', cursor: loading || emailOtpCode.length < 4 ? 'not-allowed' : 'pointer', 
+                    transition: 'all 0.3s',
+                    boxShadow: emailOtpCode.length === 4 ? '0 8px 30px rgba(255, 215, 0, 0.2)' : 'none',
+                  }}>
+                    {loading ? 'جاري التحقق...' : 'تأكيد الرمز'}
+                  </button>
+                  <button type="button" onClick={() => { setIsEmailOtpSent(false); setEmailOtpCode(''); setAuthError(''); }} style={{ background: 'transparent', border: 'none', color: 'rgba(0,0,0,0.4)', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+                    ← تغيير البريد
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleSendEmailOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>البريد الإلكتروني</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
+                      <input 
+                        type="email" required value={email} 
+                        onChange={e => setEmail(e.target.value)} 
+                        placeholder="name@example.com" 
+                        style={{ ...inputStyle('email'), paddingRight: '3rem' }}
+                        onFocus={() => setFocusedField('email')}
+                        onBlur={() => setFocusedField('')}
+                      />
+                    </div>
+                    <p style={{ margin: '0.2rem 0 0', color: 'rgba(0,0,0,0.35)', fontSize: '0.78rem', fontWeight: 600 }}>
+                      سنرسل لك رمز تحقق من 4 أرقام على بريدك
+                    </p>
+                  </div>
+                  {authError && (
+                    <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>
+                      {authError}
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
+                    padding: '1.1rem', 
+                    background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
+                    color: '#111', border: 'none', borderRadius: '14px', fontWeight: 900, 
+                    fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', 
+                    transition: 'all 0.3s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
+                    boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
+                  }}>
+                    {loading ? 'جاري الإرسال...' : (<>إرسال رمز التحقق <ArrowRight size={18} /></>)}
+                  </button>
+                </form>
+              )}
             </>
           )}
 
