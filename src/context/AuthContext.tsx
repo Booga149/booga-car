@@ -92,17 +92,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (u) {
         await fetchProfile(u.id);
 
-        // Send welcome email for brand new users (created within last 30 seconds)
+        // Send welcome email for brand new users (created within last 5 minutes)
         if (_event === 'SIGNED_IN' && u.created_at) {
           const createdAt = new Date(u.created_at).getTime();
           const now = Date.now();
-          const isNewUser = (now - createdAt) < 30000; // 30 seconds
+          const isNewUser = (now - createdAt) < 300000; // 5 minutes
           const welcomeSentKey = `booga_welcome_sent_${u.id}`;
 
           if (isNewUser && !localStorage.getItem(welcomeSentKey)) {
             localStorage.setItem(welcomeSentKey, '1');
             try {
-              fetch('/api/email/welcome', {
+              const res = await fetch('/api/email/welcome', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -110,8 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   email: u.email,
                   name: u.user_metadata?.full_name || u.email?.split('@')[0],
                 }),
-              }).catch(() => {});
-            } catch {}
+              });
+              const data = await res.json();
+              console.log('[Welcome Email]', data);
+            } catch (err) {
+              console.error('[Welcome Email Error]', err);
+            }
           }
         }
       } else {
