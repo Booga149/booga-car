@@ -363,11 +363,21 @@ export function otpEmail(data: { code: string; email: string }): { subject: stri
     </div>
 
     <!-- OTP Code Display -->
-    <div style="background:linear-gradient(135deg,#f8f9fa,#e9ecef);border:2px dashed ${BRAND_COLOR};border-radius:16px;padding:2rem;margin-bottom:1.5rem;text-align:center;">
-      <div style="font-size:42px;font-weight:950;letter-spacing:16px;color:#1f2937;font-family:'Courier New',monospace;direction:ltr;">
-        ${data.code}
-      </div>
-    </div>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:1.5rem;">
+      <tr>
+        <td align="center" style="padding:1.5rem 0;">
+          <table role="presentation" cellpadding="0" cellspacing="8" style="margin:0 auto;">
+            <tr>
+              ${data.code.split('').map(digit => `
+                <td style="width:60px;height:72px;background:${BRAND_COLOR};border-radius:12px;text-align:center;vertical-align:middle;">
+                  <span style="font-size:36px;font-weight:900;color:#ffffff;font-family:'Courier New',monospace;line-height:72px;">${digit}</span>
+                </td>
+              `).join('')}
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
     <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;">
       <p style="margin:0;color:#92400e;font-size:13px;font-weight:700;line-height:1.8;">
