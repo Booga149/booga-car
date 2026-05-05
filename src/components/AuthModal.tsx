@@ -201,14 +201,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         throw new Error(result.error || 'الرمز غير صحيح');
       }
 
-      // Use the token_hash to sign in via Supabase
-      if (result.token_hash) {
-        const { error: verifyErr } = await supabase.auth.verifyOtp({
-          token_hash: result.token_hash,
-          type: 'magiclink',
+      // Sign in using the temp password set by the server
+      if (result._tp) {
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: result.email,
+          password: result._tp,
         });
-        if (verifyErr) {
-          console.error('Verify OTP error:', verifyErr);
+        if (signInErr) {
+          console.error('Sign in error:', signInErr);
           throw new Error('فشل في تسجيل الدخول. حاول مرة أخرى');
         }
       }

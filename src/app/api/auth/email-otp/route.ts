@@ -14,7 +14,7 @@ function getAdmin() {
 }
 
 function generateOTP(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit code
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 /**
@@ -45,17 +45,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate OTP
     const code = generateOTP();
 
-    // Store in DB
     await supabase.from('email_otps').insert({
       email: normalizedEmail,
       code,
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
 
-    // Send email
     const emailContent = otpEmail({ code, email: normalizedEmail });
     const result = await sendEmail({
       to: normalizedEmail,
@@ -106,7 +103,7 @@ export async function PUT(req: NextRequest) {
       .single();
 
     if (otpErr || !otpRecord) {
-      // Increment attempts on the latest OTP for this email
+      // Increment attempts
       const { data: latestOtp } = await supabase
         .from('email_otps')
         .select('id, attempts')
@@ -117,17 +114,13 @@ export async function PUT(req: NextRequest) {
         .single();
 
       if (latestOtp) {
+        const newAttempts = (latestOtp.attempts || 0) + 1;
         await supabase
           .from('email_otps')
-          .update({ attempts: (latestOtp.attempts || 0) + 1 })
+          .update({ attempts: newAttempts, ...(newAttempts >= 5 ? { used: true } : {}) })
           .eq('id', latestOtp.id);
 
-        if ((latestOtp.attempts || 0) >= 4) {
-          // Mark as used (burned) after too many attempts
-          await supabase
-            .from('email_otps')
-            .update({ used: true })
-            .eq('id', latestOtp.id);
+        if (newAttempts >= 5) {
           return NextResponse.json(
             { error: 'تم تجاوز عدد المحاولات. اطلب رمز جديد' },
             { status: 429 }
@@ -144,36 +137,58 @@ export async function PUT(req: NextRequest) {
       .update({ used: true })
       .eq('id', otpRecord.id);
 
-    // Check if user exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(
-      (u: any) => u.email?.toLowerCase() === normalizedEmail
-    );
-
+    // Check if user exists by email (fast lookup, no listUsers)
     let userId: string;
     let isNewUser = false;
+    let tempPassword = '';
 
-    if (existingUser) {
-      userId = existingUser.id;
-    } else {
-      // Create new user (auto-confirmed, random password)
-      const randomPass = crypto.randomUUID();
-      const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
-        email: normalizedEmail,
-        password: randomPass,
-        email_confirm: true,
-        user_metadata: { full_name: normalizedEmail.split('@')[0] },
+    // Try to find the user by checking profiles table first
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', (await supabase.rpc('get_user_id_by_email', { p_email: normalizedEmail }).then(r => r.data)) || '')
+      .maybeSingle();
+
+    // Simpler approach: try to create the user. If exists, it will fail.
+    tempPassword = crypto.randomUUID();
+
+    const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
+      email: normalizedEmail,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { full_name: normalizedEmail.split('@')[0] },
+    });
+
+    if (createErr) {
+      // User already exists — update their password to our temp one
+      // First find the user
+      const { data: { users } } = await supabase.auth.admin.listUsers({ 
+        page: 1, 
+        perPage: 1,
       });
+      
+      // Search by email using a more targeted approach
+      const { data: userList } = await supabase.auth.admin.listUsers();
+      const existingUser = userList?.users?.find(
+        (u: any) => u.email?.toLowerCase() === normalizedEmail
+      );
 
-      if (createErr || !newUser?.user) {
-        console.error('[OTP Verify] Create user error:', createErr);
-        return NextResponse.json({ error: 'فشل في إنشاء الحساب' }, { status: 500 });
+      if (!existingUser) {
+        return NextResponse.json({ error: 'فشل في العثور على الحساب' }, { status: 500 });
       }
 
-      userId = newUser.user.id;
+      userId = existingUser.id;
+
+      // Update password to temp one for login
+      await supabase.auth.admin.updateUserById(userId, {
+        password: tempPassword,
+      });
+    } else {
+      // New user created successfully
+      userId = newUser.user!.id;
       isNewUser = true;
 
-      // Send welcome email for new users
+      // Send welcome email
       try {
         const customerName = normalizedEmail.split('@')[0];
         const welcomeContent = welcomeEmail({ customerName, customerEmail: normalizedEmail });
@@ -182,7 +197,6 @@ export async function PUT(req: NextRequest) {
           subject: welcomeContent.subject,
           html: welcomeContent.html,
         });
-        console.log(`[OTP] Welcome email sent to ${normalizedEmail}`);
       } catch {}
 
       // Notify admin
@@ -195,26 +209,13 @@ export async function PUT(req: NextRequest) {
       } catch {}
     }
 
-    // Generate a magic link for the user to sign in
-    const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
-      email: normalizedEmail,
-    });
-
-    if (linkErr || !linkData) {
-      console.error('[OTP Verify] Generate link error:', linkErr);
-      return NextResponse.json({ error: 'فشل في تسجيل الدخول' }, { status: 500 });
-    }
-
-    // Extract the token from the generated link
-    const token_hash = linkData.properties?.hashed_token;
-
+    // Return temp password — client will use signInWithPassword
     return NextResponse.json({
       verified: true,
       isNewUser,
       userId,
-      token_hash,
       email: normalizedEmail,
+      _tp: tempPassword, // temp password for client sign-in
     });
   } catch (err: any) {
     console.error('[OTP Verify Error]', err);
