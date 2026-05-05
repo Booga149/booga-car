@@ -366,7 +366,7 @@ export function otpEmail(data: { code: string; email: string }): { subject: stri
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:1.5rem;">
       <tr>
         <td align="center" style="padding:1.5rem 0;">
-          <table role="presentation" cellpadding="0" cellspacing="8" style="margin:0 auto;">
+          <table role="presentation" cellpadding="0" cellspacing="8" style="margin:0 auto;" dir="ltr">
             <tr>
               ${data.code.split('').map(digit => `
                 <td style="width:60px;height:72px;background:${BRAND_COLOR};border-radius:12px;text-align:center;vertical-align:middle;">
