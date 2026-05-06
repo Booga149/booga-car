@@ -66,10 +66,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function getData() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.push('/'); return; }
-      setUser(session.user);
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { 
+          window.location.href = '/'; 
+          return; 
+        }
+        setUser(session.user);
+        
         const { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (prof) {
           setProfile(prof);
@@ -86,8 +90,11 @@ export default function ProfilePage() {
            const { data: myProds } = await supabase.from('products').select('id, name, price, stock, category, views_count, likes_count, reviews_count, image_url, is_active').eq('seller_id', session.user.id);
            if (myProds) setMyProducts(myProds);
         }
-      } catch (err) {}
-      setLoading(false);
+      } catch (err) {
+        console.error("Profile load error:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     getData();
   }, [router]);
