@@ -238,7 +238,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '350px', overflowY: 'auto' }}>
                   {notifications.map(n => (
-                    <div key={n.id} onClick={() => { if (!n.is_read) markAsRead(n.id); }} style={{
+                    <div key={n.id} onClick={() => { 
+                      if (!n.is_read) markAsRead(n.id); 
+                      
+                      let url = '/admin';
+                      const title = n.title || '';
+                      const type = n.type || '';
+                      const anyN = n as any;
+                      
+                      if (anyN.link) {
+                        url = anyN.link;
+                      } else if (type.includes('ORDER') || title.includes('طلب') || title.includes('دفع') || title.includes('Stripe')) {
+                        url = '/admin/orders';
+                      } else if (title.includes('منتج') || type.includes('PRODUCT')) {
+                        url = '/admin/products';
+                      } else if (type.includes('SECURITY') || title.includes('دخول') || title.includes('محاولة')) {
+                        url = '/admin/logs';
+                      }
+                      
+                      window.location.href = url;
+                    }} style={{
                       padding: '0.8rem', 
                       background: n.is_read ? 'transparent' : adminColors.primaryLighter, 
                       borderRadius: '10px',
