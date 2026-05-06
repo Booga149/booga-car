@@ -32,8 +32,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }, [isOpen, initialMode]);
   const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [phonePassword, setPhonePassword] = useState('');
   const [email, setEmail] = useState('');
   const [emailOtpCode, setEmailOtpCode] = useState('');
   const [isEmailOtpSent, setIsEmailOtpSent] = useState(false);
@@ -103,55 +102,34 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
       if (formattedPhone.startsWith('0')) formattedPhone = formattedPhone.substring(1);
       if (!formattedPhone.startsWith('+')) formattedPhone = `+966${formattedPhone.replace(/^966/, '')}`;
       
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
-      });
-
-      if (error) throw error;
-      setIsOtpSent(true);
-    } catch (err: any) {
-      setAuthError(err.message || 'حدث خطأ أثناء إرسال الكود');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setAuthError('');
-
-    try {
-      let formattedPhone = phoneNumber.trim();
-      if (formattedPhone.startsWith('0')) formattedPhone = formattedPhone.substring(1);
-      if (!formattedPhone.startsWith('+')) formattedPhone = `+966${formattedPhone.replace(/^966/, '')}`;
-
-      const { error } = await supabase.auth.verifyOtp({
-        phone: formattedPhone,
-        token: otpCode,
-        type: 'sms',
-      });
-
-      if (error) {
-        await logSecurityEvent(supabase, {
-          type: 'AUTH_FAILURE',
-          title: 'فشل تحقق الجوال',
-          account: `جوال: ${formattedPhone}`
+      if (isLoginMode) {
+        const { error } = await supabase.auth.signInWithPassword({
+          phone: formattedPhone,
+          password: phonePassword,
         });
-        throw error;
+        if (error) throw error;
+        await logSecurityEvent(supabase, { type: 'AUTH_SUCCESS', title: 'دخول بالجوال', account: formattedPhone });
+      } else {
+        const { error } = await supabase.auth.signUp({
+          phone: formattedPhone,
+          password: phonePassword,
+        });
+        if (error) throw error;
+        await logSecurityEvent(supabase, { type: 'AUTH_SUCCESS', title: 'تسجيل جديد بالجوال', account: formattedPhone });
       }
-      
-      await logSecurityEvent(supabase, {
-        type: 'AUTH_SUCCESS',
-        title: 'دخول ناجح بالجوال',
-        account: `جوال: ${formattedPhone}`
-      });
 
       onClose();
-      setIsOtpSent(false);
       location.reload(); 
     } catch (err: any) {
-      setAuthError('كود التحقق غير صحيح، يرجى المحاولة مرة أخرى');
+      if (err.message.includes('Invalid login credentials')) {
+        setAuthError('رقم الجوال أو كلمة المرور غير صحيحة');
+      } else if (err.message.includes('User already registered')) {
+        setAuthError('رقم الجوال مسجل بالفعل، يرجى تسجيل الدخول');
+      } else if (err.message.includes('Password should be')) {
+        setAuthError('كلمة المرور يجب أن لا تقل عن 6 أحرف');
+      } else {
+        setAuthError(err.message || 'حدث خطأ أثناء المعالجة');
+      }
     } finally {
       setLoading(false);
     }
@@ -681,7 +659,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             border: '1px solid rgba(0,0,0,0.06)',
           }}>
             <button 
-              onClick={() => { setAuthMethod('phone'); setIsOtpSent(false); setAuthError(''); }} 
+              onClick={() => { setAuthMethod('phone'); setAuthError(''); }} 
               style={{ 
                 flex: 1, padding: '0.7rem', borderRadius: '10px', border: 'none', 
                 background: authMethod === 'phone' ? 'rgba(212,175,55,0.12)' : 'transparent', 
@@ -695,7 +673,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               <Phone size={16} /> الجوال
             </button>
             <button 
-              onClick={() => { setAuthMethod('email'); setIsOtpSent(false); setAuthError(''); }} 
+              onClick={() => { setAuthMethod('email'); setIsEmailOtpSent(false); setAuthError(''); }} 
               style={{ 
                 flex: 1, padding: '0.7rem', borderRadius: '10px', border: 'none', 
                 background: authMethod === 'email' ? 'rgba(212,175,55,0.12)' : 'transparent', 
@@ -712,95 +690,67 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
            
           {/* Forms */}
           {authMethod === 'phone' ? (
-            isOtpSent ? (
-              <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                <div style={{ 
-                  textAlign: 'center', padding: '1.5rem', 
-                  background: 'rgba(255,215,0,0.04)', borderRadius: '16px',
-                  border: '1px solid rgba(255,215,0,0.1)',
-                }}>
-                  <CheckCircle2 size={32} color="#FFD700" style={{ marginBottom: '0.5rem' }} />
-                  <p style={{ fontWeight: 700, color: 'white', margin: '0.5rem 0 0', fontSize: '0.95rem' }}>
-                    تم إرسال رمز التحقق إلى
-                  </p>
-                  <p style={{ fontWeight: 900, color: '#FFD700', margin: '0.3rem 0 0', fontSize: '1.1rem', direction: 'ltr' }}>
-                    +966{phoneNumber}
-                  </p>
+            <form onSubmit={handlePhoneAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>رقم الجوال</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ 
+                    position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', 
+                    fontWeight: 800, color: 'rgba(0,0,0,0.4)', fontSize: '0.95rem',
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  }}>
+                    🇸🇦 +966
+                  </span>
+                  <input 
+                    type="tel" required placeholder="5XXXXXXXX" 
+                    value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} 
+                    style={{ ...inputStyle('phone'), paddingRight: '6rem' }} 
+                    onFocus={() => setFocusedField('phone')}
+                    onBlur={() => setFocusedField('')}
+                  />
                 </div>
-                <input 
-                  type="text" required placeholder="000000" 
-                  value={otpCode} onChange={e => setOtpCode(e.target.value)} 
-                  style={{ 
-                    ...inputStyle('otp'),
-                    textAlign: 'center', letterSpacing: '10px', 
-                    fontSize: '1.5rem', fontWeight: 900, 
-                    color: '#FFD700',
-                  }} 
-                  onFocus={() => setFocusedField('otp')}
-                  onBlur={() => setFocusedField('')}
-                />
-                <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
-                  padding: '1.1rem', background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: 'var(--text-primary)', border: 'none', borderRadius: '14px', fontWeight: 900, 
-                  cursor: 'pointer', fontSize: '1rem',
-                  boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
-                  transition: 'all 0.3s',
-                }}>
-                  {loading ? 'جاري التحقق...' : 'تأكيد الرمز'}
-                </button>
-                {authError && <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>{authError}</div>}
-                <button type="button" onClick={() => setIsOtpSent(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(0,0,0,0.4)', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
-                  ← تغيير الرقم
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handlePhoneAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>رقم الجوال</label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ 
-                      position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', 
-                      fontWeight: 800, color: 'rgba(0,0,0,0.4)', fontSize: '0.95rem',
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
-                    }}>
-                      🇸🇦 +966
-                    </span>
-                    <input 
-                      type="tel" required placeholder="5XXXXXXXX" 
-                      value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} 
-                      style={{ ...inputStyle('phone'), paddingRight: '6rem' }} 
-                      onFocus={() => setFocusedField('phone')}
-                      onBlur={() => setFocusedField('')}
-                    />
-                  </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <label style={{ color: 'rgba(0,0,0,0.6)', fontWeight: 700, fontSize: '0.85rem' }}>كلمة المرور</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={18} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.3)' }} />
+                  <input 
+                    type="password" required placeholder={isLoginMode ? "أدخل كلمة المرور" : "كلمة مرور قوية (6 أحرف على الأقل)"} 
+                    value={phonePassword} onChange={e => setPhonePassword(e.target.value)} 
+                    style={{ ...inputStyle('password'), paddingRight: '3rem' }} 
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField('')}
+                    minLength={6}
+                  />
                 </div>
-                {authError && <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>{authError}</div>}
-                <button type="submit" disabled={loading} className="auth-submit-btn" style={{ 
-                  padding: '1.1rem', 
-                  background: 'linear-gradient(135deg, #FFD700, #FFA500)', 
-                  color: '#111', border: 'none', borderRadius: '14px', fontWeight: 900, 
-                  cursor: 'pointer', fontSize: '1rem',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
-                  boxShadow: '0 8px 30px rgba(255, 215, 0, 0.2)',
-                  transition: 'all 0.3s',
-                }}>
-                  {loading ? 'جاري الإرسال...' : (<>إرسال رمز التحقق <ArrowRight size={18} /></>)}
-                </button>
-                {/* Toggle login/signup */}
-                <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
-                  <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
-                    {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
-                    <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
-                      background: 'transparent', border: 'none', color: '#B8860B', 
-                      cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
-                      textDecoration: 'underline', textUnderlineOffset: '3px',
-                    }}>
-                      {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
-                    </button>
-                  </p>
-                </div>
-              </form>
-            )
+              </div>
+              {authError && <div style={{ color: '#f43f5e', fontSize: '0.9rem', padding: '0.8rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: '10px', border: '1px solid rgba(244, 63, 94, 0.15)', fontWeight: 700, textAlign: 'center' }}>{authError}</div>}
+              <button type="submit" disabled={loading || !phoneNumber || phonePassword.length < 6} className="auth-submit-btn" style={{ 
+                padding: '1.1rem', 
+                background: (!phoneNumber || phonePassword.length < 6) ? 'rgba(0,0,0,0.08)' : 'linear-gradient(135deg, #FFD700, #FFA500)', 
+                color: (!phoneNumber || phonePassword.length < 6) ? 'rgba(0,0,0,0.3)' : '#111', 
+                border: 'none', borderRadius: '14px', fontWeight: 900, 
+                cursor: (!phoneNumber || phonePassword.length < 6 || loading) ? 'not-allowed' : 'pointer', fontSize: '1rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
+                boxShadow: (!phoneNumber || phonePassword.length < 6) ? 'none' : '0 8px 30px rgba(255, 215, 0, 0.2)',
+                transition: 'all 0.3s',
+              }}>
+                {loading ? 'جاري المعالجة...' : isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب'}
+              </button>
+              {/* Toggle login/signup */}
+              <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
+                <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.9rem', fontWeight: 500, margin: 0 }}>
+                  {isLoginMode ? 'ما عندك حساب؟ ' : 'عندك حساب؟ '}
+                  <button type="button" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }} style={{ 
+                    background: 'transparent', border: 'none', color: '#B8860B', 
+                    cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem', padding: '0 2px',
+                    textDecoration: 'underline', textUnderlineOffset: '3px',
+                  }}>
+                    {isLoginMode ? 'أنشئ حساب الآن' : 'سجل دخولك'}
+                  </button>
+                </p>
+              </div>
+            </form>
           ) : (
             <>
               {isEmailOtpSent ? (
