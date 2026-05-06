@@ -63,8 +63,6 @@ export default function ProductDetailsClient({ id }: { id: string }) {
             color: 'var(--border)',
             stock_quantity: data.stock_quantity ?? 0,
           });
-          
-          setLoading(false); // Ensure UI unblocks once we have the product!
 
           // Fetch Related Products and Seller Profile in PARALLEL silently
           const pRelated = supabase.from('products').select('*').eq('category', data.category).neq('id', id).limit(4);
@@ -84,12 +82,10 @@ export default function ProductDetailsClient({ id }: { id: string }) {
           if (profRes.data) {
             setSellerProfile(profRes.data);
           }
-        } else if (!localMatch) {
-          // If no data and no local match
-          setLoading(false);
         }
       } catch (e) {
         console.error("Error fetching detail:", e);
+      } finally {
         setLoading(false);
       }
     }
