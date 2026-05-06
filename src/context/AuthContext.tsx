@@ -43,11 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile (role, name, etc.) from profiles table
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('profiles')
         .select('id, full_name, phone, role, business_name, dealer_status')
         .eq('id', userId)
         .single();
+        
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 4000)
+      );
+
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
       
       if (data && !error) {
         setProfile({
@@ -79,6 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let isMounted = true;
 
+    // Safety fallback: Force loading to false after 3 seconds no matter what
+    const fallbackTimeout = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3000);
+
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -88,7 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error("Auth init error:", e);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(fallbackTimeout);
+        }
       }
     };
 
@@ -103,11 +117,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         if (isMounted) setProfile(null);
       }
-      if (isMounted) setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+        clearTimeout(fallbackTimeout);
+      }
     });
 
     return () => {
       isMounted = false;
+      clearTimeout(fallbackTimeout);
       subscription.unsubscribe();
     };
   }, []);
