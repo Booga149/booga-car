@@ -46,10 +46,11 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     setRefreshing(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .select('*, order_items(*), profiles:user_id(full_name, email, phone)')
+        .select('*, order_items(*), profiles:user_id(full_name, phone)')
         .order('created_at', { ascending: false });
+      if (error) console.error("Fetch orders error:", error);
       if (data) setOrders(data);
     } catch (e) { console.error(e); }
     setLoading(false);
