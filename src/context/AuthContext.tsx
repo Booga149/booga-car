@@ -77,27 +77,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const u = session?.user || null;
-      setUser(u);
-      if (u) await fetchProfile(u.id);
-      setLoading(false);
-    });
+    let isMounted = true;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const u = session?.user || null;
+        if (isMounted) setUser(u);
+        if (u) await fetchProfile(u.id);
+      } catch (e) {
+        console.error("Auth init error:", e);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    initAuth();
 
     // Listen for auth changes (including OAuth callbacks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user || null;
-      setUser(u);
+      if (isMounted) setUser(u);
       if (u) {
         await fetchProfile(u.id);
-        // Welcome email is now sent server-side from /api/auth/signup
       } else {
-        setProfile(null);
+        if (isMounted) setProfile(null);
       }
+      if (isMounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const openLoginModal = () => { setAuthMode('login'); setIsAuthModalOpen(true); };
