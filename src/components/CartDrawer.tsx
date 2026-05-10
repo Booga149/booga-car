@@ -18,7 +18,7 @@ export default function CartDrawer() {
           backdropFilter: 'blur(5px)'
         }} 
       />
-      <div className="glass-panel" style={{
+      <div className="glass-panel cart-drawer-sheet" style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, width: 'min(400px, 100%)',
         borderRight: '1px solid var(--border)', zIndex: 10000,
         background: 'var(--surface)',
@@ -93,9 +93,9 @@ export default function CartDrawer() {
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                        <span style={{ color: '#e11d48', fontWeight: 900, fontSize: '1.15rem' }}>{formatCurrency(item.price)}</span>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'var(--background)', borderRadius: '6px', padding: '0.2rem 0.6rem', border: '1px solid var(--border)' }}>
-                         <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.4rem', fontWeight: 900 }}>-</button>
+                         <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.4rem', fontWeight: 900, padding: '0.5rem', touchAction: 'manipulation' }}>-</button>
                          <span style={{ fontWeight: 900, color: 'var(--text-primary)' }}>{item.quantity}</span>
-                         <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 900 }}>+</button>
+                         <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 900, padding: '0.5rem', touchAction: 'manipulation' }}>+</button>
                        </div>
                      </div>
                    </div>

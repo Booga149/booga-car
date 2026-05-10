@@ -273,8 +273,8 @@ export default function MobileBottomNav() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', gap: '0.15rem',
                   background: 'none', border: 'none',
-                  cursor: 'pointer', padding: '0.3rem 0.6rem',
-                  position: 'relative',
+                  cursor: 'pointer', padding: '0.5rem 0.8rem',
+                  position: 'relative', touchAction: 'manipulation',
                 }}
               >
                 <div style={{ position: 'relative' }}>
@@ -311,7 +311,8 @@ export default function MobileBottomNav() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', gap: '0.15rem',
                   background: 'none', border: 'none',
-                  cursor: 'pointer', padding: '0.3rem 0.6rem',
+                  cursor: 'pointer', padding: '0.5rem 0.8rem',
+                  touchAction: 'manipulation',
                 }}
               >
                 <Icon
@@ -375,7 +376,8 @@ export default function MobileBottomNav() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', gap: '0.15rem',
                   textDecoration: 'none',
-                  padding: '0.3rem 0.6rem',
+                  padding: '0.5rem 0.8rem',
+                  touchAction: 'manipulation',
                 }}
               >
                 <div style={{
@@ -415,7 +417,8 @@ export default function MobileBottomNav() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', gap: '0.15rem',
                   background: 'none', border: 'none',
-                  cursor: 'pointer', padding: '0.3rem 0.6rem',
+                  cursor: 'pointer', padding: '0.5rem 0.8rem',
+                  touchAction: 'manipulation',
                 }}
               >
                 <Icon size={22} color="var(--text-secondary)" strokeWidth={1.8} />
@@ -438,7 +441,8 @@ export default function MobileBottomNav() {
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', gap: '0.15rem',
                 textDecoration: 'none',
-                padding: '0.3rem 0.6rem',
+                padding: '0.5rem 0.8rem', /* INCREASED FOR TOUCH */
+                touchAction: 'manipulation',
               }}
             >
               <Icon

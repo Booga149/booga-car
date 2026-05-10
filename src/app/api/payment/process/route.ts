@@ -59,14 +59,12 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Create Stripe Checkout Session ───
-    // Prepare line items from cart
-    const lineItems = items?.length > 0 
-      ? items.map((item: any) => ({
-          name: item.name || `منتج #${item.id?.slice(0, 6) || ''}`,
-          quantity: item.quantity || 1,
-          price: item.price || 0,
-        }))
-      : [{ name: `طلب Booga Car #${orderId.slice(0, 8)}`, quantity: 1, price: amount }];
+    // Prepare a single line item with the exact total amount to ensure shipping & taxes are included
+    const lineItems = [{ 
+      name: `طلب Booga Car #${orderId.slice(0, 8)}`, 
+      quantity: 1, 
+      price: amount 
+    }];
 
     const session = await createCheckoutSession({
       orderId,
