@@ -653,10 +653,29 @@ export default function CheckoutPage() {
                 background: 'var(--surface)', boxShadow: 'var(--card-shadow)'
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+                  {/* المجموع الفرعي */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
                     <span>المجموع الفرعي ({cartItems.length} عناصر)</span>
                     <span style={{ color: 'var(--text-primary)' }}>{cartPricing.subtotal?.toLocaleString()} ر.س</span>
                   </div>
+
+                  {/* الخصم */}
+                  {cartPricing.couponDiscount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800, color: '#10b981' }}>
+                      <span>الخصم</span>
+                      <span>- {cartPricing.couponDiscount?.toLocaleString()} ر.س</span>
+                    </div>
+                  )}
+
+                  {/* ضريبة القيمة المضافة */}
+                  {cartPricing.vat > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                      <span>ضريبة القيمة المضافة (15%)</span>
+                      <span style={{ color: 'var(--text-primary)' }}>{cartPricing.vat?.toLocaleString()} ر.س</span>
+                    </div>
+                  )}
+
+                  {/* رسوم الشحن */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
                     <span>رسوم الشحن</span>
                     <span style={{ color: shippingCost === 0 ? '#10b981' : 'var(--text-primary)', fontWeight: shippingCost === 0 ? 900 : 700 }}>
