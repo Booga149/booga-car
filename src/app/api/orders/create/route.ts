@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENGINEER_SYSTEMS_PRODUCTS } from '@/lib/engineerData';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
+import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount, VAT_RATE } from '@/lib/pricing';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Calculate shipping securely
     const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-    const shippingCost = isFreeShipping ? 0 : STANDARD_SHIPPING_COST;
+    let shippingCost = isFreeShipping ? 0 : STANDARD_SHIPPING_COST;
 
     // 5. Validate coupon (if provided) securely
     let couponDiscount = 0;
@@ -128,15 +128,21 @@ export async function POST(req: NextRequest) {
           const couponResult = applyCouponDiscount(subtotal, shippingCost, coupon, formattedItems);
           couponDiscount = couponResult.couponDiscount;
           
+          // Handle free shipping coupon
+          if (couponResult.overrideShipping) {
+            shippingCost = 0;
+          }
+          
           // Increment coupon uses
           try { await supabase.rpc('increment_coupon_usage', { coupon_code_param: coupon.code }); } catch {}
         }
       }
     }
 
-    // 6. Final secured total computation
-    const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
-    const finalCalculatedTotal = roundPrice(totalBeforeDiscount - couponDiscount);
+    // 6. Final secured total computation — MUST match frontend calculateCartTotal exactly
+    const subtotalAfterDiscount = roundPrice(Math.max(0, subtotal - couponDiscount));
+    const vat = roundPrice(subtotalAfterDiscount * VAT_RATE);
+    const finalCalculatedTotal = roundPrice(subtotalAfterDiscount + vat + shippingCost);
 
     // 7. Secure Insertion (via Admin Client, bypassing broken/unsafe RLS)
     let insertPayload: any = {
