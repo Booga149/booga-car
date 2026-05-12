@@ -60,10 +60,10 @@ export async function POST(req: NextRequest) {
         category: customCategory || 'قطع غيار',
         condition: 'جديد',
         stock: 'متوفر',
-        image: product.imageUrl,
+        image_url: product.imageUrl,
         images: product.images,
         rating: product.rating || 4.5,
-        reviews: product.orders || 0,
+        reviews_count: product.orders || 0,
         shipping: 'شحن مجاني',
         source: 'dropship',
       })
