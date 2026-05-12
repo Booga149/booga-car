@@ -360,12 +360,13 @@ export class AliExpressSDK {
     }
 
     // All methods exhausted
-    console.log('AliExpress: all search methods returned 0 products');
+    console.log('AliExpress: all search methods returned 0 products or failed', lastError?.message);
     return {
       products: [],
       totalCount: 0,
       _rawKeys: allRawKeys,
       _method: 'all_failed',
+      _error: lastError?.message,
     };
   }
 

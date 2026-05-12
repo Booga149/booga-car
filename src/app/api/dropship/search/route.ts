@@ -89,6 +89,7 @@ export async function GET(req: NextRequest) {
       ...result,
       _translatedQuery: translatedQuery,
       _originalQuery: rawQuery,
+      _error: result._error,
     });
   } catch (error: any) {
     console.error('AliExpress search error:', error);

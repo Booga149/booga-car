@@ -34,6 +34,7 @@ export default function DropshipSearch() {
         translatedQuery: data._translatedQuery,
         originalQuery: data._originalQuery,
         method: data._method,
+        error: data._error,
       });
       setSearched(true);
     } catch (err: any) {
