@@ -186,36 +186,39 @@ export function calculateCartTotal(
   let shippingCost = isFreeShippingByThreshold ? 0 : STANDARD_SHIPPING_COST;
 
   // Coupon
+  const subtotalWithVat = roundPrice(subtotal * (1 + VAT_RATE));
   let couponResult = { couponDiscount: 0, couponType: null as DiscountType | null, overrideShipping: false };
   let couponPercent = 0;
 
   if (typeof couponOrPercent === 'number') {
     couponPercent = couponOrPercent;
-    couponResult.couponDiscount = roundPrice(subtotal * (couponOrPercent / 100));
+    // Apply percent to total including VAT for accurate display
+    couponResult.couponDiscount = roundPrice(subtotalWithVat * (couponOrPercent / 100));
     couponResult.couponType = 'percent';
   } else if (couponOrPercent) {
-    couponResult = applyCouponDiscount(subtotal, shippingCost, couponOrPercent, items.map(i => ({
-      originalPrice: i.price, quantity: i.quantity, productId: i.productId, category: i.category,
+    // Pass subtotalWithVat as the base so percent coupons apply to total incl. VAT
+    couponResult = applyCouponDiscount(subtotalWithVat, shippingCost, couponOrPercent, items.map(i => ({
+      originalPrice: i.price * (1 + VAT_RATE), quantity: i.quantity, productId: i.productId, category: i.category,
     })));
-    couponPercent = couponOrPercent.discount_value || 0;
+    couponPercent = couponOrPercent.discount_percent || couponOrPercent.discount_value || 0;
     if (couponResult.overrideShipping) shippingCost = 0;
   }
 
   // First order
   let firstOrderDiscount = 0;
   if (isFirstOrder) {
-    const afterCoupon = roundPrice(subtotal - couponResult.couponDiscount);
+    const afterCoupon = roundPrice(subtotalWithVat - couponResult.couponDiscount);
     firstOrderDiscount = roundPrice(Math.min(
       roundPrice(afterCoupon * (FIRST_ORDER_DISCOUNT_PERCENT / 100)),
       FIRST_ORDER_MAX_DISCOUNT
     ));
   }
 
-  const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
+  const totalBeforeDiscount = roundPrice(subtotalWithVat + shippingCost);
   const totalDiscount = roundPrice(couponResult.couponDiscount + firstOrderDiscount);
-  const subtotalAfterDiscount = roundPrice(Math.max(0, subtotal - totalDiscount));
-  const vat = roundPrice(subtotalAfterDiscount * VAT_RATE);
-  const finalTotal = roundPrice(subtotalAfterDiscount + vat + shippingCost);
+  const finalTotal = roundPrice(Math.max(0, totalBeforeDiscount - totalDiscount));
+  // VAT component for display
+  const vat = roundPrice(subtotalWithVat - subtotal);
 
   return {
     subtotal, productDiscountTotal, shippingCost,

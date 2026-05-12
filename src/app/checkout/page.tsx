@@ -118,16 +118,28 @@ export default function CheckoutPage() {
         setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg('تم استنفاد عدد استخدامات هذا الكود');
-      } else if (data.min_order_amount && cartTotal < data.min_order_amount) {
+      } else if (data.min_order_amount && cartPricing.totalBeforeDiscount < data.min_order_amount) {
         setAppliedDiscount(null);
         setDiscountStatus('error');
         setDiscountMsg(`الحد الأدنى للطلب ${data.min_order_amount} ر.س لاستخدام هذا الكود`);
       } else {
-        setAppliedDiscount(data);
-        setDiscountStatus('success');
-        const val = data.discount_value || data.discount_percent;
-        const msgType = data.discount_type === 'percent' ? `${val}%` : data.discount_type === 'fixed' ? `${val} ر.س` : 'شحن مجاني';
-        setDiscountMsg(`🎉 مبروك! تم تطبيق خصم ${msgType} بنجاح`);
+        // Test if coupon actually provides a discount for the current cart
+        const testPricing = calculateCartTotal(
+          cartItems.map(item => ({ price: item.price, quantity: item.quantity, productId: item.id, category: item.category })),
+          data
+        );
+
+        if (testPricing.couponDiscount === 0 && data.discount_type !== 'free_shipping') {
+          setAppliedDiscount(null);
+          setDiscountStatus('error');
+          setDiscountMsg('هذا الكود لا يشمل المنتجات في سلتك');
+        } else {
+          setAppliedDiscount(data);
+          setDiscountStatus('success');
+          const val = data.discount_value || data.discount_percent;
+          const msgType = data.discount_type === 'percent' ? `${val}%` : data.discount_type === 'fixed' ? `${val} ر.س` : 'شحن مجاني';
+          setDiscountMsg(`🎉 مبروك! تم تطبيق خصم ${msgType} بنجاح`);
+        }
       }
     } catch {
       setAppliedDiscount(null);

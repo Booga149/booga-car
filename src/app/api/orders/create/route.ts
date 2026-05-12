@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENGINEER_SYSTEMS_PRODUCTS } from '@/lib/engineerData';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount, VAT_RATE } from '@/lib/pricing';
+import { roundPrice, calculateCommission, calculateCartTotal } from '@/lib/pricing';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -101,12 +101,9 @@ export async function POST(req: NextRequest) {
       subtotal = roundPrice(subtotal + lineTotal);
     }
 
-    // 4. Calculate shipping securely
-    const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-    let shippingCost = isFreeShipping ? 0 : STANDARD_SHIPPING_COST;
-
-    // 5. Validate coupon (if provided) securely
-    let couponDiscount = 0;
+    // 4. Validate coupon (if provided) securely
+    let couponData = null;
+    let couponValid = false;
     
     if (coupon_code) {
       const { data: coupon } = await supabase
@@ -119,30 +116,34 @@ export async function POST(req: NextRequest) {
       if (coupon) {
         const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > new Date();
         const notExhausted = !coupon.max_uses || coupon.current_uses < coupon.max_uses;
-        const meetsMinimum = !coupon.min_order_amount || subtotal >= coupon.min_order_amount;
+        // Compare min_order_amount against the VAT-inclusive subtotal (what user sees on screen)
+        const subtotalWithVat = Math.round(subtotal * 1.15 * 100) / 100;
+        const meetsMinimum = !coupon.min_order_amount || subtotalWithVat >= coupon.min_order_amount;
 
         if (notExpired && notExhausted && meetsMinimum) {
-          const formattedItems = orderItemsToInsert.map((i: any) => ({
-            originalPrice: i.price, quantity: i.quantity, productId: i.product_id, category: products.find((p:any) => p.id === i.product_id)?.category
-          }));
-          const couponResult = applyCouponDiscount(subtotal, shippingCost, coupon, formattedItems);
-          couponDiscount = couponResult.couponDiscount;
-          
-          // Handle free shipping coupon
-          if (couponResult.overrideShipping) {
-            shippingCost = 0;
-          }
-          
-          // Increment coupon uses
-          try { await supabase.rpc('increment_coupon_usage', { coupon_code_param: coupon.code }); } catch {}
+          couponData = coupon;
         }
       }
     }
 
-    // 6. Final secured total computation — MUST match frontend calculateCartTotal exactly
-    const subtotalAfterDiscount = roundPrice(Math.max(0, subtotal - couponDiscount));
-    const vat = roundPrice(subtotalAfterDiscount * VAT_RATE);
-    const finalCalculatedTotal = roundPrice(subtotalAfterDiscount + vat + shippingCost);
+    // 5. Final secured total computation — MUST match frontend calculateCartTotal exactly
+    const cartPricing = calculateCartTotal(
+      orderItemsToInsert.map(item => ({
+        price: item.price,
+        quantity: item.quantity,
+        productId: item.product_id,
+        category: products.find((p:any) => p.id === item.product_id)?.category
+      })),
+      couponData
+    );
+
+    if (couponData && cartPricing.couponDiscount > 0) {
+      couponValid = true;
+      try { await supabase.rpc('increment_coupon_usage', { coupon_code_param: couponData.code }); } catch {}
+    }
+
+    const shippingCost = cartPricing.shippingCost;
+    const finalCalculatedTotal = cartPricing.finalTotal;
 
     // 7. Secure Insertion (via Admin Client, bypassing broken/unsafe RLS)
     let insertPayload: any = {
@@ -209,9 +210,9 @@ export async function POST(req: NextRequest) {
           p_seller_id: orderItemsToInsert[0].seller_id,
           p_source: 'online',
           p_order_id: newOrder.id,
-          p_subtotal: totalBeforeDiscount,
-          p_discount: couponDiscount,
-          p_total: finalCalculatedTotal,
+          p_subtotal: cartPricing.totalBeforeDiscount,
+          p_discount: cartPricing.couponDiscount,
+          p_total: cartPricing.finalTotal,
           p_customer_name: shippingDetails.name,
           p_customer_phone: shippingDetails.phone,
         });

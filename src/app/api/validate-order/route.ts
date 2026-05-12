@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENGINEER_SYSTEMS_PRODUCTS } from '@/lib/engineerData';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { roundPrice, calculateCommission, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, applyCouponDiscount } from '@/lib/pricing';
+import { roundPrice, calculateCommission, calculateCartTotal } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,13 +108,8 @@ export async function POST(req: NextRequest) {
       subtotal = roundPrice(subtotal + lineTotal);
     }
 
-    // 3. Calculate shipping
-    const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-    const shippingCost = isFreeShipping ? 0 : STANDARD_SHIPPING_COST;
-
-    // 4. Validate coupon (if provided)
-    let couponDiscount = 0;
-    let couponPercent = 0;
+    // 3. Prepare coupon logic
+    let couponData = null;
     let couponValid = false;
 
     if (coupon_code) {
@@ -128,36 +123,45 @@ export async function POST(req: NextRequest) {
       if (coupon) {
         const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > new Date();
         const notExhausted = !coupon.max_uses || coupon.current_uses < coupon.max_uses;
-        const meetsMinimum = !coupon.min_order_amount || subtotal >= coupon.min_order_amount;
+        // Compare min_order_amount against the VAT-inclusive subtotal (what user sees on screen)
+        const subtotalWithVat = Math.round(subtotal * 1.15 * 100) / 100;
+        const meetsMinimum = !coupon.min_order_amount || subtotalWithVat >= coupon.min_order_amount;
 
         if (notExpired && notExhausted && meetsMinimum) {
-          const formattedItems = orderItems.map((i: any) => ({
-            originalPrice: i.unit_price, quantity: i.quantity, productId: i.product_id, category: products.find((p:any) => p.id === i.product_id)?.category
-          }));
-          const couponResult = applyCouponDiscount(subtotal, shippingCost, coupon, formattedItems);
-          couponDiscount = couponResult.couponDiscount;
-          couponValid = true;
+          couponData = coupon;
         }
       }
     }
 
-    // 5. Calculate final total
-    const totalBeforeDiscount = roundPrice(subtotal + shippingCost);
-    const finalTotal = roundPrice(totalBeforeDiscount - couponDiscount);
+    // 4. Calculate total using Centralized Pricing Engine
+    const cartPricing = calculateCartTotal(
+      orderItems.map(item => ({
+        price: item.unit_price,
+        quantity: item.quantity,
+        productId: item.product_id,
+        category: products.find((p:any) => p.id === item.product_id)?.category
+      })),
+      couponData
+    );
 
-    // 6. Return validated order
+    if (couponData && cartPricing.couponDiscount > 0) {
+      couponValid = true;
+    }
+
+    // 5. Return validated order
     return NextResponse.json({
       valid: true,
       order: {
         items: orderItems,
-        subtotal,
-        shipping_cost: shippingCost,
-        is_free_shipping: isFreeShipping,
+        subtotal: cartPricing.subtotal,
+        shipping_cost: cartPricing.shippingCost,
+        is_free_shipping: cartPricing.isFreeShipping,
         coupon_code: couponValid ? coupon_code : null,
-        coupon_percent: couponPercent,
-        coupon_discount: couponDiscount,
-        total_before_discount: totalBeforeDiscount,
-        final_total: finalTotal,
+        coupon_percent: cartPricing.couponPercent,
+        coupon_discount: cartPricing.couponDiscount,
+        total_before_discount: cartPricing.totalBeforeDiscount,
+        vat: cartPricing.vat,
+        final_total: cartPricing.finalTotal,
         calculated_at: new Date().toISOString(),
       }
     });

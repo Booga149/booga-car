@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { logSecurityEvent } from '@/lib/utils';
 import { useAdminNotifications } from '@/hooks/useAdminNotifications';
 import { useAuth } from '@/context/AuthContext';
-import { BarChart2, Package, ShoppingCart, Users, Activity, Globe, Bell, User, Upload, Search, Menu, ShieldAlert, Ticket, LayoutDashboard } from 'lucide-react';
+import { BarChart2, Package, ShoppingCart, Users, Activity, Globe, Bell, User, Upload, Search, Menu, ShieldAlert, Ticket, LayoutDashboard, Wrench } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, role, loading: authLoading } = useAuth();
@@ -50,6 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: '/admin', icon: <BarChart2 size={20} />, label: 'لوحة التحكم' },
     { href: '/admin/orders', icon: <ShoppingCart size={20} />, label: 'الطلبات' },
+    { href: '/admin/part-requests', icon: <Wrench size={20} />, label: 'طلبات القطع' },
     { href: '/admin/products', icon: <Package size={20} />, label: 'المنتجات' },
     { href: '/admin/users', icon: <Users size={20} />, label: 'المستخدمين' },
     { href: '/admin/import', icon: <Upload size={20} />, label: 'استيراد المنتجات' },
@@ -248,6 +249,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       
                       if (anyN.link) {
                         url = anyN.link;
+                      } else if (type === 'PART_REQUEST' || title.includes('قطعة')) {
+                        url = '/admin/part-requests';
                       } else if (type.includes('ORDER') || title.includes('طلب') || title.includes('دفع') || title.includes('Stripe')) {
                         url = '/admin/orders';
                       } else if (title.includes('منتج') || type.includes('PRODUCT')) {
